@@ -52,15 +52,11 @@
                     </svg>
                 </a>
 
-                <form method="POST" action="{{ route('logout') }}" class="shrink-0">
-                @csrf
-
-                    <button type="submit" title="{{ __('Log Out') }}" aria-label="{{ __('Log Out') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    <button type="button" x-on:click="$dispatch('open-modal', 'logout-confirm')" title="{{ __('Log Out') }}" aria-label="{{ __('Log Out') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 12h9m0 0-3-3m3 3-3 3" />
                         </svg>
                     </button>
-                </form>
             </div>
         </div>
 
@@ -126,17 +122,26 @@
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
+                <button type="button" x-on:click="$dispatch('open-modal', 'logout-confirm')" class="flex w-full items-center px-4 py-2 text-start text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                    {{ __('Log Out') }}
+                </button>
             </div>
         </div>
     </div>
+
+    <x-modal name="logout-confirm" maxWidth="sm" focusable>
+        <form method="POST" action="{{ route('logout') }}" class="p-6">
+            @csrf
+
+            <h2 class="text-lg font-semibold text-gray-900">{{ __('Confirm logout') }}</h2>
+            <p class="mt-2 text-sm text-gray-600">{{ __('Are you sure you want to log out of your account?') }}</p>
+
+            <div class="mt-6 flex items-center justify-end gap-3">
+                <button type="button" x-on:click="$dispatch('close-modal', 'logout-confirm')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    {{ __('Cancel') }}
+                </button>
+                <x-primary-button>{{ __('Log Out') }}</x-primary-button>
+            </div>
+        </form>
+    </x-modal>
 </nav>
