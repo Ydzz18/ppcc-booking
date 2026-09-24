@@ -16,7 +16,6 @@
         <section aria-labelledby="core-sections-title">
             <div class="mb-4 flex items-end justify-between gap-4">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Core sections') }}</p>
                     <h3 id="core-sections-title" class="mt-1 text-lg font-semibold text-gray-900">{{ __('Booking operations') }}</h3>
                 </div>
             </div>
@@ -47,7 +46,6 @@
 
         <section aria-labelledby="quick-stats-title">
             <div class="mb-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Dashboard widgets') }}</p>
                 <h3 id="quick-stats-title" class="mt-1 text-lg font-semibold text-gray-900">{{ __('At a glance') }}</h3>
             </div>
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -77,7 +75,6 @@
         <section aria-labelledby="calendar-title" class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Core sections') }}</p>
                     <h3 id="calendar-title" class="mt-1 text-lg font-semibold text-gray-900">{{ __('Booking calendar') }}</h3>
                 </div>
                 <div class="flex items-center rounded-md border border-gray-200 p-1 text-xs font-semibold">
@@ -123,7 +120,6 @@
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex flex-wrap items-end justify-between gap-4">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Client management') }}</p>
                         <h3 id="client-management-title" class="mt-1 text-lg font-semibold text-gray-900">{{ __('Client Profiles') }}</h3>
                     </div>
                     <a href="{{ route('settings.index', ['tab' => 'clients']) }}" class="text-sm font-medium text-indigo-700 hover:text-indigo-900">{{ __('Open directory') }} &rarr;</a>
@@ -159,7 +155,6 @@
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Operational tools') }}</p>
                         <h3 class="mt-1 text-lg font-semibold text-gray-900">{{ __('Notifications') }}</h3>
                     </div>
                     <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">{{ $notifications->count() }}</span>
@@ -181,7 +176,6 @@
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex items-end justify-between gap-4">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Analytical insights') }}</p>
                         <h3 id="insights-title" class="mt-1 text-lg font-semibold text-gray-900">{{ __('Booking trends') }}</h3>
                     </div>
                     <a href="{{ route('reports.index', ['type' => 'bookings']) }}" class="text-sm font-medium text-indigo-700 hover:text-indigo-900">{{ __('Reports') }} &rarr;</a>
@@ -202,7 +196,6 @@
 
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Operational tools') }}</p>
                     <h3 class="mt-1 text-lg font-semibold text-gray-900">{{ __('Staff assignments') }}</h3>
                 </div>
                 <div class="mt-5 space-y-4">
@@ -225,7 +218,6 @@
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex items-end justify-between gap-4">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Graphs and charts') }}</p>
                         <h3 id="charts-title" class="mt-1 text-lg font-semibold text-gray-900">{{ __('Booking distribution') }}</h3>
                     </div>
                     <span class="text-xs text-gray-500">{{ $bookingTotal }} {{ __('total') }}</span>
@@ -249,7 +241,6 @@
             <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 shadow-sm">
                 <div class="flex items-end justify-between gap-4">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Graphs and charts') }}</p>
                         <h3 class="mt-1 text-lg font-semibold text-gray-900">{{ __('Revenue trends') }}</h3>
                     </div>
                     <a href="{{ route('reports.index', ['type' => 'bookings']) }}" class="text-sm font-medium text-indigo-700 hover:text-indigo-900">{{ __('Reports') }} &rarr;</a>
