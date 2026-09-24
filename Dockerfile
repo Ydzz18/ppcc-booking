@@ -28,8 +28,14 @@ WORKDIR /var/www
 # Copy Laravel app contents (flatten src/)
 COPY src/ .
 
+# Install dependencies and build frontend assets inside the image so a fresh
+# checkout does not depend on ignored vendor, node_modules, or public/build files.
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader \
+    && npm install \
+    && npm run build
+
 # Optional: fix permissions
-RUN chown -R www-data:www-data /var/www
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 9000
 
