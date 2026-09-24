@@ -11,13 +11,67 @@
                     <div>
 
                     <div x-show="activeMenu === 'users'">
-                        <div class="flex items-center justify-between gap-4">
+                        <div class="mb-5 flex items-center justify-between gap-4">
                             @can('manage-users')
-                                <a href="{{ route('users.create') }}" class="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                <button type="button" x-on:click="$dispatch('open-modal', 'register-user')" class="inline-flex items-center rounded-md bg-gray-800 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                                     {{ __('Register New User') }}
-                                </a>
+                                </button>
                             @endcan
                         </div>
+
+                        <x-modal name="register-user" :show="$errors->hasAny(['name', 'email', 'role', 'password', 'password_confirmation'])" maxWidth="md" focusable>
+                            <form method="POST" action="{{ route('users.store') }}" class="space-y-6 p-6" data-confirm="Are you sure you want to register this user?">
+                                @csrf
+
+                                <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
+                                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Create User Account') }}</h2>
+                                    <button type="button" x-on:click="$dispatch('close-modal', 'register-user')" aria-label="{{ __('Close') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        &times;
+                                    </button>
+                                </div>
+
+                                <div>
+                                    <x-input-label for="name" :value="__('Name')" />
+                                    <x-text-input id="name" class="mt-1 block w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+                                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="email" :value="__('Email')" />
+                                    <x-text-input id="email" class="mt-1 block w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
+                                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="role" :value="__('Role')" />
+                                    <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                                        @foreach ($roles as $role)
+                                            <option value="{{ $role }}" @selected(old('role', 'requester') === $role)>{{ ucfirst($role) }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-input-error :messages="$errors->get('role')" class="mt-2" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="password" :value="__('Password')" />
+                                    <x-text-input id="password" class="mt-1 block w-full" type="password" name="password" required autocomplete="new-password" />
+                                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+                                    <x-text-input id="password_confirmation" class="mt-1 block w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
+                                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                                </div>
+
+                                <div class="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
+                                    <button type="button" x-on:click="$dispatch('close-modal', 'register-user')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        {{ __('Cancel') }}
+                                    </button>
+                                    <x-primary-button>{{ __('Register') }}</x-primary-button>
+                                </div>
+                            </form>
+                        </x-modal>
                     </div>
 
                     <div x-show="activeMenu === 'users'">
@@ -53,9 +107,9 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $user->created_at?->format('F d, Y') }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 @can('manage-users')
-                                                    <a href="{{ route('users.edit', $user) }}" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                    <button type="button" x-on:click="$dispatch('open-modal', 'edit-user-{{ $user->id }}')" class="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                                         {{ __('Edit') }}
-                                                    </a>
+                                                    </button>
                                                 @else
                                                     <span class="text-gray-400">{{ __('—') }}</span>
                                                 @endcan
@@ -73,6 +127,62 @@
                         <div class="mt-4">
                             {{ $users->appends(['tab' => 'users', 'clients_page' => request('clients_page'), 'tasks_page' => request('tasks_page'), 'forms_page' => request('forms_page')])->links() }}
                         </div>
+
+                        @foreach ($users as $user)
+                            <x-modal name="edit-user-{{ $user->id }}" :show="$errors->hasAny(['name', 'email', 'role', 'status']) && (string) old('editing_user_id') === (string) $user->id" maxWidth="md" focusable>
+                                <form method="POST" action="{{ route('users.update', $user) }}" class="space-y-6 p-6" data-confirm="{{ __('Are you sure you want to update this user?') }}">
+                                    @csrf
+                                    @method('patch')
+                                    <input type="hidden" name="editing_user_id" value="{{ $user->id }}">
+
+                                    <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
+                                        <h2 class="text-lg font-semibold text-gray-900">{{ __('Edit User') }}</h2>
+                                        <button type="button" x-on:click="$dispatch('close-modal', 'edit-user-{{ $user->id }}')" aria-label="{{ __('Close') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            &times;
+                                        </button>
+                                    </div>
+
+                                    <div>
+                                        <x-input-label for="edit-name-{{ $user->id }}" :value="__('Name')" />
+                                        <x-text-input id="edit-name-{{ $user->id }}" class="mt-1 block w-full" type="text" name="name" :value="old('editing_user_id') == $user->id ? old('name') : $user->name" required autocomplete="name" />
+                                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                                    </div>
+
+                                    <div>
+                                        <x-input-label for="edit-email-{{ $user->id }}" :value="__('Email')" />
+                                        <x-text-input id="edit-email-{{ $user->id }}" class="mt-1 block w-full" type="email" name="email" :value="old('editing_user_id') == $user->id ? old('email') : $user->email" required autocomplete="username" />
+                                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                                    </div>
+
+                                    <div>
+                                        <x-input-label for="edit-role-{{ $user->id }}" :value="__('Role')" />
+                                        <select id="edit-role-{{ $user->id }}" name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                                            @foreach ($roles as $role)
+                                                <option value="{{ $role }}" @selected((old('editing_user_id') == $user->id ? old('role') : $user->role) === $role)>{{ ucfirst($role) }}</option>
+                                            @endforeach
+                                        </select>
+                                        <x-input-error :messages="$errors->get('role')" class="mt-2" />
+                                    </div>
+
+                                    <div>
+                                        <x-input-label for="edit-status-{{ $user->id }}" :value="__('Status')" />
+                                        <select id="edit-status-{{ $user->id }}" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                                            @foreach (\App\Models\User::statuses() as $status)
+                                                <option value="{{ $status }}" @selected((old('editing_user_id') == $user->id ? old('status') : $user->status) === $status)>{{ ucfirst($status) }}</option>
+                                            @endforeach
+                                        </select>
+                                        <x-input-error :messages="$errors->get('status')" class="mt-2" />
+                                    </div>
+
+                                    <div class="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
+                                        <button type="button" x-on:click="$dispatch('close-modal', 'edit-user-{{ $user->id }}')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            {{ __('Cancel') }}
+                                        </button>
+                                        <x-primary-button>{{ __('Save') }}</x-primary-button>
+                                    </div>
+                                </form>
+                            </x-modal>
+                        @endforeach
                     </div>
 
                     <div id="clients-lists" class="space-y-4" x-show="activeMenu === 'clients'">

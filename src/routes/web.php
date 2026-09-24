@@ -146,7 +146,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->latest('created_at')
             ->paginate(10, ['*'], 'forms_page');
 
-        return view('settings', compact('users', 'clients', 'tasks', 'forms'));
+        $roles = User::roles();
+
+        return view('settings', compact('users', 'clients', 'tasks', 'forms', 'roles'));
     })->name('settings.index');
 
     Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
