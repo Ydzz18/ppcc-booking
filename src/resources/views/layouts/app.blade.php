@@ -15,13 +15,13 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-gray-100 min-h-screen md:h-screen md:overflow-hidden">
-        <div class="min-h-screen bg-gray-100 flex flex-col md:h-full md:flex-row md:overflow-hidden">
+    <body class="font-sans antialiased bg-gray-100 text-gray-900 transition-colors duration-200 min-h-screen md:h-screen md:overflow-hidden dark:bg-slate-950 dark:text-slate-100">
+        <div class="min-h-screen bg-gray-100 flex flex-col md:h-full md:flex-row md:overflow-hidden dark:bg-slate-950">
             @include('layouts.navigation')
 
             <div class="min-w-0 flex-1 md:flex md:h-full md:min-h-0 md:flex-col">
                 @isset($header)
-                    <header class="w-full shrink-0 border-b border-gray-200 bg-white md:sticky md:top-0 md:z-20 md:flex md:h-20 md:items-center">
+                    <header class="w-full shrink-0 border-b border-gray-200 bg-white md:sticky md:top-0 md:z-20 md:flex md:h-20 md:items-center dark:border-slate-800 dark:bg-slate-900">
                         <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:px-8 md:py-0">
                             {{ $header }}
                         </div>

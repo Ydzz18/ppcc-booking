@@ -12,7 +12,7 @@
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ __('Analytical insights') }}</p>
                     <h1 id="report-builder-title" class="mt-1 text-lg font-semibold text-gray-900">{{ __('Build a report') }}</h1>
-                    <p class="mt-2 text-sm text-gray-500">{{ __('Choose a record type and date range, then export it for Excel.') }}</p>
+                    <p class="mt-2 text-sm text-gray-500">{{ __('Choose a record type and date range, then export it as CSV or PDF.') }}</p>
                 </div>
                 <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">{{ count($rows) }} {{ __('records') }}</span>
             </div>
@@ -45,12 +45,20 @@
                     <h2 id="preview-title" class="text-lg font-semibold text-gray-900">{{ __($title) }}</h2>
                     <p class="mt-1 text-sm text-gray-500">{{ __('Preview of the records that will be exported.') }}</p>
                 </div>
-                <a href="{{ route('reports.export', array_filter(['type' => $reportType, 'from' => $from, 'to' => $to])) }}" class="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2" />
-                    </svg>
-                    {{ __('Export CSV') }}
-                </a>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('reports.export', array_filter(['type' => $reportType, 'from' => $from, 'to' => $to])) }}" class="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2" />
+                        </svg>
+                        {{ __('Export CSV') }}
+                    </a>
+                    <a href="{{ route('reports.export.pdf', array_filter(['type' => $reportType, 'from' => $from, 'to' => $to])) }}" class="inline-flex items-center gap-2 rounded-md bg-red-700 px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14a2 2 0 0 1 2-2v-3M3 16v3a2 2 0 0 1 2-2" />
+                        </svg>
+                        {{ __('Export PDF') }}
+                    </a>
+                </div>
             </div>
 
             <div class="overflow-x-auto">

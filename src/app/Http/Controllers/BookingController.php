@@ -7,6 +7,7 @@ use App\Models\FormItem;
 use App\Models\Task;
 use App\Models\TaskMonitoring;
 use App\Models\TaskMonitoringFormNote;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -140,6 +141,54 @@ class BookingController extends Controller
             || ! empty($monitoring->acknowledgement_receipt_reference_number);
 
         return view('task-monitorings.edit', compact('monitoring', 'clients', 'tasks', 'contactPersons', 'forms', 'notesByForm', 'showSubmissionForm'));
+    }
+
+    /**
+     * Show a print-ready preview of the specified booking.
+     */
+    public function print(TaskMonitoring $monitoring): View
+    {
+        $requiredForms = $this->requiredFormsForPrint($monitoring);
+
+        return view('bookings.print', compact('monitoring', 'requiredForms'));
+    }
+
+    /**
+     * Download a PDF of the specified booking.
+     */
+    public function downloadPdf(TaskMonitoring $monitoring)
+    {
+        $requiredForms = $this->requiredFormsForPrint($monitoring);
+
+        return Pdf::loadView('bookings.print', compact('monitoring', 'requiredForms') + ['isPdf' => true])
+            ->download('booking-'.$monitoring->id.'.pdf');
+    }
+
+    /**
+     * Load the booking data shared by the preview and PDF responses.
+     */
+    private function requiredFormsForPrint(TaskMonitoring $monitoring)
+    {
+        $monitoring->load(['client', 'task', 'assignedResponsiblePerson']);
+
+        $requiredFormIds = collect($monitoring->required_forms_documents ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->values();
+        $formsById = FormItem::query()
+            ->whereIn('id', $requiredFormIds)
+            ->get()
+            ->keyBy('id');
+        $notesByForm = TaskMonitoringFormNote::query()
+            ->where('task_monitoring_id', $monitoring->id)
+            ->get()
+            ->keyBy('form_id');
+
+        return $requiredFormIds->map(fn (int $formId) => [
+            'name' => $formsById->get($formId)?->form_name ?? __('Unknown form'),
+            'status' => strtolower(trim((string) ($notesByForm->get($formId)?->note_status ?? 'pending'))),
+            'note' => $notesByForm->get($formId)?->notes_remarks,
+            'note_date' => $notesByForm->get($formId)?->note_date,
+        ]);
     }
 
     /**

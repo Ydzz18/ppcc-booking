@@ -2,6 +2,144 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    color-scheme: light;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+html {
+    background-color: #f3f4f6;
+}
+
+html.dark {
+    background-color: #1a1a1a;
+}
+
+body {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+html.dark body,
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100,
+html.dark [class*="bg-white"],
+html.dark [class*="bg-gray-50"],
+html.dark [class*="bg-gray-100"],
+html.dark [class*="bg-slate-50"],
+html.dark [class*="bg-slate-100"] {
+    background-color: #202020 !important;
+}
+
+html.dark .bg-gray-800,
+html.dark .bg-gray-900,
+html.dark [class*="bg-gray-800"],
+html.dark [class*="bg-gray-900"] {
+    background-color: #262626 !important;
+}
+
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-gray-400,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark [class*="text-gray-900"],
+html.dark [class*="text-gray-800"],
+html.dark [class*="text-gray-700"],
+html.dark [class*="text-gray-600"],
+html.dark [class*="text-gray-500"],
+html.dark [class*="text-gray-400"],
+html.dark [class*="text-slate-900"],
+html.dark [class*="text-slate-800"],
+html.dark [class*="text-slate-700"],
+html.dark [class*="text-slate-600"],
+html.dark [class*="text-slate-500"],
+html.dark [class*="text-slate-400"] {
+    color: #f4efe7 !important;
+}
+
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300,
+html.dark .border-slate-200,
+html.dark [class*="border-gray-100"],
+html.dark [class*="border-gray-200"],
+html.dark [class*="border-gray-300"],
+html.dark [class*="border-slate-200"],
+html.dark .divide-gray-200 > * + *,
+html.dark [class*="divide-gray-200"] > * + * {
+    border-color: rgba(212, 175, 55, 0.28) !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea,
+html.dark .form-control,
+html.dark [type="text"],
+html.dark [type="email"],
+html.dark [type="password"],
+html.dark [type="search"],
+html.dark [type="url"],
+html.dark [type="date"],
+html.dark [type="datetime-local"],
+html.dark [type="month"],
+html.dark [type="time"],
+html.dark [type="week"],
+html.dark [multiple],
+html.dark textarea,
+html.dark select,
+html.dark input {
+    background-color: #242424 !important;
+    color: #fffdf8 !important;
+    border-color: rgba(212, 175, 55, 0.35) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #d8c98d !important;
+}
+
+html.dark .text-white,
+html.dark [class*="text-white"] {
+    color: #fffdf8 !important;
+}
+
+html.dark .text-yellow-500,
+html.dark .text-amber-500,
+html.dark .text-amber-700,
+html.dark [class*="text-yellow-500"],
+html.dark [class*="text-amber-500"],
+html.dark [class*="text-amber-700"] {
+    color: #d7b75a !important;
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-yellow-50,
+html.dark [class*="bg-amber-50"],
+html.dark [class*="bg-yellow-50"] {
+    background-color: rgba(215, 183, 90, 0.12) !important;
+}
+
+html.dark .bg-yellow-100,
+html.dark .bg-amber-100,
+html.dark [class*="bg-yellow-100"],
+html.dark [class*="bg-amber-100"] {
+    background-color: rgba(215, 183, 90, 0.18) !important;
+}
+
 @keyframes shake {
 	0%, 100% { transform: translateX(0); }
 	25% { transform: translateX(-6px); }

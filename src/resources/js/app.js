@@ -4,9 +4,36 @@ import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
 
+const savedTheme = localStorage.getItem('theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const initialTheme = savedTheme ?? (prefersDark ? 'dark' : 'light');
+
+const applyTheme = (theme) => {
+    const isDark = theme === 'dark';
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+        const icon = button.querySelector('[data-theme-icon]');
+        if (icon) {
+            icon.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        }
+    });
+};
+
+applyTheme(initialTheme);
+
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-theme-toggle]').forEach((toggleButton) => {
+        toggleButton.addEventListener('click', () => {
+            const nextTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            applyTheme(nextTheme);
+        });
+    });
+
 	const modalRoot = document.createElement('div');
 	modalRoot.id = 'global-confirm-modal';
 	modalRoot.className = 'fixed inset-0 z-50 hidden items-center justify-center bg-gray-900/50 p-4';

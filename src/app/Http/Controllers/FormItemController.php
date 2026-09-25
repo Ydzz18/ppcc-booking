@@ -21,7 +21,7 @@ class FormItemController extends Controller
 
         FormItem::create($validated);
 
-        return Redirect::route('settings.index', ['forms_page' => 1])->with('status', 'form-created');
+        return Redirect::route('settings.index', ['tab' => 'forms', 'forms_page' => 1])->with('status', 'form-created');
     }
 
     /**

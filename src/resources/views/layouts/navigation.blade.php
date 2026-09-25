@@ -46,6 +46,13 @@
             <div class="flex items-center gap-2">
                 <div class="min-w-0 flex-1 truncate px-1 text-sm font-medium text-gray-700">{{ Auth::user()->name }}</div>
 
+                <button type="button" data-theme-toggle title="{{ __('Toggle theme') }}" aria-label="{{ __('Toggle theme') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    <svg data-theme-icon class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path class="dark:hidden" stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.5m0 13V21m9-9h-2.5M5.5 12H3m15.5 6.5-1.8-1.8M8.3 8.3 6.5 6.5m0 11 1.8-1.8m7.4-7.4 1.8-1.8M12 7.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Z" />
+                        <path class="hidden dark:block" stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A8.8 8.8 0 0 1 11.2 3a9 9 0 1 0 9.8 9.8Z" />
+                    </svg>
+                </button>
+
                 <a href="{{ route('profile.edit') }}" title="{{ __('Profile') }}" aria-label="{{ __('Profile') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0" />
@@ -76,12 +83,20 @@
             <x-application-logo class="block h-9 w-9 shrink-0 object-contain" />
             <span class="truncate text-sm font-semibold tracking-tight text-gray-800">{{ config('app.name', 'PPCC Booking') }}</span>
         </a>
-        <button @click="open = ! open" type="button" class="rounded-md p-2 text-gray-500 hover:bg-gray-100" aria-label="{{ __('Toggle navigation') }}">
-            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
+        <div class="flex items-center gap-2">
+            <button type="button" data-theme-toggle class="rounded-md p-2 text-gray-500 hover:bg-gray-100" aria-label="{{ __('Toggle theme') }}">
+                <svg data-theme-icon class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path class="dark:hidden" stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.5m0 13V21m9-9h-2.5M5.5 12H3m15.5 6.5-1.8-1.8M8.3 8.3 6.5 6.5m0 11 1.8-1.8m7.4-7.4 1.8-1.8M12 7.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Z" />
+                    <path class="hidden dark:block" stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A8.8 8.8 0 0 1 11.2 3a9 9 0 1 0 9.8 9.8Z" />
+                </svg>
+            </button>
+            <button @click="open = ! open" type="button" class="rounded-md p-2 text-gray-500 hover:bg-gray-100" aria-label="{{ __('Toggle navigation') }}">
+                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                    <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
     </div>
     <div :class="{'block': open, 'hidden': ! open}" class="hidden border-b border-gray-200 bg-white p-4 md:hidden">
         <div class="pt-2 pb-3 space-y-1" x-data="{ bookingsOpen: @js(request()->routeIs('bookings.*')), settingsOpen: @js(request()->routeIs('settings.*')) }">

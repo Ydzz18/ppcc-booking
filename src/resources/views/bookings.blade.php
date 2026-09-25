@@ -104,7 +104,7 @@
                         <div id="job-task-monitoring" class="border border-gray-200 rounded-lg p-6">
                             <h3 class="text-lg font-medium text-gray-900">{{ __('Task Monitoring') }}</h3>
 
-                        <div class="mt-6 overflow-hidden border border-gray-200 rounded-lg">
+                        <div class="mt-6 overflow-visible border border-gray-200 rounded-lg">
                             <div class="divide-y divide-gray-200">
                                 @forelse ($monitorings as $monitoring)
                                     @php
@@ -114,15 +114,24 @@
                                         $submissionStatus = strtolower((string) ($monitoring->submission_status ?? 'pending'));
                                         $bookingStatus = $allRequiredFormsCompleted || $submissionStatus === 'completed' ? 'completed' : 'pending';
                                     @endphp
-                                    <div x-data="{ expanded: false }" class="bg-white">
+                                    <div x-data="{ expanded: false, actionsOpen: false }" class="bg-white">
                                         <div class="grid items-center gap-4 px-4 py-4 sm:grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_120px_2rem]">
-                                            <div class="order-first flex flex-wrap gap-2 sm:col-start-1">
-                                                @if ($allRequiredFormsCompleted)
-                                                    <a href="{{ route('bookings.edit', ['monitoring' => $monitoring, 'show_submission_form' => 1]) }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500">{{ $submissionStatus === 'completed' ? __('View Details') : __('Submission Process') }}</a>
-                                                @endif
-                                                @unless ($allRequiredFormsCompleted)
-                                                    <a href="{{ route('bookings.edit', $monitoring) }}" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700">{{ __('Update') }}</a>
-                                                @endunless
+                                            <div class="relative order-first z-10 sm:col-start-1" x-on:click.outside="actionsOpen = false" :class="actionsOpen ? 'z-50' : 'z-10'">
+                                                <div class="inline-flex rounded-md shadow-sm">
+                                                    <button type="button" x-on:click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen.toString()" class="inline-flex min-h-9 w-32 items-center justify-between rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                                        {{ __('Actions') }}
+                                                           <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+                                                    </button>
+                                                </div>
+                                                <div x-show="actionsOpen" x-cloak class="absolute left-0 top-full z-50 mt-1 w-40 overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+                                                    <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Print') }}</a>
+                                                    @if ($allRequiredFormsCompleted)
+                                                        <a href="{{ route('bookings.edit', ['monitoring' => $monitoring, 'show_submission_form' => 1]) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm {{ $submissionStatus === 'completed' ? 'text-green-700 hover:bg-green-50' : 'text-blue-700 hover:bg-blue-50' }}">{{ $submissionStatus === 'completed' ? __('View Details') : __('Submission Process') }}</a>
+                                                    @endif
+                                                    @unless ($allRequiredFormsCompleted)
+                                                        <a href="{{ route('bookings.edit', $monitoring) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Update') }}</a>
+                                                    @endunless
+                                                </div>
                                             </div>
                                             <div>
                                                 <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Task ID') }}</p>
@@ -208,7 +217,7 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse ($monitorings as $monitoring)
-                                        <tr>
+                                        <tr x-data="{ actionsOpen: false }">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $monitoring->id }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $monitoring->date_task_received?->format('F d, Y') }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $monitoring->client?->client_name }}</td>
@@ -292,18 +301,20 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ '—' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                <div class="flex flex-col items-start gap-2">
-                                                    @if ($allRequiredFormsCompleted)
-                                                        <a href="{{ route('bookings.edit', ['monitoring' => $monitoring, 'show_submission_form' => 1]) }}" class="inline-flex items-center rounded-md px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 {{ $submissionStatus === 'completed' ? 'bg-green-600 hover:bg-green-500 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-500 focus:ring-blue-500' }}">
-                                                            {{ $submissionStatus === 'completed' ? __('View Details') : __('Submission Process') }}
-                                                        </a>
-                                                    @endif
-
-                                                    @unless ($allRequiredFormsCompleted)
-                                                        <a href="{{ route('bookings.edit', $monitoring) }}" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                            {{ __('Update') }}
-                                                        </a>
-                                                    @endunless
+                                                <div class="relative z-10" x-on:click.outside="actionsOpen = false" :class="actionsOpen ? 'z-50' : 'z-10'">
+                                                    <button type="button" x-on:click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen.toString()" class="inline-flex min-h-9 w-32 items-center justify-between rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                                        {{ __('Actions') }}
+                                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+                                                    </button>
+                                                    <div x-show="actionsOpen" x-cloak class="absolute right-0 z-50 mt-1 w-40 overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+                                                        <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Print') }}</a>
+                                                        @if ($allRequiredFormsCompleted)
+                                                            <a href="{{ route('bookings.edit', ['monitoring' => $monitoring, 'show_submission_form' => 1]) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm {{ $submissionStatus === 'completed' ? 'text-green-700 hover:bg-green-50' : 'text-blue-700 hover:bg-blue-50' }}">{{ $submissionStatus === 'completed' ? __('View Details') : __('Submission Process') }}</a>
+                                                        @endif
+                                                        @unless ($allRequiredFormsCompleted)
+                                                            <a href="{{ route('bookings.edit', $monitoring) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Update') }}</a>
+                                                        @endunless
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>

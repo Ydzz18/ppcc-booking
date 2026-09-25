@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -21,7 +22,7 @@ class TaskController extends Controller
 
         Task::create($validated);
 
-        return Redirect::route('settings.index', ['tasks_page' => 1])->with('status', 'task-created');
+        return Redirect::route('settings.index', ['tab' => 'tasks', 'tasks_page' => 1])->with('status', 'task-created');
     }
 
     /**
@@ -32,6 +33,27 @@ class TaskController extends Controller
         return view('tasks.edit', [
             'task' => $task,
         ]);
+    }
+
+    /**
+     * Show a print-ready preview of the specified task.
+     */
+    public function print(Task $task): View
+    {
+        return view('tasks.print', [
+            'task' => $task,
+        ]);
+    }
+
+    /**
+     * Download a PDF of the specified task.
+     */
+    public function downloadPdf(Task $task)
+    {
+        return Pdf::loadView('tasks.print', [
+            'task' => $task,
+            'isPdf' => true,
+        ])->download('task-'.$task->id.'.pdf');
     }
 
     /**

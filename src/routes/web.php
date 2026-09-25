@@ -119,8 +119,11 @@ Route::get('/dashboard', function (Request $request) {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+    Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::get('/bookings/{monitoring}/print', [BookingController::class, 'print'])->name('bookings.print');
+    Route::get('/bookings/{monitoring}/pdf', [BookingController::class, 'downloadPdf'])->name('bookings.pdf');
     Route::get('/bookings/{monitoring}/edit', [BookingController::class, 'edit'])->name('bookings.edit');
     Route::patch('/bookings/{monitoring}', [BookingController::class, 'update'])->name('bookings.update');
     Route::post('/bookings/{monitoring}/form-note', [BookingController::class, 'saveFormNote'])->name('bookings.form-note.save');
@@ -156,6 +159,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
 
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
+    Route::get('/tasks/{task}/print', [TaskController::class, 'print'])->name('tasks.print');
+    Route::get('/tasks/{task}/pdf', [TaskController::class, 'downloadPdf'])->name('tasks.pdf');
     Route::get('/tasks/{task}/edit', [TaskController::class, 'edit'])->name('tasks.edit');
     Route::patch('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
 

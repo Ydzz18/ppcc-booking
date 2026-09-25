@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Task;
 use App\Models\TaskMonitoring;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
@@ -51,6 +52,23 @@ class ReportController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    /**
+     * Download the selected report as a fixed PDF document.
+     */
+    public function exportPdf(Request $request)
+    {
+        [$title, $headers, $rows] = $this->reportData($request);
+        $filename = str($title)->slug('_').'_'.now()->format('Ymd_His').'.pdf';
+
+        return Pdf::loadView('reports.pdf', [
+            'title' => $title,
+            'headers' => $headers,
+            'rows' => $rows,
+            'from' => $request->query('from'),
+            'to' => $request->query('to'),
+        ])->setPaper('a4', 'landscape')->download($filename);
     }
 
     /**

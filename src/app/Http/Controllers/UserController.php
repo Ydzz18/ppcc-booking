@@ -51,7 +51,7 @@ class UserController extends Controller
 
         event(new Registered($user));
 
-        return Redirect::route('settings.index')->with('status', 'user-created');
+        return Redirect::route('settings.index', ['tab' => 'users'])->with('status', 'user-created');
     }
 
     /**
