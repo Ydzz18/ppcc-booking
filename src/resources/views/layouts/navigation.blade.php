@@ -4,12 +4,12 @@
         <div class="flex h-20 items-center border-b border-gray-100 px-6">
             <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-3">
                 <x-application-logo class="block h-9 w-9 shrink-0 object-contain" />
-                <span class="truncate text-sm font-semibold tracking-tight text-gray-800">{{ config('app.name', 'PPCC Booking') }}</span>
+                <span class="truncate text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-100">{{ config('app.name', 'PPCC Booking') }}</span>
             </a>
         </div>
 
         <div class="flex-1 space-y-2 p-4" x-data="{ bookingsOpen: @js(request()->routeIs('bookings.*')), settingsOpen: @js(request()->routeIs('settings.*')) }">
-            <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">{{ __('Workspace') }}</p>
+            <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('Workspace') }}</p>
             <div class="space-y-1">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
@@ -17,49 +17,49 @@
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                         {{ __('Reports') }}
                     </x-nav-link>
-                    <button type="button" x-on:click="bookingsOpen = !bookingsOpen" class="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('bookings.*') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <button type="button" x-on:click="bookingsOpen = !bookingsOpen" class="flex w-full items-center justify-between rounded-lg border border-transparent px-3 py-2 text-sm font-medium {{ request()->routeIs('bookings.*') ? 'border-yellow-400/40 bg-yellow-400/10 text-yellow-600 shadow-sm shadow-yellow-500/10 dark:text-yellow-300' : 'text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">
                         <span>{{ __('Bookings') }}</span>
                         <svg class="h-4 w-4 transition-transform" :class="bookingsOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div x-show="bookingsOpen" class="ml-3 space-y-1 border-l border-gray-200 pl-3">
-                        <a href="{{ route('bookings.index', ['tab' => 'entry']) }}" class="block rounded-md px-3 py-2 text-sm {{ request('tab') !== 'monitoring' ? 'font-semibold text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ __('Task Entry') }}</a>
-                        <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="block rounded-md px-3 py-2 text-sm {{ request('tab') === 'monitoring' ? 'font-semibold text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ __('Task Monitoring') }}</a>
+                    <div x-show="bookingsOpen" class="ml-3 space-y-1 border-l border-slate-700 pl-3">
+                        <a href="{{ route('bookings.index', ['tab' => 'entry']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') !== 'monitoring' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Task Entry') }}</a>
+                        <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') === 'monitoring' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Task Monitoring') }}</a>
                     </div>
-                    <button type="button" x-on:click="settingsOpen = !settingsOpen" class="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('settings.*') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <button type="button" x-on:click="settingsOpen = !settingsOpen" class="flex w-full items-center justify-between rounded-lg border border-transparent px-3 py-2 text-sm font-medium {{ request()->routeIs('settings.*') ? 'border-yellow-400/40 bg-yellow-400/10 text-yellow-600 shadow-sm shadow-yellow-500/10 dark:text-yellow-300' : 'text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">
                         <span>{{ __('Settings') }}</span>
                         <svg class="h-4 w-4 transition-transform" :class="settingsOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div x-show="settingsOpen" class="ml-3 space-y-1 border-l border-gray-200 pl-3">
-                        <a href="{{ route('settings.index', ['tab' => 'users']) }}" class="block rounded-md px-3 py-2 text-sm {{ request('tab', 'users') === 'users' ? 'font-semibold text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ __('User Settings') }}</a>
-                        <a href="{{ route('settings.index', ['tab' => 'clients']) }}" class="block rounded-md px-3 py-2 text-sm {{ request('tab') === 'clients' ? 'font-semibold text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ __('Clients List') }}</a>
-                        <a href="{{ route('settings.index', ['tab' => 'tasks']) }}" class="block rounded-md px-3 py-2 text-sm {{ request('tab') === 'tasks' ? 'font-semibold text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ __('Tasks List') }}</a>
-                        <a href="{{ route('settings.index', ['tab' => 'forms']) }}" class="block rounded-md px-3 py-2 text-sm {{ request('tab') === 'forms' ? 'font-semibold text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ __('Forms List') }}</a>
+                    <div x-show="settingsOpen" class="ml-3 space-y-1 border-l border-slate-700 pl-3">
+                        <a href="{{ route('settings.index', ['tab' => 'users']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab', 'users') === 'users' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('User Settings') }}</a>
+                        <a href="{{ route('settings.index', ['tab' => 'clients']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') === 'clients' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Clients List') }}</a>
+                        <a href="{{ route('settings.index', ['tab' => 'tasks']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') === 'tasks' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Tasks List') }}</a>
+                        <a href="{{ route('settings.index', ['tab' => 'forms']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') === 'forms' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Forms List') }}</a>
                     </div>
             </div>
         </div>
 
         <div class="mt-auto border-t border-gray-100 p-4">
             <div class="flex items-center gap-2">
-                <div class="min-w-0 flex-1 truncate px-1 text-sm font-medium text-gray-700">{{ Auth::user()->name }}</div>
+                <div class="min-w-0 flex-1 truncate px-1 text-sm font-medium text-slate-800 dark:text-slate-200">{{ Auth::user()->name }}</div>
 
-                <button type="button" data-theme-toggle title="{{ __('Toggle theme') }}" aria-label="{{ __('Toggle theme') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                <button type="button" data-theme-toggle title="{{ __('Toggle theme') }}" aria-label="{{ __('Toggle theme') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-800 hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                     <svg data-theme-icon class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <path class="dark:hidden" stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.5m0 13V21m9-9h-2.5M5.5 12H3m15.5 6.5-1.8-1.8M8.3 8.3 6.5 6.5m0 11 1.8-1.8m7.4-7.4 1.8-1.8M12 7.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Z" />
                         <path class="hidden dark:block" stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A8.8 8.8 0 0 1 11.2 3a9 9 0 1 0 9.8 9.8Z" />
                     </svg>
                 </button>
 
-                <a href="{{ route('profile.edit') }}" title="{{ __('Profile') }}" aria-label="{{ __('Profile') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                <a href="{{ route('profile.edit') }}" title="{{ __('Profile') }}" aria-label="{{ __('Profile') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-800 hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0" />
                     </svg>
                 </a>
 
-                    <button type="button" x-on:click="$dispatch('open-modal', 'logout-confirm')" title="{{ __('Log Out') }}" aria-label="{{ __('Log Out') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    <button type="button" x-on:click="$dispatch('open-modal', 'logout-confirm')" title="{{ __('Log Out') }}" aria-label="{{ __('Log Out') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-800 hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 12h9m0 0-3-3m3 3-3 3" />
                         </svg>
@@ -81,16 +81,16 @@
     <div class="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden">
         <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-3">
             <x-application-logo class="block h-9 w-9 shrink-0 object-contain" />
-            <span class="truncate text-sm font-semibold tracking-tight text-gray-800">{{ config('app.name', 'PPCC Booking') }}</span>
+            <span class="truncate text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-100">{{ config('app.name', 'PPCC Booking') }}</span>
         </a>
         <div class="flex items-center gap-2">
-            <button type="button" data-theme-toggle class="rounded-md p-2 text-gray-500 hover:bg-gray-100" aria-label="{{ __('Toggle theme') }}">
+            <button type="button" data-theme-toggle class="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" aria-label="{{ __('Toggle theme') }}">
                 <svg data-theme-icon class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                     <path class="dark:hidden" stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.5m0 13V21m9-9h-2.5M5.5 12H3m15.5 6.5-1.8-1.8M8.3 8.3 6.5 6.5m0 11 1.8-1.8m7.4-7.4 1.8-1.8M12 7.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Z" />
                     <path class="hidden dark:block" stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A8.8 8.8 0 0 1 11.2 3a9 9 0 1 0 9.8 9.8Z" />
                 </svg>
             </button>
-            <button @click="open = ! open" type="button" class="rounded-md p-2 text-gray-500 hover:bg-gray-100" aria-label="{{ __('Toggle navigation') }}">
+            <button @click="open = ! open" type="button" class="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" aria-label="{{ __('Toggle navigation') }}">
                 <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                     <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -104,7 +104,7 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <button type="button" @click="bookingsOpen = !bookingsOpen" class="flex w-full items-center justify-between px-4 py-2 text-start text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+            <button type="button" @click="bookingsOpen = !bookingsOpen" class="flex w-full items-center justify-between px-4 py-2 text-start text-base font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100">
                 <span>{{ __('Bookings') }}</span>
                 <svg class="h-4 w-4 transition-transform" :class="bookingsOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
             </button>
@@ -113,7 +113,7 @@
                 <x-responsive-nav-link :href="route('bookings.index', ['tab' => 'monitoring'])">{{ __('Task Monitoring') }}</x-responsive-nav-link>
             </div>
 
-            <button type="button" @click="settingsOpen = !settingsOpen" class="flex w-full items-center justify-between px-4 py-2 text-start text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+            <button type="button" @click="settingsOpen = !settingsOpen" class="flex w-full items-center justify-between px-4 py-2 text-start text-base font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100">
                 <span>{{ __('Settings') }}</span>
                 <svg class="h-4 w-4 transition-transform" :class="settingsOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
             </button>
@@ -128,8 +128,8 @@
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                <div class="font-medium text-base text-slate-100">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-sm text-slate-400">{{ Auth::user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
@@ -137,7 +137,7 @@
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
-                <button type="button" x-on:click="$dispatch('open-modal', 'logout-confirm')" class="flex w-full items-center px-4 py-2 text-start text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                <button type="button" x-on:click="$dispatch('open-modal', 'logout-confirm')" class="flex w-full items-center px-4 py-2 text-start text-base font-medium text-slate-300 hover:bg-slate-800 hover:text-slate-100">
                     {{ __('Log Out') }}
                 </button>
             </div>
@@ -148,11 +148,11 @@
         <form method="POST" action="{{ route('logout') }}" class="p-6">
             @csrf
 
-            <h2 class="text-lg font-semibold text-gray-900">{{ __('Confirm logout') }}</h2>
-            <p class="mt-2 text-sm text-gray-600">{{ __('Are you sure you want to log out of your account?') }}</p>
+            <h2 class="text-lg font-semibold text-slate-100">{{ __('Confirm logout') }}</h2>
+            <p class="mt-2 text-sm text-slate-300">{{ __('Are you sure you want to log out of your account?') }}</p>
 
             <div class="mt-6 flex items-center justify-end gap-3">
-                <button type="button" x-on:click="$dispatch('close-modal', 'logout-confirm')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                <button type="button" x-on:click="$dispatch('close-modal', 'logout-confirm')" class="inline-flex items-center rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-100 transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                     {{ __('Cancel') }}
                 </button>
                 <x-primary-button>{{ __('Log Out') }}</x-primary-button>

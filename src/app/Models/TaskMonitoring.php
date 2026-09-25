@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,13 @@ use Illuminate\Database\Eloquent\Model;
 class TaskMonitoring extends Model
 {
     use HasFactory;
+
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where(function (Builder $pendingQuery): void {
+            $pendingQuery->whereNull('submission_status')->orWhere('submission_status', '!=', 'completed');
+        });
+    }
 
     protected static function booted(): void
     {

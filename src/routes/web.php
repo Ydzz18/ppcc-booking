@@ -5,6 +5,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\FormItemController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 use App\Models\Client;
 use App\Models\FormItem;
 use App\Models\Task;
@@ -97,9 +98,7 @@ Route::get('/dashboard', function (Request $request) {
 
     $notifications = TaskMonitoring::query()
         ->with(['client:id,client_name', 'task:id,task_name'])
-        ->where(function ($query): void {
-            $query->whereNull('submission_status')->orWhere('submission_status', '!=', 'completed');
-        })
+        ->pending()
         ->latest('created_at')
         ->limit(5)
         ->get(['id', 'client_id', 'task_id', 'submission_status', 'created_at']);
@@ -118,6 +117,7 @@ Route::get('/dashboard', function (Request $request) {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
     Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');

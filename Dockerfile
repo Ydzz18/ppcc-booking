@@ -25,8 +25,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
-# Copy Laravel app contents (flatten src/)
-COPY src/ .
+# Copy Laravel app with www-data ownership
+COPY --chown=www-data:www-data src/ .
 
 # Install dependencies and build frontend assets inside the image so a fresh
 # checkout does not depend on ignored vendor, node_modules, or public/build files.
@@ -34,9 +34,6 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader \
     && npm install \
     && npm run build
 
-# Optional: fix permissions
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-
 EXPOSE 9000
 
-CMD ["php-fpm"]
+CMD ["sh", "-c", "mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && exec php-fpm"]

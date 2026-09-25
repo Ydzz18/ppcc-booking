@@ -1,6 +1,7 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
+import { applyTheme, syncBrandLogos } from './theme';
 
 window.Alpine = Alpine;
 
@@ -8,28 +9,30 @@ const savedTheme = localStorage.getItem('theme');
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 const initialTheme = savedTheme ?? (prefersDark ? 'dark' : 'light');
 
-const applyTheme = (theme) => {
-    const isDark = theme === 'dark';
-    document.documentElement.classList.toggle('dark', isDark);
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-
-    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
-        const icon = button.querySelector('[data-theme-icon]');
-        if (icon) {
-            icon.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-        }
-    });
-};
-
-applyTheme(initialTheme);
-
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', () => {
+    const root = document.documentElement;
+    applyTheme(initialTheme);
+    syncBrandLogos();
+
+    const themeObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            if (mutation.type === 'attributes' && (mutation.attributeName === 'class' || mutation.attributeName === 'data-theme')) {
+                syncBrandLogos();
+                break;
+            }
+        }
+    });
+
+    themeObserver.observe(root, {
+        attributes: true,
+        attributeFilter: ['class', 'data-theme'],
+    });
+
     document.querySelectorAll('[data-theme-toggle]').forEach((toggleButton) => {
         toggleButton.addEventListener('click', () => {
-            const nextTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            const nextTheme = root.classList.contains('dark') ? 'light' : 'dark';
             applyTheme(nextTheme);
         });
     });

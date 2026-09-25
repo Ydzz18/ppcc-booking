@@ -4,18 +4,41 @@
 
 :root {
     color-scheme: light;
+    --app-bg: #0B111A;
+    --sidebar-bg: #0D141E;
+    --card-bg: #111A26;
+    --card-alt: #1C2736;
+    --border-color: #273448;
+    --text-primary: #F1F5F9;
+    --text-secondary: #A9B7CC;
+    --gold: #F2B84B;
+    --gold-hover: #FFC95F;
+    --success: #34D399;
+    --danger: #F87171;
+    --surface-soft: rgba(242, 184, 75, 0.10);
+    --surface-soft-strong: rgba(242, 184, 75, 0.16);
+    --navy-strong: #0B111A;
+    --navy-sidebar: #0D141E;
+    --navy-card: #111A26;
+    --navy-hover: #1C2736;
+    --navy-border: #273448;
+    --text-main: #F1F5F9;
+    --text-muted: #A9B7CC;
+    --gold-accent: #F2B84B;
+    --gold-accent-hover: #FFC95F;
+    --success-green: #34D399;
+    --danger-red: #F87171;
 }
 
-html.dark {
+html.dark,
+html[data-theme='dark'] {
     color-scheme: dark;
+    background-color: var(--navy-strong);
+    background: linear-gradient(180deg, var(--navy-strong) 0%, #0e1723 100%);
 }
 
 html {
     background-color: #f3f4f6;
-}
-
-html.dark {
-    background-color: #1a1a1a;
 }
 
 body {
@@ -23,65 +46,209 @@ body {
     color: #111827;
 }
 
+.app-shell,
+.app-main {
+    background-color: #f3f4f6;
+}
+
+html.dark .app-shell,
+html[data-theme='dark'] .app-shell,
+html.dark .app-main,
+html[data-theme='dark'] .app-main {
+    background-color: var(--navy-strong) !important;
+}
+
 html.dark body,
+html[data-theme='dark'] body,
+html.dark nav,
+html[data-theme='dark'] nav,
+html.dark nav > div,
+html[data-theme='dark'] nav > div,
 html.dark .bg-white,
+html[data-theme='dark'] .bg-white,
 html.dark .bg-gray-50,
+html[data-theme='dark'] .bg-gray-50,
 html.dark .bg-gray-100,
+html[data-theme='dark'] .bg-gray-100,
 html.dark .bg-slate-50,
+html[data-theme='dark'] .bg-slate-50,
 html.dark .bg-slate-100,
+html[data-theme='dark'] .bg-slate-100,
 html.dark [class*="bg-white"],
+html[data-theme='dark'] [class*="bg-white"],
 html.dark [class*="bg-gray-50"],
+html[data-theme='dark'] [class*="bg-gray-50"],
 html.dark [class*="bg-gray-100"],
+html[data-theme='dark'] [class*="bg-gray-100"],
 html.dark [class*="bg-slate-50"],
-html.dark [class*="bg-slate-100"] {
-    background-color: #202020 !important;
+html[data-theme='dark'] [class*="bg-slate-50"],
+html.dark [class*="bg-slate-100"],
+html[data-theme='dark'] [class*="bg-slate-100"] {
+    background-color: var(--navy-card) !important;
+}
+
+html.dark nav,
+html[data-theme='dark'] nav {
+    background-color: var(--navy-sidebar) !important;
 }
 
 html.dark .bg-gray-800,
+html[data-theme='dark'] .bg-gray-800,
 html.dark .bg-gray-900,
+html[data-theme='dark'] .bg-gray-900,
+html.dark .bg-slate-900,
+html[data-theme='dark'] .bg-slate-900,
 html.dark [class*="bg-gray-800"],
-html.dark [class*="bg-gray-900"] {
-    background-color: #262626 !important;
+html[data-theme='dark'] [class*="bg-gray-800"],
+html.dark [class*="bg-gray-900"],
+html[data-theme='dark'] [class*="bg-gray-900"],
+html.dark [class*="bg-slate-900"],
+html[data-theme='dark'] [class*="bg-slate-900"] {
+    background-color: var(--navy-hover) !important;
 }
 
 html.dark .text-gray-900,
+html[data-theme='dark'] .text-gray-900,
 html.dark .text-gray-800,
+html[data-theme='dark'] .text-gray-800,
 html.dark .text-gray-700,
+html[data-theme='dark'] .text-gray-700,
 html.dark .text-gray-600,
+html[data-theme='dark'] .text-gray-600,
 html.dark .text-gray-500,
+html[data-theme='dark'] .text-gray-500,
 html.dark .text-gray-400,
+html[data-theme='dark'] .text-gray-400,
 html.dark .text-slate-900,
+html[data-theme='dark'] .text-slate-900,
 html.dark .text-slate-800,
+html[data-theme='dark'] .text-slate-800,
 html.dark .text-slate-700,
+html[data-theme='dark'] .text-slate-700,
 html.dark .text-slate-600,
+html[data-theme='dark'] .text-slate-600,
 html.dark .text-slate-500,
+html[data-theme='dark'] .text-slate-500,
 html.dark .text-slate-400,
+html[data-theme='dark'] .text-slate-400,
 html.dark [class*="text-gray-900"],
+html[data-theme='dark'] [class*="text-gray-900"],
 html.dark [class*="text-gray-800"],
+html[data-theme='dark'] [class*="text-gray-800"],
 html.dark [class*="text-gray-700"],
+html[data-theme='dark'] [class*="text-gray-700"],
 html.dark [class*="text-gray-600"],
+html[data-theme='dark'] [class*="text-gray-600"],
 html.dark [class*="text-gray-500"],
+html[data-theme='dark'] [class*="text-gray-500"],
 html.dark [class*="text-gray-400"],
+html[data-theme='dark'] [class*="text-gray-400"],
 html.dark [class*="text-slate-900"],
+html[data-theme='dark'] [class*="text-slate-900"],
 html.dark [class*="text-slate-800"],
+html[data-theme='dark'] [class*="text-slate-800"],
 html.dark [class*="text-slate-700"],
+html[data-theme='dark'] [class*="text-slate-700"],
 html.dark [class*="text-slate-600"],
+html[data-theme='dark'] [class*="text-slate-600"],
 html.dark [class*="text-slate-500"],
-html.dark [class*="text-slate-400"] {
-    color: #f4efe7 !important;
+html[data-theme='dark'] [class*="text-slate-500"],
+html.dark [class*="text-slate-400"],
+html[data-theme='dark'] [class*="text-slate-400"] {
+    color: var(--text-main) !important;
+}
+
+html.dark .text-gray-300,
+html[data-theme='dark'] .text-gray-300,
+html.dark .text-gray-200,
+html[data-theme='dark'] .text-gray-200,
+html.dark [class*="text-gray-300"],
+html[data-theme='dark'] [class*="text-gray-300"],
+html.dark [class*="text-gray-200"],
+html[data-theme='dark'] [class*="text-gray-200"] {
+    color: var(--text-muted) !important;
+}
+
+html.dark .text-white,
+html[data-theme='dark'] .text-white,
+html.dark [class*="text-white"],
+html[data-theme='dark'] [class*="text-white"] {
+    color: var(--text-main) !important;
+}
+
+html.dark .text-indigo-700,
+html[data-theme='dark'] .text-indigo-700,
+html.dark .text-indigo-900,
+html[data-theme='dark'] .text-indigo-900,
+html.dark .text-indigo-800,
+html[data-theme='dark'] .text-indigo-800,
+html.dark [class*="text-indigo-700"],
+html[data-theme='dark'] [class*="text-indigo-700"],
+html.dark [class*="text-indigo-900"],
+html[data-theme='dark'] [class*="text-indigo-900"],
+html.dark [class*="text-indigo-800"],
+html[data-theme='dark'] [class*="text-indigo-800"] {
+    color: var(--gold-accent) !important;
 }
 
 html.dark .border-gray-100,
+html[data-theme='dark'] .border-gray-100,
 html.dark .border-gray-200,
+html[data-theme='dark'] .border-gray-200,
 html.dark .border-gray-300,
+html[data-theme='dark'] .border-gray-300,
 html.dark .border-slate-200,
+html[data-theme='dark'] .border-slate-200,
 html.dark [class*="border-gray-100"],
+html[data-theme='dark'] [class*="border-gray-100"],
 html.dark [class*="border-gray-200"],
+html[data-theme='dark'] [class*="border-gray-200"],
 html.dark [class*="border-gray-300"],
+html[data-theme='dark'] [class*="border-gray-300"],
 html.dark [class*="border-slate-200"],
+html[data-theme='dark'] [class*="border-slate-200"],
 html.dark .divide-gray-200 > * + *,
-html.dark [class*="divide-gray-200"] > * + * {
-    border-color: rgba(212, 175, 55, 0.28) !important;
+html[data-theme='dark'] .divide-gray-200 > * + *,
+html.dark [class*="divide-gray-200"] > * + *,
+html[data-theme='dark'] [class*="divide-gray-200"] > * + * {
+    border-color: var(--navy-border) !important;
+}
+
+html.dark .bg-indigo-50,
+html[data-theme='dark'] .bg-indigo-50,
+html.dark .bg-indigo-100,
+html[data-theme='dark'] .bg-indigo-100,
+html.dark [class*="bg-indigo-50"],
+html[data-theme='dark'] [class*="bg-indigo-50"],
+html.dark [class*="bg-indigo-100"],
+html[data-theme='dark'] [class*="bg-indigo-100"] {
+    background-color: var(--navy-hover) !important;
+}
+
+html.dark .border-indigo-500,
+html[data-theme='dark'] .border-indigo-500,
+html.dark [class*="border-indigo-500"],
+html[data-theme='dark'] [class*="border-indigo-500"] {
+    border-color: rgba(242, 184, 75, 0.65) !important;
+}
+
+html.dark .ring-indigo-500,
+html[data-theme='dark'] .ring-indigo-500,
+html.dark [class*="ring-indigo-500"],
+html[data-theme='dark'] [class*="ring-indigo-500"] {
+    --tw-ring-color: rgba(242, 184, 75, 0.65) !important;
+}
+
+html.dark .min-h-screen.bg-gray-100,
+html[data-theme='dark'] .min-h-screen.bg-gray-100 {
+    background-color: var(--navy-strong) !important;
+}
+
+html.dark .border-indigo-400,
+html[data-theme='dark'] .border-indigo-400,
+html.dark [class*="border-indigo-400"],
+html[data-theme='dark'] [class*="border-indigo-400"] {
+    border-color: rgba(242, 184, 75, 0.45) !important;
 }
 
 html.dark input,
@@ -102,42 +269,127 @@ html.dark [multiple],
 html.dark textarea,
 html.dark select,
 html.dark input {
-    background-color: #242424 !important;
-    color: #fffdf8 !important;
-    border-color: rgba(212, 175, 55, 0.35) !important;
+    background-color: var(--card-alt) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: inset 0 0 0 1px rgba(163, 180, 204, 0.12);
 }
 
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-    color: #d8c98d !important;
-}
-
-html.dark .text-white,
-html.dark [class*="text-white"] {
-    color: #fffdf8 !important;
+    color: var(--text-secondary) !important;
 }
 
 html.dark .text-yellow-500,
+html[data-theme='dark'] .text-yellow-500,
 html.dark .text-amber-500,
+html[data-theme='dark'] .text-amber-500,
 html.dark .text-amber-700,
+html[data-theme='dark'] .text-amber-700,
 html.dark [class*="text-yellow-500"],
+html[data-theme='dark'] [class*="text-yellow-500"],
 html.dark [class*="text-amber-500"],
-html.dark [class*="text-amber-700"] {
-    color: #d7b75a !important;
+html[data-theme='dark'] [class*="text-amber-500"],
+html.dark [class*="text-amber-700"],
+html[data-theme='dark'] [class*="text-amber-700"] {
+    color: var(--gold-accent) !important;
 }
 
 html.dark .bg-amber-50,
 html.dark .bg-yellow-50,
 html.dark [class*="bg-amber-50"],
 html.dark [class*="bg-yellow-50"] {
-    background-color: rgba(215, 183, 90, 0.12) !important;
+    background-color: var(--surface-soft) !important;
 }
 
 html.dark .bg-yellow-100,
 html.dark .bg-amber-100,
 html.dark [class*="bg-yellow-100"],
 html.dark [class*="bg-amber-100"] {
-    background-color: rgba(215, 183, 90, 0.18) !important;
+    background-color: var(--surface-soft-strong) !important;
+}
+
+html.dark .status-card-pending {
+    background-color: var(--card-bg) !important;
+    border-color: rgba(242, 184, 75, 0.55) !important;
+}
+
+html.dark .status-card-pending .text-amber-800,
+html.dark .status-card-pending .text-amber-950,
+html[data-theme='dark'] .status-card-pending .text-amber-800,
+html[data-theme='dark'] .status-card-pending .text-amber-950 {
+    color: var(--gold-accent) !important;
+}
+
+html.dark .status-card-completed {
+    background-color: var(--card-bg) !important;
+    border-color: rgba(52, 211, 153, 0.55) !important;
+}
+
+html.dark .status-card-completed .text-emerald-800,
+html.dark .status-card-completed .text-emerald-950,
+html[data-theme='dark'] .status-card-completed .text-emerald-800,
+html[data-theme='dark'] .status-card-completed .text-emerald-950 {
+    color: var(--success-green) !important;
+}
+
+html.dark .text-green-600,
+html[data-theme='dark'] .text-green-600,
+html.dark [class*="text-green-600"],
+html[data-theme='dark'] [class*="text-green-600"] {
+    color: var(--success-green) !important;
+}
+
+html.dark .bg-green-100,
+html[data-theme='dark'] .bg-green-100,
+html.dark [class*="bg-green-100"],
+html[data-theme='dark'] [class*="bg-green-100"] {
+    background-color: rgba(52, 211, 153, 0.12) !important;
+}
+
+html.dark .text-red-600,
+html[data-theme='dark'] .text-red-600,
+html.dark [class*="text-red-600"],
+html[data-theme='dark'] [class*="text-red-600"] {
+    color: var(--danger-red) !important;
+}
+
+html.dark .bg-red-100,
+html[data-theme='dark'] .bg-red-100,
+html.dark [class*="bg-red-100"],
+html[data-theme='dark'] [class*="bg-red-100"] {
+    background-color: rgba(248, 113, 113, 0.12) !important;
+}
+
+html.dark .bg-gray-700,
+html.dark [class*="bg-gray-700"] {
+    background-color: var(--card-alt) !important;
+}
+
+html.dark .app-header-actions button,
+html.dark .app-header-actions a {
+    background-color: rgba(17, 26, 38, 0.7) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-secondary) !important;
+}
+
+html.dark .app-header-actions button:hover,
+html.dark .app-header-actions a:hover {
+    border-color: rgba(242, 184, 75, 0.5) !important;
+    color: var(--gold) !important;
+}
+
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-gray-100:hover,
+html.dark [class*="hover:bg-gray-50"]:hover,
+html.dark [class*="hover:bg-gray-100"]:hover {
+    background-color: var(--card-alt) !important;
+}
+
+html.dark .rounded-md,
+html.dark .rounded-lg,
+html.dark .rounded-xl {
+    border-radius: 10px;
 }
 
 @keyframes shake {

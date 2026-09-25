@@ -26,12 +26,12 @@
                     <p class="mt-3 text-3xl font-semibold tracking-tight text-gray-900">{{ $bookingTotal }}</p>
                     <a href="{{ route('bookings.index') }}" class="mt-4 inline-flex text-sm font-medium text-indigo-700 hover:text-indigo-900">{{ __('View bookings') }} &rarr;</a>
                 </div>
-                <div class="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                <div class="status-card-pending rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
                     <p class="text-sm text-amber-800">{{ __('Pending') }}</p>
                     <p class="mt-3 text-3xl font-semibold tracking-tight text-amber-950">{{ $pendingBookings }}</p>
                     <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="mt-4 inline-flex text-sm font-medium text-amber-800 hover:text-amber-950">{{ __('Review queue') }} &rarr;</a>
                 </div>
-                <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+                <div class="status-card-completed rounded-lg border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
                     <p class="text-sm text-emerald-800">{{ __('Completed') }}</p>
                     <p class="mt-3 text-3xl font-semibold tracking-tight text-emerald-950">{{ $completedBookings }}</p>
                     <p class="mt-4 text-sm text-emerald-800">{{ __('Completed workflows') }}</p>
