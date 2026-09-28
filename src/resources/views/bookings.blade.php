@@ -31,12 +31,46 @@
                         <p class="text-sm text-green-600">{{ __('Task entry updated successfully.') }}</p>
                     @endif
 
-                    <div id="job-task-entry-section" class="max-w-7xl mx-auto" x-show="activeMenu === 'entry'">
-                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ selectedForms: [], initializeSelectedForms() { const checked = this.$root.querySelectorAll(`input[name='required_forms_documents[]']:checked`); this.selectedForms = Array.from(checked).map((item) => ({ value: item.value, text: item.dataset.formName })); }, toggleForm(event) { const value = event.target.value; const text = event.target.dataset.formName; if (event.target.checked) { if (!this.selectedForms.find((item) => item.value === value)) { this.selectedForms.push({ value, text }); } return; } this.selectedForms = this.selectedForms.filter((item) => item.value !== value); }, removeSelectedForm(value) { const checkbox = this.$root.querySelector(`input[name='required_forms_documents[]'][value='${value}']`); if (checkbox) { checkbox.checked = false; } this.selectedForms = this.selectedForms.filter((item) => item.value !== value); } }" x-init="initializeSelectedForms()">
-                            <h3 class="text-lg font-medium text-gray-900">{{ __('Task Monitoring Form') }}</h3>
+                    @if (session('status') === 'task-deleted')
+                        <p class="text-sm text-green-600">{{ __('Task entry deleted successfully.') }}</p>
+                    @endif
 
-                        <form method="POST" action="{{ route('bookings.store') }}" class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3" data-confirm="Are you sure you want to create this task?">
+                    <div id="job-task-entry-section" class="max-w-7xl mx-auto" x-show="activeMenu === 'entry'">
+                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ selectedAgency: '', selectedTaskId: '', selectedTaskRequiredForms: [], additionalFormsOpen: false, selectAgency() { const taskSelect = this.$root.querySelector('#type_of_task'); taskSelect.value = ''; this.selectedTaskId = ''; this.selectedTaskRequiredForms = []; this.additionalFormsOpen = false; }, selectTask(event) { const option = event.target.selectedOptions[0]; this.selectedAgency = option?.dataset.agency || this.selectedAgency; this.selectedTaskId = event.target.value; this.selectedTaskRequiredForms = JSON.parse(option?.dataset.requiredForms || '[]').map(String); this.additionalFormsOpen = false; } }" x-init="const taskSelect = $root.querySelector('#type_of_task'); if (taskSelect?.value) { selectedAgency = taskSelect.selectedOptions[0]?.dataset.agency || ''; selectTask({ target: taskSelect }); }">
+                            <div class="flex items-center justify-between gap-4">
+                                <h3 class="text-lg font-medium text-gray-900">{{ __('Task Entry') }}</h3>
+                                <x-primary-button form="task-entry-form">{{ __('Create Task') }}</x-primary-button>
+                            </div>
+
+                        <form id="task-entry-form" method="POST" action="{{ route('bookings.store') }}" data-monitoring-refresh-url="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4" data-confirm="Are you sure you want to create this task?" data-async-monitoring-entry>
                             @csrf
+                            <div id="task-entry-feedback" class="hidden md:col-span-4 rounded-md px-4 py-3 text-sm" role="status" aria-live="polite"></div>
+
+                            <div class="md:col-span-2 rounded-md border border-gray-200 p-4">
+                                <x-input-label :value="__('Task Selection')" />
+                                <div class="mt-2 grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <x-input-label for="task_agency" :value="__('Agency')" />
+                                        <select id="task_agency" x-model="selectedAgency" x-on:change="selectAgency()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            <option value="">{{ __('Select Agency') }}</option>
+                                            @foreach ($tasks->pluck('agency')->filter()->unique()->sort()->values() as $agency)
+                                                <option value="{{ $agency }}">{{ $agency }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <x-input-label for="type_of_task" :value="__('Type of Task')" />
+                                        <select id="type_of_task" name="type_of_task" x-on:change="selectTask($event)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            <option value="">{{ __('Select Task') }}</option>
+                                            @foreach ($tasks as $task)
+                                                <option value="{{ $task->id }}" data-agency="{{ $task->agency }}" data-required-forms='@json($task->required_forms_documents ?? [])' x-bind:hidden="selectedAgency !== '' && $el.dataset.agency !== selectedAgency" @selected((string) old('type_of_task') === (string) $task->id)>{{ $task->task_name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500">{{ __('Choose an agency to filter task types, then select a task to load its required forms and documents.') }}</p>
+                            </div>
 
                             <div>
                                 <x-input-label for="date_task_received" :value="__('Date Task Received')" />
@@ -55,47 +89,37 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('client_name')" />
                             </div>
 
-                            <div>
-                                <x-input-label for="type_of_task" :value="__('Type of Task')" />
-                                <select id="type_of_task" name="type_of_task" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">{{ __('Select Task') }}</option>
-                                    @foreach ($tasks as $task)
-                                        <option value="{{ $task->id }}" @selected((string) old('type_of_task') === (string) $task->id)>{{ $task->task_name }}</option>
-                                    @endforeach
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
-                            </div>
-
-                            <div class="md:col-span-3">
+                            <div class="md:col-span-4">
                                 <x-input-label for="required_forms_documents" :value="__('List of Required Forms and Documents')" />
                                 <div id="required_forms_documents" class="mt-1 max-h-48 overflow-y-auto rounded-md border border-gray-300 p-3">
                                     <div class="space-y-2">
                                         @foreach ($forms as $form)
-                                            <label class="flex items-center gap-2 text-sm text-gray-700">
-                                                <input type="checkbox" name="required_forms_documents[]" value="{{ $form->id }}" data-form-name="{{ $form->form_name }}" @checked(in_array((string) $form->id, array_map('strval', old('required_forms_documents', [])), true)) x-on:change="toggleForm($event)" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                            <div x-show="selectedTaskRequiredForms.includes('{{ $form->id }}')" x-cloak class="flex items-center gap-2 text-sm text-gray-700">
+                                                <input type="hidden" name="required_forms_documents[]" value="{{ $form->id }}" data-form-name="{{ $form->form_name }}" x-bind:disabled="!selectedTaskRequiredForms.includes('{{ $form->id }}')">
                                                 <span>{{ $form->form_name }}</span>
-                                            </label>
+                                            </div>
+                                        @endforeach
+                                        <p x-show="selectedTaskRequiredForms.length === 0" x-cloak class="text-sm text-gray-500">{{ __('Select a task to view its required forms and documents.') }}</p>
+                                    </div>
+                                </div>
+                                <button type="button" x-on:click="additionalFormsOpen = !additionalFormsOpen" x-bind:disabled="!selectedTaskId" class="mt-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
+                                    {{ __('Add Additional Form') }}
+                                </button>
+                                <div x-show="additionalFormsOpen" x-cloak class="mt-3 rounded-md border border-gray-200 p-3">
+                                    <p class="mb-2 text-sm font-medium text-gray-700">{{ __('Select additional forms and documents') }}</p>
+                                    <div class="max-h-48 space-y-1 overflow-y-auto">
+                                        @foreach ($forms as $form)
+                                            <button type="button" x-show="!selectedTaskRequiredForms.includes('{{ $form->id }}')" x-on:click="selectedTaskRequiredForms.push('{{ $form->id }}')" class="block w-full rounded px-2 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-100">
+                                                {{ $form->form_name }}
+                                            </button>
                                         @endforeach
                                     </div>
+                                    <button type="button" x-on:click="additionalFormsOpen = false" class="mt-2 text-sm font-medium text-gray-600 hover:text-gray-900">{{ __('Done') }}</button>
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
 
-                                <div class="mt-3 space-y-1" x-show="selectedForms.length > 0">
-                                    <p class="text-sm font-medium text-gray-700">{{ __('Selected Forms:') }}</p>
-                                    <div class="flex flex-wrap gap-2">
-                                        <template x-for="form in selectedForms" :key="form.value">
-                                            <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-                                                <span x-text="form.text"></span>
-                                                <button type="button" x-on:click="removeSelectedForm(form.value)" class="text-gray-500 hover:text-gray-700">&times;</button>
-                                            </span>
-                                        </template>
-                                    </div>
-                                </div>
                             </div>
 
-                            <div class="md:col-span-3">
-                                <x-primary-button>{{ __('Create Task') }}</x-primary-button>
-                            </div>
                             </form>
                         </div>
                     </div>
@@ -131,6 +155,13 @@
                                                     @unless ($allRequiredFormsCompleted)
                                                         <a href="{{ route('bookings.edit', $monitoring) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Update') }}</a>
                                                     @endunless
+                                                    @if (Auth::user()->isAdmin())
+                                                        <form method="POST" action="{{ route('bookings.destroy', $monitoring) }}" data-confirm="{{ __('Are you sure you want to delete this task monitoring entry?') }}">
+                                                            @csrf
+                                                            @method('delete')
+                                                            <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">{{ __('Delete') }}</button>
+                                                        </form>
+                                                    @endif
                                                 </div>
                                             </div>
                                             <div>
@@ -142,7 +173,7 @@
                                                 <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-left text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->task?->task_name ?? '—' }}</button>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Assigned Responsible Person') }}</p>
+                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Client Name') }}</p>
                                                 <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-left text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</button>
                                             </div>
                                             <div>
@@ -179,8 +210,8 @@
                                                                 @endphp
 
                                                                 @if ($formName)
-                                                                    <div class="flex items-center justify-between gap-3 rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50' }}">
-                                                                        <span class="text-gray-900">{{ $formName }}</span>
+                                                                    <div class="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-black dark:text-black {{ $formCompleted ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50' }}">
+                                                                        <span class="required-form-name text-black dark:text-black">{{ $formName }}</span>
                                                                         <span class="shrink-0 text-xs font-semibold {{ $formCompleted ? 'text-green-700' : 'text-red-700' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
                                                                     </div>
                                                                 @endif
@@ -206,7 +237,7 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Date Task Received') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Client Name') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Type of Task') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Assigned Responsible Person') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Client Name') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-200 border-r-0">{{ __('List of Required Forms and Documents') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-200 border-l-0">{{ __('Required Docs Status') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-200 border-r-0">{{ __('Submission Details') }}</th>
@@ -314,6 +345,13 @@
                                                         @unless ($allRequiredFormsCompleted)
                                                             <a href="{{ route('bookings.edit', $monitoring) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Update') }}</a>
                                                         @endunless
+                                                        @if (Auth::user()->isAdmin())
+                                                            <form method="POST" action="{{ route('bookings.destroy', $monitoring) }}" data-confirm="{{ __('Are you sure you want to delete this task monitoring entry?') }}">
+                                                                @csrf
+                                                                @method('delete')
+                                                                <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">{{ __('Delete') }}</button>
+                                                            </form>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </td>

@@ -23,7 +23,7 @@
             <div class="detail"><dt>{{ __('Date Task Received') }}</dt><dd>{{ $monitoring->date_task_received?->format('F d, Y') ?? '—' }}</dd></div>
             <div class="detail"><dt>{{ __('Client Name') }}</dt><dd>{{ $monitoring->client?->client_name ?? '—' }}</dd></div>
             <div class="detail"><dt>{{ __('Type of Task') }}</dt><dd>{{ $monitoring->task?->task_name ?? '—' }}</dd></div>
-            <div class="detail"><dt>{{ __('Assigned Responsible Person') }}</dt><dd>{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</dd></div>
+            <div class="detail"><dt>{{ __('Client Name') }}</dt><dd>{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</dd></div>
             <div class="detail"><dt>{{ __('Submission Status') }}</dt><dd class="status">{{ ucfirst((string) ($monitoring->submission_status ?? 'pending')) }}</dd></div>
             <div class="detail"><dt>{{ __('Date of Submission') }}</dt><dd>{{ $monitoring->date_of_submission?->format('F d, Y') ?? '—' }}</dd></div>
             <div class="detail"><dt>{{ __('Receiving Officer') }}</dt><dd>{{ $monitoring->receiving_officer ?? '—' }}</dd></div>

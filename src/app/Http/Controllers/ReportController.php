@@ -72,6 +72,23 @@ class ReportController extends Controller
     }
 
     /**
+     * Show the selected report in a print-friendly layout.
+     */
+    public function print(Request $request): Response
+    {
+        [$title, $headers, $rows] = $this->reportData($request);
+
+        return response()->view('reports.print', [
+            'title' => $title,
+            'headers' => $headers,
+            'rows' => $rows,
+            'from' => $request->query('from'),
+            'to' => $request->query('to'),
+            'reportType' => $this->reportType($request),
+        ]);
+    }
+
+    /**
      * @return array{0: string, 1: list<string>, 2: list<list<string|int|null>>}
      */
     private function reportData(Request $request): array

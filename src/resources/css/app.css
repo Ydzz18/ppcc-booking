@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] {
+    display: none !important;
+}
+
+nav svg.rotate-180,
+nav svg.transition-transform {
+    display: none;
+}
+
 :root {
     color-scheme: light;
     --app-bg: #0B111A;
@@ -44,6 +53,12 @@ html {
 body {
     background-color: #f3f4f6;
     color: #111827;
+}
+
+.required-form-name,
+html.dark .required-form-name,
+html[data-theme='dark'] .required-form-name {
+    color: #000000 !important;
 }
 
 .app-shell,

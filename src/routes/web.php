@@ -1,18 +1,19 @@
 <?php
 
-use App\Http\Controllers\ClientController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\FormItemController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\NotificationController;
 use App\Models\Client;
 use App\Models\FormItem;
 use App\Models\Task;
 use App\Models\TaskMonitoring;
 use App\Models\User;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
@@ -117,18 +118,22 @@ Route::get('/dashboard', function (Request $request) {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('can:manage-users')->name('audit-logs.index');
+    Route::get('/notifications/live', [NotificationController::class, 'live'])->name('notifications.live');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
     Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+    Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{monitoring}/print', [BookingController::class, 'print'])->name('bookings.print');
     Route::get('/bookings/{monitoring}/pdf', [BookingController::class, 'downloadPdf'])->name('bookings.pdf');
     Route::get('/bookings/{monitoring}/edit', [BookingController::class, 'edit'])->name('bookings.edit');
     Route::patch('/bookings/{monitoring}', [BookingController::class, 'update'])->name('bookings.update');
+    Route::delete('/bookings/{monitoring}', [BookingController::class, 'destroy'])->middleware('can:manage-users')->name('bookings.destroy');
     Route::post('/bookings/{monitoring}/form-note', [BookingController::class, 'saveFormNote'])->name('bookings.form-note.save');
 
-    Route::get('/settings', function () {
+    Route::get('/settings', function (Request $request) {
         $users = User::query()
             ->select(['id', 'name', 'email', 'role', 'status', 'created_at'])
             ->latest('created_at')
@@ -139,19 +144,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->latest('created_at')
             ->paginate(10, ['*'], 'clients_page');
 
+        $taskSearch = trim((string) $request->query('task_search', ''));
+        $taskOrder = $request->query('task_order') === 'desc' ? 'desc' : 'asc';
+        $taskSort = $request->query('task_sort') === 'task_name' ? 'task_name' : 'id';
         $tasks = Task::query()
-            ->select(['id', 'task_name', 'created_at'])
-            ->latest('created_at')
+            ->select(['id', 'agency', 'task_name', 'required_forms_documents', 'created_at'])
+            ->when($taskSearch !== '', function ($query) use ($taskSearch): void {
+                $query->where(function ($taskQuery) use ($taskSearch): void {
+                    $taskQuery->where('agency', 'like', "%{$taskSearch}%")
+                        ->orWhere('task_name', 'like', "%{$taskSearch}%");
+                });
+            })
+            ->orderBy($taskSort, $taskOrder)
             ->paginate(10, ['*'], 'tasks_page');
 
+        $formSearch = trim((string) $request->query('form_search', ''));
+        $formOrder = $request->query('form_order') === 'desc' ? 'desc' : 'asc';
         $forms = FormItem::query()
             ->select(['id', 'form_name', 'created_at'])
-            ->latest('created_at')
+            ->when($formSearch !== '', function ($query) use ($formSearch): void {
+                $query->where('form_name', 'like', "%{$formSearch}%");
+            })
+            ->orderBy('form_name', $formOrder)
             ->paginate(10, ['*'], 'forms_page');
+
+        $taskForms = FormItem::query()
+            ->select(['id', 'form_name'])
+            ->orderBy('form_name')
+            ->get();
 
         $roles = User::roles();
 
-        return view('settings', compact('users', 'clients', 'tasks', 'forms', 'roles'));
+        return view('settings', compact('users', 'clients', 'tasks', 'forms', 'taskForms', 'roles', 'taskSearch', 'taskOrder', 'taskSort', 'formSearch', 'formOrder'));
     })->name('settings.index');
 
     Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
@@ -173,6 +197,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/users/register', [UserController::class, 'store'])->name('users.store');
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
     });
 });
 

@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\TaskMonitoring;
 use App\Models\TaskMonitoringFormNote;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -34,7 +35,7 @@ class BookingController extends Controller
             ->get();
 
         $tasks = Task::query()
-            ->select(['id', 'task_name'])
+            ->select(['id', 'agency', 'task_name', 'required_forms_documents'])
             ->orderBy('task_name')
             ->get();
 
@@ -75,7 +76,7 @@ class BookingController extends Controller
     /**
      * Store a newly created monitoring task entry.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'date_task_received' => ['required', 'date'],
@@ -93,6 +94,12 @@ class BookingController extends Controller
             'required_forms_documents' => $validated['required_forms_documents'] ?? [],
             'submission_status' => 'pending',
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => __('Task created successfully.'),
+            ], 201);
+        }
 
         return Redirect::route('bookings.index')->with('status', 'task-created');
     }
@@ -242,6 +249,17 @@ class BookingController extends Controller
         return Redirect::route('bookings.edit', ['monitoring' => $monitoring, 'show_submission_form' => 1])
             ->withFragment('submission-action')
             ->with('status', 'task-updated');
+    }
+
+    /**
+     * Remove the specified task monitoring entry.
+     */
+    public function destroy(TaskMonitoring $monitoring): RedirectResponse
+    {
+        $monitoring->delete();
+
+        return Redirect::route('bookings.index', ['tab' => 'monitoring'])
+            ->with('status', 'task-deleted');
     }
 
     /**

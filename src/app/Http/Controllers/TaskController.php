@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\TaskMonitoring;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,10 @@ class TaskController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'agency' => ['required', 'string', 'max:255'],
             'task_name' => ['required', 'string', 'max:255'],
+            'required_forms_documents' => ['nullable', 'array'],
+            'required_forms_documents.*' => ['integer', 'exists:forms,id'],
         ]);
 
         Task::create($validated);
@@ -62,11 +66,30 @@ class TaskController extends Controller
     public function update(Request $request, Task $task): RedirectResponse
     {
         $validated = $request->validate([
+            'agency' => ['required', 'string', 'max:255'],
             'task_name' => ['required', 'string', 'max:255'],
+            'required_forms_documents' => ['nullable', 'array'],
+            'required_forms_documents.*' => ['integer', 'exists:forms,id'],
         ]);
 
         $task->update($validated);
 
         return Redirect::route('settings.index')->with('status', 'task-updated');
+    }
+
+    /**
+     * Remove the specified task when it is not used by monitoring records.
+     */
+    public function destroy(Task $task): RedirectResponse
+    {
+        if (TaskMonitoring::query()->where('task_id', $task->id)->exists()) {
+            return Redirect::route('settings.index', ['tab' => 'tasks'])
+                ->with('error', 'task-in-use');
+        }
+
+        $task->delete();
+
+        return Redirect::route('settings.index', ['tab' => 'tasks'])
+            ->with('status', 'task-deleted');
     }
 }

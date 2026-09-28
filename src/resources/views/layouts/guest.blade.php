@@ -6,6 +6,8 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        @include('layouts.theme-init')
+
         <link rel="icon" href="{{ asset('logo-booking.png') }}" type="image/png">
 
         <!-- Fonts -->

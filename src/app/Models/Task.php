@@ -13,6 +13,15 @@ class Task extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'agency',
         'task_name',
+        'required_forms_documents',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'required_forms_documents' => 'array',
+        ];
+    }
 }

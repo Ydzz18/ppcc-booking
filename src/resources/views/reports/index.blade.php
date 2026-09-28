@@ -45,19 +45,26 @@
                     <h2 id="preview-title" class="text-lg font-semibold text-gray-900">{{ __($title) }}</h2>
                     <p class="mt-1 text-sm text-gray-500">{{ __('Preview of the records that will be exported.') }}</p>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('reports.export', array_filter(['type' => $reportType, 'from' => $from, 'to' => $to])) }}" class="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">
+                <div class="relative" x-data="{ actionsOpen: false }" @click.outside="actionsOpen = false" @keydown.escape.window="actionsOpen = false">
+                    <button type="button" x-on:click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen.toString()" aria-haspopup="menu" aria-controls="report-actions-menu" class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                        {{ __('Actions') }}
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
                         </svg>
-                        {{ __('Export CSV') }}
-                    </a>
-                    <a href="{{ route('reports.export.pdf', array_filter(['type' => $reportType, 'from' => $from, 'to' => $to])) }}" class="inline-flex items-center gap-2 rounded-md bg-red-700 px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14a2 2 0 0 1 2-2v-3M3 16v3a2 2 0 0 1 2-2" />
-                        </svg>
-                        {{ __('Export PDF') }}
-                    </a>
+                    </button>
+
+                    <div id="report-actions-menu" x-show="actionsOpen" x-cloak role="menu" aria-label="{{ __('Report actions') }}" class="absolute left-0 right-auto top-full z-30 mt-2 w-48 max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-lg ring-1 ring-black/5 sm:left-auto sm:right-0">
+                        <a href="{{ route('reports.print', array_filter(['type' => $reportType, 'from' => $from, 'to' => $to])) }}" target="_blank" rel="noopener" role="menuitem" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 focus:bg-gray-50 focus:outline-none">
+                            {{ __('Print') }}
+                        </a>
+                        <div class="my-1 border-t border-gray-100"></div>
+                        <a href="{{ route('reports.export', array_filter(['type' => $reportType, 'from' => $from, 'to' => $to])) }}" role="menuitem" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 focus:bg-gray-50 focus:outline-none">
+                            {{ __('Export CSV') }}
+                        </a>
+                        <a href="{{ route('reports.export.pdf', array_filter(['type' => $reportType, 'from' => $from, 'to' => $to])) }}" role="menuitem" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 focus:bg-gray-50 focus:outline-none">
+                            {{ __('Export PDF') }}
+                        </a>
+                    </div>
                 </div>
             </div>
 

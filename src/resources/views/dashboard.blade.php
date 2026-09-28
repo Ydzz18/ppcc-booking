@@ -48,7 +48,7 @@
             <div class="mb-4">
                 <h3 id="quick-stats-title" class="mt-1 text-lg font-semibold text-gray-900">{{ __('At a glance') }}</h3>
             </div>
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                 <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                     <p class="text-sm text-gray-500">{{ __('Bookings today') }}</p>
                     <p class="mt-3 text-3xl font-semibold tracking-tight text-gray-900">{{ $bookingsToday }}</p>
@@ -63,11 +63,6 @@
                     <p class="text-sm text-gray-500">{{ __('Completion rate') }}</p>
                     <p class="mt-3 text-3xl font-semibold tracking-tight text-gray-900">{{ $completionRate }}%</p>
                     <p class="mt-2 text-xs text-gray-500">{{ __('Of all bookings') }}</p>
-                </div>
-                <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-5">
-                    <p class="text-sm text-gray-500">{{ __('Occupancy') }}</p>
-                    <p class="mt-3 text-3xl font-semibold tracking-tight text-gray-400">—</p>
-                    <p class="mt-2 text-xs text-gray-500">{{ __('Capacity tracking not configured') }}</p>
                 </div>
             </div>
         </section>
@@ -116,7 +111,7 @@
             @endif
         </section>
 
-        <section aria-labelledby="client-management-title" class="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+        <section aria-labelledby="client-management-title" class="grid gap-6 md:grid-cols-2">
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex flex-wrap items-end justify-between gap-4">
                     <div>
@@ -151,28 +146,27 @@
                     @endforelse
                 </div>
             </div>
-
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <h3 class="mt-1 text-lg font-semibold text-gray-900">{{ __('Notifications') }}</h3>
-                    </div>
-                    <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">{{ $notifications->count() }}</span>
+                <div>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">{{ __('Staff assignments') }}</h3>
                 </div>
                 <div class="mt-5 space-y-4">
-                    @forelse ($notifications as $notification)
-                        <a href="{{ route('bookings.edit', $notification) }}" class="block border-l-2 border-amber-400 pl-3 hover:border-gray-900">
-                            <p class="text-sm font-medium text-gray-900">{{ $notification->task?->task_name ?? __('Booking') }}</p>
-                            <p class="mt-1 text-xs text-gray-500">{{ $notification->client?->client_name ?? __('Unknown client') }} · {{ ucfirst($notification->submission_status ?: 'pending') }}</p>
-                        </a>
+                    @forelse ($staff as $member)
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-medium text-gray-900">{{ $member->name }}</p>
+                                <p class="text-xs capitalize text-gray-500">{{ $member->role }}</p>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{{ $staffWorkload[$member->id] ?? 0 }} {{ __('open') }}</span>
+                        </div>
                     @empty
-                        <p class="text-sm text-gray-500">{{ __('No pending notifications.') }}</p>
+                        <p class="text-sm text-gray-500">{{ __('No active staff members.') }}</p>
                     @endforelse
                 </div>
             </div>
         </section>
 
-        <section aria-labelledby="insights-title" class="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)]">
+        <section aria-labelledby="insights-title" class="grid gap-6 md:grid-cols-2">
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex items-end justify-between gap-4">
                     <div>
@@ -195,30 +189,9 @@
             </div>
 
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                <div>
-                    <h3 class="mt-1 text-lg font-semibold text-gray-900">{{ __('Staff assignments') }}</h3>
-                </div>
-                <div class="mt-5 space-y-4">
-                    @forelse ($staff as $member)
-                        <div class="flex items-center justify-between gap-3">
-                            <div class="min-w-0">
-                                <p class="truncate text-sm font-medium text-gray-900">{{ $member->name }}</p>
-                                <p class="text-xs capitalize text-gray-500">{{ $member->role }}</p>
-                            </div>
-                            <span class="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{{ $staffWorkload[$member->id] ?? 0 }} {{ __('open') }}</span>
-                        </div>
-                    @empty
-                        <p class="text-sm text-gray-500">{{ __('No active staff members.') }}</p>
-                    @endforelse
-                </div>
-            </div>
-        </section>
-
-        <section aria-labelledby="charts-title" class="grid gap-6 lg:grid-cols-2">
-            <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex items-end justify-between gap-4">
                     <div>
-                        <h3 id="charts-title" class="mt-1 text-lg font-semibold text-gray-900">{{ __('Booking distribution') }}</h3>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">{{ __('Booking distribution') }}</h3>
                     </div>
                     <span class="text-xs text-gray-500">{{ $bookingTotal }} {{ __('total') }}</span>
                 </div>
@@ -235,21 +208,6 @@
                             </div>
                         </div>
                     @endforeach
-                </div>
-            </div>
-
-            <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 shadow-sm">
-                <div class="flex items-end justify-between gap-4">
-                    <div>
-                        <h3 class="mt-1 text-lg font-semibold text-gray-900">{{ __('Revenue trends') }}</h3>
-                    </div>
-                    <a href="{{ route('reports.index', ['type' => 'bookings']) }}" class="text-sm font-medium text-indigo-700 hover:text-indigo-900">{{ __('Reports') }} &rarr;</a>
-                </div>
-                <div class="mt-7 flex h-28 items-center justify-center rounded-md border border-dashed border-gray-300 bg-white px-6 text-center">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">{{ __('Revenue data is not tracked yet.') }}</p>
-                        <p class="mt-1 text-xs leading-5 text-gray-500">{{ __('Add pricing or revenue fields to enable this chart.') }}</p>
-                    </div>
                 </div>
             </div>
         </section>

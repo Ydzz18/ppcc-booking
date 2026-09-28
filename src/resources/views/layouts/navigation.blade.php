@@ -8,37 +8,36 @@
             </a>
         </div>
 
-        <div class="flex-1 space-y-2 p-4" x-data="{ bookingsOpen: @js(request()->routeIs('bookings.*')), settingsOpen: @js(request()->routeIs('settings.*')) }">
+        <div class="flex-1 space-y-2 p-4">
             <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('Workspace') }}</p>
-            <div class="space-y-1">
+            <div class="flex flex-col space-y-1">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
-                        {{ __('Reports') }}
-                    </x-nav-link>
-                    <button type="button" x-on:click="bookingsOpen = !bookingsOpen" class="flex w-full items-center justify-between rounded-lg border border-transparent px-3 py-2 text-sm font-medium {{ request()->routeIs('bookings.*') ? 'border-yellow-400/40 bg-yellow-400/10 text-yellow-600 shadow-sm shadow-yellow-500/10 dark:text-yellow-300' : 'text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">
+                    <div class="flex w-full items-center justify-between rounded-lg border border-transparent px-3 py-2 text-sm font-medium {{ request()->routeIs('bookings.*') ? 'border-yellow-400/40 bg-yellow-400/10 text-yellow-600 shadow-sm shadow-yellow-500/10 dark:text-yellow-300' : 'text-slate-700 dark:text-slate-300' }}">
                         <span>{{ __('Bookings') }}</span>
-                        <svg class="h-4 w-4 transition-transform" :class="bookingsOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <div x-show="bookingsOpen" class="ml-3 space-y-1 border-l border-slate-700 pl-3">
-                        <a href="{{ route('bookings.index', ['tab' => 'entry']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') !== 'monitoring' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Task Entry') }}</a>
-                        <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') === 'monitoring' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Task Monitoring') }}</a>
                     </div>
-                    <button type="button" x-on:click="settingsOpen = !settingsOpen" class="flex w-full items-center justify-between rounded-lg border border-transparent px-3 py-2 text-sm font-medium {{ request()->routeIs('settings.*') ? 'border-yellow-400/40 bg-yellow-400/10 text-yellow-600 shadow-sm shadow-yellow-500/10 dark:text-yellow-300' : 'text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">
+                    <div class="ml-3 space-y-1 border-l border-slate-700 pl-3">
+                        <a href="{{ route('bookings.index', ['tab' => 'entry']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('bookings.*') && request('tab', 'entry') === 'entry' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Task Entry') }}</a>
+                        <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('bookings.*') && request('tab') === 'monitoring' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Task Monitoring') }}</a>
+                    </div>
+                    <div class="flex w-full items-center justify-between rounded-lg border border-transparent px-3 py-2 text-sm font-medium {{ request()->routeIs('settings.*') ? 'border-yellow-400/40 bg-yellow-400/10 text-yellow-600 shadow-sm shadow-yellow-500/10 dark:text-yellow-300' : 'text-slate-700 dark:text-slate-300' }}">
                         <span>{{ __('Settings') }}</span>
-                        <svg class="h-4 w-4 transition-transform" :class="settingsOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <div x-show="settingsOpen" class="ml-3 space-y-1 border-l border-slate-700 pl-3">
+                    </div>
+                    <div class="ml-3 space-y-1 border-l border-slate-700 pl-3">
                         <a href="{{ route('settings.index', ['tab' => 'users']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab', 'users') === 'users' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('User Settings') }}</a>
                         <a href="{{ route('settings.index', ['tab' => 'clients']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') === 'clients' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Clients List') }}</a>
                         <a href="{{ route('settings.index', ['tab' => 'tasks']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') === 'tasks' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Tasks List') }}</a>
                         <a href="{{ route('settings.index', ['tab' => 'forms']) }}" class="block rounded-lg px-3 py-2 text-sm {{ request('tab') === 'forms' ? 'border border-yellow-400/40 bg-yellow-400/10 font-semibold text-yellow-600 dark:text-yellow-300' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100' }}">{{ __('Forms List') }}</a>
                     </div>
+                    <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                        {{ __('Reports') }}
+                    </x-nav-link>
+                    @can('manage-users')
+                        <x-nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')">
+                            {{ __('Audit Logs') }}
+                        </x-nav-link>
+                    @endcan
             </div>
         </div>
 
@@ -99,21 +98,21 @@
         </div>
     </div>
     <div :class="{'block': open, 'hidden': ! open}" class="hidden border-b border-gray-200 bg-white p-4 md:hidden">
-        <div class="pt-2 pb-3 space-y-1" x-data="{ bookingsOpen: @js(request()->routeIs('bookings.*')), settingsOpen: @js(request()->routeIs('settings.*')) }">
+        <div class="pt-2 pb-3 space-y-1" x-data="{ settingsOpen: true }">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <button type="button" @click="bookingsOpen = !bookingsOpen" class="flex w-full items-center justify-between px-4 py-2 text-start text-base font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100">
+            <div class="flex w-full items-center justify-between px-4 py-2 text-start text-base font-medium text-slate-700 dark:text-slate-300">
                 <span>{{ __('Bookings') }}</span>
-                <svg class="h-4 w-4 transition-transform" :class="bookingsOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
-            </button>
-            <div x-show="bookingsOpen" class="ml-4 space-y-1 border-l border-gray-200 pl-2">
+                <svg class="h-4 w-4 rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75 0.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+            </div>
+            <div class="ml-4 space-y-1 border-l border-gray-200 pl-2">
                 <x-responsive-nav-link :href="route('bookings.index', ['tab' => 'entry'])">{{ __('Task Entry') }}</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('bookings.index', ['tab' => 'monitoring'])">{{ __('Task Monitoring') }}</x-responsive-nav-link>
             </div>
 
-            <button type="button" @click="settingsOpen = !settingsOpen" class="flex w-full items-center justify-between px-4 py-2 text-start text-base font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100">
+            <button type="button" disabled class="flex w-full items-center justify-between px-4 py-2 text-start text-base font-medium text-slate-700 dark:text-slate-300">
                 <span>{{ __('Settings') }}</span>
                 <svg class="h-4 w-4 transition-transform" :class="settingsOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
             </button>
@@ -123,6 +122,14 @@
                 <x-responsive-nav-link :href="route('settings.index', ['tab' => 'tasks'])">{{ __('Tasks List') }}</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('settings.index', ['tab' => 'forms'])">{{ __('Forms List') }}</x-responsive-nav-link>
             </div>
+            <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                {{ __('Reports') }}
+            </x-responsive-nav-link>
+            @can('manage-users')
+                <x-responsive-nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')">
+                    {{ __('Audit Logs') }}
+                </x-responsive-nav-link>
+            @endcan
         </div>
 
         <!-- Responsive Settings Options -->
@@ -148,11 +155,11 @@
         <form method="POST" action="{{ route('logout') }}" class="p-6">
             @csrf
 
-            <h2 class="text-lg font-semibold text-slate-100">{{ __('Confirm logout') }}</h2>
-            <p class="mt-2 text-sm text-slate-300">{{ __('Are you sure you want to log out of your account?') }}</p>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ __('Confirm logout') }}</h2>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ __('Are you sure you want to log out of your account?') }}</p>
 
             <div class="mt-6 flex items-center justify-end gap-3">
-                <button type="button" x-on:click="$dispatch('close-modal', 'logout-confirm')" class="inline-flex items-center rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-100 transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                <button type="button" x-on:click="$dispatch('close-modal', 'logout-confirm')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">
                     {{ __('Cancel') }}
                 </button>
                 <x-primary-button>{{ __('Log Out') }}</x-primary-button>

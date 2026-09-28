@@ -6,11 +6,12 @@
     </x-slot>
                                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 space-y-6" x-data="{ activeMenu: @js(in_array(request('tab'), ['users', 'clients', 'tasks', 'forms']) ? request('tab') : 'users'), showTaskForm: @js($errors->has('task_name')), showFormEntry: @js($errors->has('form_name')) }">
+                @php($activeSettingsTab = in_array(request('tab'), ['users', 'clients', 'tasks', 'forms'], true) ? request('tab') : 'users')
+                <div class="p-6 text-gray-900 space-y-6" x-data="{ activeMenu: @js($activeSettingsTab), showTaskForm: @js($errors->has('task_name')), showFormEntry: @js($errors->has('form_name') || $errors->has('form_names') || $errors->has('form_names.*')) }" x-cloak>
                                                         </svg>
                     <div>
 
-                    <div x-show="activeMenu === 'users'">
+                    <div x-show="activeMenu === 'users'" style="{{ $activeSettingsTab !== 'users' ? 'display: none;' : '' }}">
                         <div class="mb-5 flex items-center justify-between gap-4">
                             @can('manage-users')
                                 <button type="button" x-on:click="$dispatch('open-modal', 'register-user')" class="inline-flex items-center rounded-md bg-gray-800 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
@@ -74,7 +75,7 @@
                         </x-modal>
                     </div>
 
-                    <div x-show="activeMenu === 'users'">
+                    <div x-show="activeMenu === 'users'" style="{{ $activeSettingsTab !== 'users' ? 'display: none;' : '' }}">
                         @if (session('status') === 'user-created')
                             <p class="mb-3 text-sm text-green-600">{{ __('New user registered successfully.') }}</p>
                         @endif
@@ -191,7 +192,7 @@
                         @endforeach
                     </div>
 
-                    <div id="clients-lists" class="space-y-4" x-show="activeMenu === 'clients'">
+                    <div id="clients-lists" class="space-y-4" x-show="activeMenu === 'clients'" style="{{ $activeSettingsTab !== 'clients' ? 'display: none;' : '' }}">
                         @if (session('status') === 'client-created')
                             <p class="text-sm text-green-600">{{ __('Client added successfully.') }}</p>
                         @endif
@@ -554,7 +555,13 @@
                         </div>
                     </div>
 
-                    <div id="tasks-lists" class="space-y-4" x-show="activeMenu === 'tasks'">
+                    <div id="tasks-lists" class="space-y-4" x-show="activeMenu === 'tasks'" x-data="{ taskSearchText: @js($taskSearch) }" style="{{ $activeSettingsTab !== 'tasks' ? 'display: none;' : '' }}">
+                                                @if (session('error') === 'task-in-use')
+                                                    <p class="text-sm text-red-600">{{ __('This task cannot be deleted because it is used by task monitoring records.') }}</p>
+                                                @endif
+                                                @if (session('status') === 'task-deleted')
+                                                    <p class="text-sm text-green-600">{{ __('Task deleted successfully.') }}</p>
+                                                @endif
                         @if (session('status') === 'task-created')
                             <p class="text-sm text-green-600">{{ __('Task added successfully.') }}</p>
                         @endif
@@ -567,8 +574,25 @@
                             {{ __('ADD TASK') }}
                         </button>
 
-                        <x-modal name="add-task" :show="$errors->has('task_name')" maxWidth="md" focusable>
-                            <form method="POST" action="{{ route('tasks.store') }}" class="space-y-6 p-6" data-confirm="Are you sure you want to save this task?">
+                        <form method="GET" action="{{ route('settings.index') }}" class="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_160px_auto]">
+                            <input type="hidden" name="tab" value="tasks">
+                            <label class="sr-only" for="task_search">{{ __('Search tasks') }}</label>
+                            <input id="task_search" name="task_search" x-model="taskSearchText" value="{{ $taskSearch }}" type="search" placeholder="{{ __('Search agency or task name') }}" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
+                            <label class="sr-only" for="task_sort">{{ __('Sort tasks by') }}</label>
+                            <select id="task_sort" name="task_sort" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
+                                <option value="task_name" @selected($taskSort === 'task_name')>{{ __('Task Name') }}</option>
+                                <option value="id" @selected($taskSort === 'id')>{{ __('Task ID') }}</option>
+                            </select>
+                            <label class="sr-only" for="task_order">{{ __('Task order') }}</label>
+                            <select id="task_order" name="task_order" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
+                                <option value="asc" @selected($taskOrder === 'asc')>{{ __('Ascending') }}</option>
+                                <option value="desc" @selected($taskOrder === 'desc')>{{ __('Descending') }}</option>
+                            </select>
+                            <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">{{ __('Search') }}</button>
+                        </form>
+
+                        <x-modal name="add-task" :show="$errors->hasAny(['agency', 'task_name', 'required_forms_documents', 'required_forms_documents.*'])" maxWidth="md" focusable>
+                            <form method="POST" action="{{ route('tasks.store') }}" class="space-y-6 p-6" x-data="{ formSearch: '', formsModalOpen: false, formNames: @js($taskForms->pluck('form_name', 'id')), selectedForms: @js(array_map('strval', old('required_forms_documents', []))) }" data-confirm="Are you sure you want to save this task?">
                                 @csrf
                                 <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
                                     <div>
@@ -578,9 +602,50 @@
                                     <button type="button" x-on:click="$dispatch('close-modal', 'add-task')" aria-label="{{ __('Close') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600">&times;</button>
                                 </div>
                                 <div>
+                                    <x-input-label for="agency" :value="__('Agency')" />
+                                    <x-text-input id="agency" name="agency" type="text" class="mt-2 block w-full" :value="old('agency')" required autofocus />
+                                    <x-input-error class="mt-2" :messages="$errors->get('agency')" />
+                                </div>
+                                <div>
                                     <x-input-label for="task_name" :value="__('Task Name')" />
-                                    <x-text-input id="task_name" name="task_name" type="text" class="mt-2 block w-full" :value="old('task_name')" required autofocus />
+                                    <x-text-input id="task_name" name="task_name" type="text" class="mt-2 block w-full" :value="old('task_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('task_name')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="required_forms_documents" :value="__('Required Forms and Documents')" />
+                                    <div class="mt-2 space-y-2 rounded-md border border-gray-300 p-3">
+                                        <template x-for="formId in selectedForms" :key="formId">
+                                            <div class="flex items-center justify-between gap-3 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                                                <span x-text="formNames[formId]"></span>
+                                                <button type="button" x-on:click="selectedForms = selectedForms.filter((id) => id !== formId)" class="inline-flex h-6 w-6 items-center justify-center rounded-md text-lg leading-none text-gray-400 hover:bg-gray-200 hover:text-gray-700" aria-label="{{ __('Remove form') }}">&times;</button>
+                                            </div>
+                                        </template>
+                                        <p x-show="selectedForms.length === 0" class="text-sm text-gray-500">{{ __('No forms added yet.') }}</p>
+                                        <template x-for="formId in selectedForms" :key="`input-${formId}`">
+                                            <input type="hidden" name="required_forms_documents[]" :value="formId">
+                                        </template>
+                                    </div>
+                                    <button type="button" x-on:click="formsModalOpen = true" class="mt-3 inline-flex items-center rounded-md bg-gray-800 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700">+ {{ __('Add form') }}</button>
+                                    <template x-teleport="body">
+                                    <div x-show="formsModalOpen" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-black/35 px-4 py-4">
+                                        <div x-on:click.stop class="flex h-[min(35rem,calc(100vh-2rem))] w-full max-w-md flex-col overflow-hidden rounded-lg bg-white p-6 shadow-xl">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <h3 class="text-lg font-semibold text-gray-900">{{ __('Add required forms') }}</h3>
+                                                <button type="button" x-on:click="formsModalOpen = false" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700">{{ __('Done') }}</button>
+                                            </div>
+                                            <input type="search" x-model="formSearch" placeholder="{{ __('Search forms and documents...') }}" class="mt-4 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900" aria-label="{{ __('Search forms and documents') }}">
+                                            <div class="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto">
+                                                @foreach ($taskForms as $form)
+                                                    <button type="button" x-show="formSearch === '' || $el.dataset.formName.toLowerCase().includes(formSearch.toLowerCase())" data-form-name="{{ $form->form_name }}" data-form-option="{{ $form->id }}" x-on:click="selectedForms = selectedForms.includes('{{ $form->id }}') ? selectedForms.filter((id) => id !== '{{ $form->id }}') : [...selectedForms, '{{ $form->id }}']" x-bind:aria-pressed="selectedForms.includes('{{ $form->id }}')" class="flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100" :class="selectedForms.includes('{{ $form->id }}') ? 'bg-gray-100' : ''">
+                                                        <span>{{ $form->form_name }}</span>
+                                                        <span class="text-xs font-semibold" :class="selectedForms.includes('{{ $form->id }}') ? 'text-red-600' : 'text-green-600'" x-text="selectedForms.includes('{{ $form->id }}') ? '{{ __('Deselect') }}' : '{{ __('Add') }}'"></span>
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </template>
+                                    <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
                                 </div>
                                 <div class="flex items-center justify-end gap-3">
                                     <button type="button" x-on:click="$dispatch('close-modal', 'add-task')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">{{ __('Cancel') }}</button>
@@ -594,15 +659,21 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Agency') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Task Name') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Requirements') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse ($tasks as $task)
-                                        <tr>
+                                        <tr x-show="taskSearchText === '' || $el.dataset.agency.includes(taskSearchText.toLowerCase()) || $el.dataset.taskName.includes(taskSearchText.toLowerCase())" data-agency="{{ strtolower($task->agency) }}" data-task-name="{{ strtolower($task->task_name) }}">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $task->id }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $task->agency }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $task->task_name }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-900">
+                                                {{ $taskForms->whereIn('id', $task->required_forms_documents ?? [])->pluck('form_name')->join(', ') ?: '—' }}
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 <div class="flex items-center gap-2">
                                                     <button type="button" x-on:click="$dispatch('open-modal', 'edit-task-{{ $task->id }}')" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
@@ -611,12 +682,21 @@
                                                     <a href="{{ route('tasks.print', $task) }}" target="_blank" rel="noopener" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                                                         {{ __('Print') }}
                                                     </a>
+                                                    @if (Auth::user()->isAdmin())
+                                                        <form method="POST" action="{{ route('tasks.destroy', $task) }}" data-confirm="{{ __('Are you sure you want to delete this task?') }}">
+                                                            @csrf
+                                                            @method('delete')
+                                                            <button type="submit" class="inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                                                {{ __('Delete') }}
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="3" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('No tasks found.') }}</td>
+                                            <td colspan="5" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('No tasks found.') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -625,7 +705,7 @@
 
                         @foreach ($tasks as $task)
                             <x-modal name="edit-task-{{ $task->id }}" maxWidth="md" focusable>
-                                <form method="POST" action="{{ route('tasks.update', $task) }}" class="space-y-6 p-6" data-confirm="Are you sure you want to update this task?">
+                                <form method="POST" action="{{ route('tasks.update', $task) }}" class="space-y-6 p-6" x-data="{ formSearch: '', formsModalOpen: false, formNames: @js($taskForms->pluck('form_name', 'id')), selectedForms: @js(array_map('strval', $task->required_forms_documents ?? [])) }" data-confirm="Are you sure you want to update this task?">
                                     @csrf
                                     @method('patch')
                                     <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
@@ -636,9 +716,50 @@
                                         <button type="button" x-on:click="$dispatch('close-modal', 'edit-task-{{ $task->id }}')" aria-label="{{ __('Close') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600">&times;</button>
                                     </div>
                                     <div>
+                                        <x-input-label for="edit_agency_{{ $task->id }}" :value="__('Agency')" />
+                                        <x-text-input id="edit_agency_{{ $task->id }}" name="agency" type="text" class="mt-2 block w-full" :value="old('agency', $task->agency)" required />
+                                        <x-input-error class="mt-2" :messages="$errors->get('agency')" />
+                                    </div>
+                                    <div>
                                         <x-input-label for="edit_task_name_{{ $task->id }}" :value="__('Task Name')" />
                                         <x-text-input id="edit_task_name_{{ $task->id }}" name="task_name" type="text" class="mt-2 block w-full" :value="old('task_name', $task->task_name)" required />
                                         <x-input-error class="mt-2" :messages="$errors->get('task_name')" />
+                                    </div>
+                                    <div>
+                                        <x-input-label for="edit_required_forms_documents_{{ $task->id }}" :value="__('Required Forms and Documents')" />
+                                        <div class="mt-2 space-y-2 rounded-md border border-gray-300 p-3">
+                                            <template x-for="formId in selectedForms" :key="formId">
+                                                <div class="flex items-center justify-between gap-3 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                                                    <span x-text="formNames[formId]"></span>
+                                                    <button type="button" x-on:click="selectedForms = selectedForms.filter((id) => id !== formId)" class="inline-flex h-6 w-6 items-center justify-center rounded-md text-lg leading-none text-gray-400 hover:bg-gray-200 hover:text-gray-700" aria-label="{{ __('Remove form') }}">&times;</button>
+                                                </div>
+                                            </template>
+                                            <p x-show="selectedForms.length === 0" class="text-sm text-gray-500">{{ __('No forms added yet.') }}</p>
+                                            <template x-for="formId in selectedForms" :key="`input-${formId}`">
+                                                <input type="hidden" name="required_forms_documents[]" :value="formId">
+                                            </template>
+                                        </div>
+                                        <button type="button" x-on:click="formsModalOpen = true" class="mt-3 inline-flex items-center rounded-md bg-gray-800 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700">+ {{ __('Add form') }}</button>
+                                        <template x-teleport="body">
+                                        <div x-show="formsModalOpen" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-black/35 px-4 py-4">
+                                            <div x-on:click.stop class="flex h-[min(35rem,calc(100vh-2rem))] w-full max-w-md flex-col overflow-hidden rounded-lg bg-white p-6 shadow-xl">
+                                                <div class="flex items-center justify-between gap-4">
+                                                    <h3 class="text-lg font-semibold text-gray-900">{{ __('Add required forms') }}</h3>
+                                                    <button type="button" x-on:click="formsModalOpen = false" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700">{{ __('Done') }}</button>
+                                                </div>
+                                                <input type="search" x-model="formSearch" placeholder="{{ __('Search forms and documents...') }}" class="mt-4 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900" aria-label="{{ __('Search forms and documents') }}">
+                                                <div class="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto">
+                                                    @foreach ($taskForms as $form)
+                                                        <button type="button" x-show="formSearch === '' || $el.dataset.formName.toLowerCase().includes(formSearch.toLowerCase())" data-form-name="{{ $form->form_name }}" data-form-option="{{ $form->id }}" x-on:click="selectedForms = selectedForms.includes('{{ $form->id }}') ? selectedForms.filter((id) => id !== '{{ $form->id }}') : [...selectedForms, '{{ $form->id }}']" x-bind:aria-pressed="selectedForms.includes('{{ $form->id }}')" class="flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100" :class="selectedForms.includes('{{ $form->id }}') ? 'bg-gray-100' : ''">
+                                                            <span>{{ $form->form_name }}</span>
+                                                            <span class="text-xs font-semibold" :class="selectedForms.includes('{{ $form->id }}') ? 'text-red-600' : 'text-green-600'" x-text="selectedForms.includes('{{ $form->id }}') ? '{{ __('Deselect') }}' : '{{ __('Add') }}'"></span>
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </template>
+                                        <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
                                     </div>
                                     <div class="flex items-center justify-end gap-3">
                                         <button type="button" x-on:click="$dispatch('close-modal', 'edit-task-{{ $task->id }}')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">{{ __('Cancel') }}</button>
@@ -649,11 +770,11 @@
                         @endforeach
 
                         <div class="mt-4">
-                            {{ $tasks->appends(['tab' => 'tasks', 'users_page' => request('users_page'), 'clients_page' => request('clients_page'), 'forms_page' => request('forms_page')])->links() }}
+                            {{ $tasks->appends(['tab' => 'tasks', 'task_search' => $taskSearch, 'task_sort' => $taskSort, 'task_order' => $taskOrder, 'users_page' => request('users_page'), 'clients_page' => request('clients_page'), 'forms_page' => request('forms_page')])->links() }}
                         </div>
                     </div>
 
-                    <div id="forms-lists" class="space-y-4" x-show="activeMenu === 'forms'">
+                    <div id="forms-lists" class="space-y-4" x-show="activeMenu === 'forms'" x-data="{ formSearchText: @js($formSearch) }" style="{{ $activeSettingsTab !== 'forms' ? 'display: none;' : '' }}">
                         @if (session('status') === 'form-created')
                             <p class="text-sm text-green-600">{{ __('Form added successfully.') }}</p>
                         @endif
@@ -666,8 +787,20 @@
                             {{ __('ADD FORM') }}
                         </button>
 
-                        <x-modal name="add-form" :show="$errors->has('form_name')" maxWidth="md" focusable>
-                            <form method="POST" action="{{ route('forms.store') }}" class="space-y-6 p-6" data-confirm="{{ __('Are you sure you want to save this form?') }}">
+                        <form method="GET" action="{{ route('settings.index') }}" class="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_160px_auto]">
+                            <input type="hidden" name="tab" value="forms">
+                            <label class="sr-only" for="form_search">{{ __('Search forms') }}</label>
+                            <input id="form_search" name="form_search" x-model="formSearchText" value="{{ $formSearch }}" type="search" placeholder="{{ __('Search form name') }}" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
+                            <label class="sr-only" for="form_order">{{ __('Form order') }}</label>
+                            <select id="form_order" name="form_order" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
+                                <option value="asc" @selected($formOrder === 'asc')>{{ __('A-Z') }}</option>
+                                <option value="desc" @selected($formOrder === 'desc')>{{ __('Z-A') }}</option>
+                            </select>
+                            <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">{{ __('Search') }}</button>
+                        </form>
+
+                        <x-modal name="add-form" :show="$errors->hasAny(['form_name', 'form_names', 'form_names.*'])" maxWidth="md" focusable>
+                            <form method="POST" action="{{ route('forms.store') }}" class="space-y-6 p-6" x-data="{ formNames: @js(old('form_names', [''])) }" data-confirm="{{ __('Are you sure you want to save these forms?') }}">
                                 @csrf
                                 <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
                                     <div>
@@ -677,9 +810,18 @@
                                     <button type="button" x-on:click="$dispatch('close-modal', 'add-form')" aria-label="{{ __('Close') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600">&times;</button>
                                 </div>
                                 <div>
-                                    <x-input-label for="form_name" :value="__('Form Name')" />
-                                    <x-text-input id="form_name" name="form_name" type="text" class="mt-2 block w-full" :value="old('form_name')" required autofocus />
-                                    <x-input-error class="mt-2" :messages="$errors->get('form_name')" />
+                                    <x-input-label :value="__('Form Names')" />
+                                    <div class="mt-2 space-y-3">
+                                        <template x-for="(formName, index) in formNames" :key="index">
+                                            <div class="flex items-start gap-2">
+                                                <x-text-input x-model="formNames[index]" name="form_names[]" type="text" class="block w-full" required autofocus />
+                                                <button type="button" x-show="formNames.length > 1" x-on:click="formNames.splice(index, 1)" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="{{ __('Remove form') }}">&times;</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <button type="button" x-on:click="formNames.push('')" class="mt-3 text-sm font-semibold text-indigo-700 hover:text-indigo-900">+ {{ __('Add another form') }}</button>
+                                    <x-input-error class="mt-2" :messages="$errors->get('form_names')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('form_names.*')" />
                                 </div>
                                 <div class="flex items-center justify-end gap-3">
                                     <button type="button" x-on:click="$dispatch('close-modal', 'add-form')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">{{ __('Cancel') }}</button>
@@ -699,7 +841,7 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse ($forms as $form)
-                                        <tr>
+                                        <tr x-show="formSearchText === '' || $el.dataset.formName.toLowerCase().includes(formSearchText.toLowerCase())" data-form-name="{{ $form->form_name }}">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $form->id }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $form->form_name }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -759,7 +901,7 @@
                         </div>
 
                         <div class="mt-4">
-                            {{ $forms->appends(['tab' => 'forms', 'users_page' => request('users_page'), 'clients_page' => request('clients_page'), 'tasks_page' => request('tasks_page')])->links() }}
+                            {{ $forms->appends(['tab' => 'forms', 'form_search' => $formSearch, 'form_order' => $formOrder, 'users_page' => request('users_page'), 'clients_page' => request('clients_page'), 'tasks_page' => request('tasks_page')])->links() }}
                         </div>
                     </div>
                     </div>

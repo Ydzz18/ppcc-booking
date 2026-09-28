@@ -47,7 +47,7 @@
                         </div>
 
                         <div>
-                            <x-input-label for="assigned_responsible_person" :value="__('Assigned Responsible Person')" />
+                            <x-input-label for="assigned_responsible_person" :value="__('Client Name')" />
                             <select id="assigned_responsible_person" name="assigned_responsible_person" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" disabled>
                                 <option value="">{{ __('Select Contact Person') }}</option>
                                 @foreach ($contactPersons as $contactPerson)
@@ -208,7 +208,14 @@
                                 </div>
                             @endif
 
-                            <div id="submission-action" class="mt-6 flex justify-end border-t border-gray-200 pt-4">
+                            <div id="submission-action" class="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-gray-200 pt-4 sm:flex-row">
+                                <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 8V4h10v4M7 17H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M7 14h10v6H7z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 11h.01" />
+                                    </svg>
+                                    {{ __('Print') }}
+                                </a>
                                 <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                                     <span aria-hidden="true">&larr;</span>
                                     {{ __('Back to Monitoring') }}
