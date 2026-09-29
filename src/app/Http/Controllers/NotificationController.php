@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\TaskMonitoring;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class NotificationController extends Controller
@@ -27,6 +29,7 @@ class NotificationController extends Controller
      */
     public function live(): JsonResponse
     {
+        $viewedAt = DB::table('user_notification_views')->where('user_id', auth()->id())->value('viewed_at');
         $notifications = TaskMonitoring::query()
             ->pending()
             ->with(['client:id,client_name', 'task:id,task_name'])
@@ -35,7 +38,7 @@ class NotificationController extends Controller
             ->get(['id', 'client_id', 'task_id', 'submission_status', 'created_at']);
 
         return response()->json([
-            'count' => TaskMonitoring::query()->pending()->count(),
+            'count' => $this->unreadNotificationCount($viewedAt),
             'notifications' => $notifications->map(fn (TaskMonitoring $notification): array => [
                 'id' => $notification->id,
                 'task_name' => $notification->task?->task_name ?? __('Booking'),
@@ -45,5 +48,25 @@ class NotificationController extends Controller
                 'created_at' => $notification->created_at?->toIso8601String(),
             ])->values(),
         ]);
+    }
+
+    public function markViewed(Request $request): JsonResponse
+    {
+        $viewedAt = now();
+
+        DB::table('user_notification_views')->updateOrInsert(
+            ['user_id' => $request->user()->id],
+            ['viewed_at' => $viewedAt, 'updated_at' => $viewedAt, 'created_at' => $viewedAt],
+        );
+
+        return response()->json(['viewed_at' => $viewedAt->toIso8601String()]);
+    }
+
+    private function unreadNotificationCount(mixed $viewedAt): int
+    {
+        return TaskMonitoring::query()
+            ->pending()
+            ->when($viewedAt !== null, fn ($query) => $query->where('created_at', '>', $viewedAt))
+            ->count();
     }
 }

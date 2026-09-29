@@ -16,6 +16,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -58,8 +59,18 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('layouts.app', function ($view): void {
+            $userId = auth()->id();
+            $notificationViewedAt = $userId
+                ? DB::table('user_notification_views')->where('user_id', $userId)->value('viewed_at')
+                : null;
+            $unreadNotifications = TaskMonitoring::query()->pending();
+
+            if ($notificationViewedAt !== null) {
+                $unreadNotifications->where('created_at', '>', $notificationViewedAt);
+            }
+
             $view->with([
-                'notificationCount' => TaskMonitoring::query()->pending()->count(),
+                'notificationCount' => $unreadNotifications->count(),
                 'headerNotifications' => TaskMonitoring::query()
                     ->pending()
                     ->with(['client:id,client_name', 'task:id,task_name'])

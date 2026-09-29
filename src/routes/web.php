@@ -120,6 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('can:manage-users')->name('audit-logs.index');
     Route::get('/notifications/live', [NotificationController::class, 'live'])->name('notifications.live');
+    Route::post('/notifications/viewed', [NotificationController::class, 'markViewed'])->name('notifications.viewed');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
     Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
