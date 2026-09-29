@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\TaskMonitoring;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -86,5 +87,21 @@ class ClientController extends Controller
         $client->update($validated);
 
         return Redirect::route('settings.index')->with('status', 'client-updated');
+    }
+
+    /**
+     * Remove the specified client when it is not used by task monitoring records.
+     */
+    public function destroy(Client $client): RedirectResponse
+    {
+        if (TaskMonitoring::query()->where('client_id', $client->id)->exists()) {
+            return Redirect::route('settings.index', ['tab' => 'clients'])
+                ->with('error', 'client-in-use');
+        }
+
+        $client->delete();
+
+        return Redirect::route('settings.index', ['tab' => 'clients'])
+            ->with('status', 'client-deleted');
     }
 }

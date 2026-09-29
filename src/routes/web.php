@@ -197,6 +197,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/users/register', [UserController::class, 'store'])->name('users.store');
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
         Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
     });
 });

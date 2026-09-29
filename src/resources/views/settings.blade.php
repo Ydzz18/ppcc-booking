@@ -200,6 +200,12 @@
                         @if (session('status') === 'client-updated')
                             <p class="text-sm text-green-600">{{ __('Client updated successfully.') }}</p>
                         @endif
+                        @if (session('error') === 'client-in-use')
+                            <p class="text-sm text-red-600">{{ __('This client cannot be deleted because it is used by task monitoring records.') }}</p>
+                        @endif
+                        @if (session('status') === 'client-deleted')
+                            <p class="text-sm text-green-600">{{ __('Client deleted successfully.') }}</p>
+                        @endif
                         <button type="button" x-on:click="$dispatch('open-modal', 'add-client')" class="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                             {{ __('ADD CLIENT') }}
                         </button>
@@ -445,6 +451,15 @@
                                                     <a href="{{ route('clients.edit', $client) }}" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                                         {{ __('Edit') }}
                                                     </a>
+                                                    @if (Auth::user()->isAdmin())
+                                                        <form method="POST" action="{{ route('clients.destroy', $client) }}" data-confirm="{{ __('Are you sure you want to delete this client?') }}">
+                                                            @csrf
+                                                            @method('delete')
+                                                            <button type="submit" class="inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                                                {{ __('Delete') }}
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                     <button type="button" x-on:click="$dispatch('open-modal', 'client-details-{{ $client->id }}')" aria-label="{{ __('View client details') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25-4.5a.75.75 0 01-1.08 0l-4.25 4.5a.75.75 0 01.02 1.06z" clip-rule="evenodd" />
@@ -544,6 +559,15 @@
                                     <a href="{{ route('clients.edit', $client) }}" class="mt-4 inline-flex w-full items-center justify-center rounded-md bg-gray-800 px-3 py-2 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                         {{ __('Edit') }}
                                     </a>
+                                    @if (Auth::user()->isAdmin())
+                                        <form method="POST" action="{{ route('clients.destroy', $client) }}" data-confirm="{{ __('Are you sure you want to delete this client?') }}" class="mt-2">
+                                            @csrf
+                                            @method('delete')
+                                            <button type="submit" class="inline-flex w-full items-center justify-center rounded-md bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                                {{ __('Delete') }}
+                                            </button>
+                                        </form>
+                                    @endif
                                 </article>
                             @empty
                                 <p class="rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-500">{{ __('No clients found.') }}</p>

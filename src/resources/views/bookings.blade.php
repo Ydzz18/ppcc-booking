@@ -177,7 +177,7 @@
                                             <div class="task-monitoring-metric">
                                                 <div class="task-monitoring-pair">
                                                     <span class="task-monitoring-label">{{ __('Client Name') }}</span>
-                                                    <button type="button" x-on:click="expanded = !expanded" class="task-monitoring-value text-left text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</button>
+                                                    <button type="button" x-on:click="expanded = !expanded" class="task-monitoring-value text-left text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->client?->client_name ?? '—' }}</button>
                                                 </div>
                                             </div>
                                             <div class="task-monitoring-metric">
@@ -252,7 +252,7 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Date Task Received') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Client Name') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Type of Task') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Client Name') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Assigned Responsible Person') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-200 border-r-0">{{ __('List of Required Forms and Documents') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-200 border-l-0">{{ __('Required Docs Status') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-200 border-r-0">{{ __('Submission Details') }}</th>
