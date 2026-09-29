@@ -679,9 +679,6 @@
                                                     <button type="button" x-on:click="$dispatch('open-modal', 'edit-task-{{ $task->id }}')" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                                         {{ __('Edit') }}
                                                     </button>
-                                                    <a href="{{ route('tasks.print', $task) }}" target="_blank" rel="noopener" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                                        {{ __('Print') }}
-                                                    </a>
                                                     @if (Auth::user()->isAdmin())
                                                         <form method="POST" action="{{ route('tasks.destroy', $task) }}" data-confirm="{{ __('Are you sure you want to delete this task?') }}">
                                                             @csrf

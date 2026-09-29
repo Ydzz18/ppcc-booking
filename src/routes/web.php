@@ -183,7 +183,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
 
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
-    Route::get('/tasks/{task}/print', [TaskController::class, 'print'])->name('tasks.print');
     Route::get('/tasks/{task}/pdf', [TaskController::class, 'downloadPdf'])->name('tasks.pdf');
     Route::get('/tasks/{task}/edit', [TaskController::class, 'edit'])->name('tasks.edit');
     Route::patch('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
