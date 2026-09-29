@@ -141,7 +141,7 @@
                                         $requiredFormNames = $requiredFormIds->map(fn ($formId) => $formNamesById[$formId] ?? null)->filter();
                                     @endphp
                                     <div x-data="{ expanded: false, actionsOpen: false }" class="bg-white">
-                                        <div class="grid items-center gap-4 px-4 py-4 sm:grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_100px_120px_2rem]">
+                                        <div class="grid task-monitoring-summary-grid items-center gap-4 px-4 py-4">
                                             <div class="relative order-first z-10 sm:col-start-1" x-on:click.outside="actionsOpen = false" :class="actionsOpen ? 'z-50' : 'z-10'">
                                                 <div class="inline-flex rounded-md shadow-sm">
                                                     <button type="button" x-on:click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen.toString()" class="inline-flex min-h-9 w-32 items-center justify-between rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -179,14 +179,11 @@
                                                 <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-left text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</button>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Task Age') }}</p>
-                                                <p class="mt-1 text-sm font-semibold text-gray-900">{{ $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days')) }}</p>
-                                            </div>
-                                            <div>
                                                 <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Status') }}</p>
                                                 <span class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
                                                     {{ $bookingStatus === 'completed' ? __('Completed') : __('Pending') }}
                                                 </span>
+                                                <p class="mt-1 text-xs text-gray-500">{{ __('Task Age') }}: <span class="font-semibold text-gray-900">{{ $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days')) }}</span></p>
                                             </div>
                                             <button type="button" x-on:click="expanded = !expanded" :aria-expanded="expanded.toString()" aria-label="{{ __('Toggle task details') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:justify-self-end">
                                                 <svg class="h-4 w-4 transition-transform" :class="expanded ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

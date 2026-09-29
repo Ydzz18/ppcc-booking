@@ -40,15 +40,6 @@ class TaskController extends Controller
     }
 
     /**
-     * Show a print-ready preview of the specified task.
-     */
-    public function print(Task $task): View
-    {
-        return view('tasks.print', [
-            'task' => $task,
-        ]);
-    }
-
     /**
      * Download a PDF of the specified task.
      */

@@ -6,6 +6,16 @@
     display: none !important;
 }
 
+.task-monitoring-summary-grid {
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+    .task-monitoring-summary-grid {
+        grid-template-columns: minmax(128px, 1fr) minmax(60px, 0.65fr) minmax(120px, 1.4fr) minmax(120px, 1.4fr) minmax(110px, 1fr) 2rem;
+    }
+}
+
 nav svg.rotate-180,
 nav svg.transition-transform {
     display: none;
