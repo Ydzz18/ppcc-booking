@@ -7,7 +7,7 @@
 
     <div class="py-12">
         <div class="w-full px-4 sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 space-y-6" x-data="{ activeMenu: '{{ request('tab') === 'monitoring' ? 'monitoring' : 'entry' }}', taskCreatedModalOpen: @js(session('status') === 'task-created') }">
                     @if (session('status') === 'task-created')
                         <div x-show="taskCreatedModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 px-4" role="dialog" aria-modal="true" aria-labelledby="task-created-title">
