@@ -6,6 +6,135 @@
     display: none !important;
 }
 
+.task-monitoring-summary-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.2fr) repeat(4, minmax(0, 1fr)) 32px;
+    align-items: center;
+    column-gap: clamp(0.5rem, 1.5vw, 1.25rem);
+    row-gap: 0.25rem;
+    width: 100%;
+}
+
+.task-monitoring-actions {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.task-monitoring-actions form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.task-monitoring-action {
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.task-monitoring-action-icon {
+    width: 2rem;
+    padding: 0;
+}
+
+.task-monitoring-action-update {
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.task-monitoring-action-update:hover {
+    background: #dbeafe;
+}
+
+.task-monitoring-action-print {
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    color: #374151;
+}
+
+.task-monitoring-action-print:hover {
+    background: #f3f4f6;
+}
+
+.task-monitoring-action-delete {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+    cursor: pointer;
+}
+
+.task-monitoring-action-delete:hover {
+    background: #fee2e2;
+}
+
+.task-monitoring-metric {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.35rem;
+}
+
+.task-monitoring-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.task-monitoring-label {
+    font-size: 11px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.task-monitoring-value {
+    max-width: 100%;
+    margin: 0;
+    line-height: 1.2;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    overflow-wrap: anywhere;
+}
+
+.task-monitoring-toggle {
+    justify-self: end;
+    align-self: center;
+    margin-top: 0;
+}
+
+@media (max-width: 1023px) {
+    .task-monitoring-summary-grid {
+        display: grid !important;
+        grid-template-columns: 1fr;
+        row-gap: 0.5rem;
+    }
+
+    .task-monitoring-metric,
+    .task-monitoring-pair {
+        flex-wrap: wrap;
+        white-space: normal;
+    }
+}
+
 nav svg.rotate-180,
 nav svg.transition-transform {
     display: none;

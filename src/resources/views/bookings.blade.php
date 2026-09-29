@@ -140,57 +140,58 @@
                                         $taskAgeDays = $monitoring->taskAgeInDays();
                                         $requiredFormNames = $requiredFormIds->map(fn ($formId) => $formNamesById[$formId] ?? null)->filter();
                                     @endphp
-                                    <div x-data="{ expanded: false, actionsOpen: false }" class="bg-white">
-                                        <div class="grid items-center gap-4 px-4 py-4 sm:grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_100px_120px_2rem]">
-                                            <div class="relative order-first z-10 sm:col-start-1" x-on:click.outside="actionsOpen = false" :class="actionsOpen ? 'z-50' : 'z-10'">
-                                                <div class="inline-flex rounded-md shadow-sm">
-                                                    <button type="button" x-on:click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen.toString()" class="inline-flex min-h-9 w-32 items-center justify-between rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                                        {{ __('Actions') }}
-                                                           <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
-                                                    </button>
+                                    <div x-data="{ expanded: false }" class="bg-white">
+                                        <div class="task-monitoring-summary-grid px-4 py-4">
+                                            <div class="task-monitoring-actions">
+                                                <a href="{{ route('bookings.edit', $monitoring) }}" class="task-monitoring-action task-monitoring-action-update">{{ __('Update') }}</a>
+                                                <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" aria-label="{{ __('Print') }}" title="{{ __('Print') }}" class="task-monitoring-action task-monitoring-action-icon task-monitoring-action-print">
+                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 11h.01" />
+                                                    </svg>
+                                                </a>
+                                                @if (Auth::user()->isAdmin())
+                                                    <form method="POST" action="{{ route('bookings.destroy', $monitoring) }}" data-confirm="{{ __('Are you sure you want to delete this task monitoring entry?') }}">
+                                                        @csrf
+                                                        @method('delete')
+                                                        <button type="submit" aria-label="{{ __('Delete') }}" title="{{ __('Delete') }}" class="task-monitoring-action task-monitoring-action-icon task-monitoring-action-delete">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3" />
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Task ID') }}</span>
+                                                    <button type="button" x-on:click="expanded = !expanded" class="task-monitoring-value text-indigo-700 hover:underline">{{ $monitoring->id }}</button>
                                                 </div>
-                                                <div x-show="actionsOpen" x-cloak class="absolute left-0 top-full z-50 mt-1 w-40 overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-lg">
-                                                    <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Print') }}</a>
-                                                    @if ($allRequiredFormsCompleted)
-                                                        <a href="{{ route('bookings.edit', ['monitoring' => $monitoring, 'show_submission_form' => 1]) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm {{ $submissionStatus === 'completed' ? 'text-green-700 hover:bg-green-50' : 'text-blue-700 hover:bg-blue-50' }}">{{ $submissionStatus === 'completed' ? __('View Details') : __('Submission Process') }}</a>
-                                                    @endif
-                                                    @unless ($allRequiredFormsCompleted)
-                                                        <a href="{{ route('bookings.edit', $monitoring) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Update') }}</a>
-                                                    @endunless
-                                                    @if (Auth::user()->isAdmin())
-                                                        <form method="POST" action="{{ route('bookings.destroy', $monitoring) }}" data-confirm="{{ __('Are you sure you want to delete this task monitoring entry?') }}">
-                                                            @csrf
-                                                            @method('delete')
-                                                            <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">{{ __('Delete') }}</button>
-                                                        </form>
-                                                    @endif
+                                            </div>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Type of Task') }}</span>
+                                                    <button type="button" x-on:click="expanded = !expanded" class="task-monitoring-value text-left text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->task?->task_name ?? '—' }}</button>
                                                 </div>
                                             </div>
-                                            <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Task ID') }}</p>
-                                                <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-sm font-semibold text-indigo-700 hover:underline">{{ $monitoring->id }}</button>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Client Name') }}</span>
+                                                    <button type="button" x-on:click="expanded = !expanded" class="task-monitoring-value text-left text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</button>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Type of Task') }}</p>
-                                                <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-left text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->task?->task_name ?? '—' }}</button>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Status') }}</span>
+                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                                                        {{ $bookingStatus === 'completed' ? __('Completed') : __('Pending') }}
+                                                    </span>
+                                                </div>
+                                                <p class="mt-1 text-xs text-gray-500">{{ __('Task Age') }}: <span class="font-semibold text-gray-900">{{ $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days')) }}</span></p>
                                             </div>
-                                            <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Client Name') }}</p>
-                                                <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-left text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</button>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Task Age') }}</p>
-                                                <p class="mt-1 text-sm font-semibold text-gray-900">{{ $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days')) }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Status') }}</p>
-                                                <span class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
-                                                    {{ $bookingStatus === 'completed' ? __('Completed') : __('Pending') }}
-                                                </span>
-                                            </div>
-                                            <button type="button" x-on:click="expanded = !expanded" :aria-expanded="expanded.toString()" aria-label="{{ __('Toggle task details') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:justify-self-end">
+                                            <button type="button" x-on:click="expanded = !expanded" :aria-expanded="expanded.toString()" aria-label="{{ __('Toggle task details') }}" class="task-monitoring-toggle inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                 <svg class="h-4 w-4 transition-transform" :class="expanded ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75 0 01-1.08 0l-4.25-4.5a.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z" clip-rule="evenodd" />
                                                 </svg>
                                             </button>
                                         </div>
