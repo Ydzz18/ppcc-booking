@@ -42,6 +42,7 @@ class NotificationController extends Controller
                 'client_name' => $notification->client?->client_name ?? __('Unknown client'),
                 'status' => ucfirst($notification->submission_status ?: 'pending'),
                 'url' => route('bookings.edit', $notification),
+                'created_at' => $notification->created_at?->toIso8601String(),
             ])->values(),
         ]);
     }
