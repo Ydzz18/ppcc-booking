@@ -55,10 +55,13 @@ body {
     color: #111827;
 }
 
-.required-form-name,
+.required-form-name {
+    color: #000000 !important;
+}
+
 html.dark .required-form-name,
 html[data-theme='dark'] .required-form-name {
-    color: #000000 !important;
+    color: var(--text-primary) !important;
 }
 
 .app-shell,

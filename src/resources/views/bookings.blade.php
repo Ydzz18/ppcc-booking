@@ -210,9 +210,9 @@
                                                                 @endphp
 
                                                                 @if ($formName)
-                                                                    <div class="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-black dark:text-black {{ $formCompleted ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50' }}">
-                                                                        <span class="required-form-name text-black dark:text-black">{{ $formName }}</span>
-                                                                        <span class="shrink-0 text-xs font-semibold {{ $formCompleted ? 'text-green-700' : 'text-red-700' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
+                                                                    <div class="flex items-center justify-between gap-3 rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
+                                                                        <span class="required-form-name">{{ $formName }}</span>
+                                                                        <span class="shrink-0 text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
                                                                     </div>
                                                                 @endif
                                                             @endforeach
