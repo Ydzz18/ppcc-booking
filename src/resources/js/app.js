@@ -5,45 +5,44 @@ import { applyTheme, syncBrandLogos } from './theme';
 
 window.Alpine = Alpine;
 
-Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, userId) => ({
+Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, viewedEndpoint) => ({
 	notificationsOpen: false,
 	notificationCount: initialCount,
 	headerNotifications: initialNotifications,
 	seenNotificationIds: new Set(initialNotifications.map((notification) => notification.id)),
-	viewedAt: null,
-	storageKey: `ppcc-booking-notifications-viewed-at-${userId}`,
 	toast: null,
 	toastTimeout: null,
 	pollInterval: null,
 
 	start() {
-		try {
-			const storedViewedAt = Number(localStorage.getItem(this.storageKey));
-			this.viewedAt = Number.isFinite(storedViewedAt) && storedViewedAt > 0 ? storedViewedAt : null;
-			if (this.viewedAt) {
-				this.notificationCount = this.unreadNotifications(this.headerNotifications).length;
-			}
-		} catch {
-		}
-
 		this.pollInterval = window.setInterval(() => this.refresh(), 15000);
 		window.addEventListener('task-entry-created', () => this.refresh());
 	},
 
-	unreadNotifications(notifications) {
-		return notifications.filter((notification) => Date.parse(notification.created_at) > this.viewedAt);
-	},
-
-	markNotificationsViewed() {
-		const latestNotificationTime = Math.max(...this.headerNotifications.map((notification) => Date.parse(notification.created_at) || 0));
-		this.viewedAt = Math.max(Date.now(), latestNotificationTime);
+	async markNotificationsViewed() {
 		this.notificationCount = 0;
 		this.headerNotifications.forEach((notification) => this.seenNotificationIds.add(notification.id));
 
 		try {
-			localStorage.setItem(this.storageKey, String(this.viewedAt));
+			const response = await fetch(viewedEndpoint, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					Accept: 'application/json',
+					'X-Requested-With': 'XMLHttpRequest',
+					'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+				},
+			});
+
+			if (!response.ok) throw new Error('Unable to save notification view state.');
 		} catch {
+			await this.refresh();
 		}
+	},
+
+	async visitNotification(url) {
+		await this.markNotificationsViewed();
+		window.location.assign(url);
 	},
 
 	async refresh() {
@@ -59,11 +58,7 @@ Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, 
 			const unseen = data.notifications.filter((notification) => !this.seenNotificationIds.has(notification.id));
 
 			this.headerNotifications = data.notifications;
-			if (this.viewedAt) {
-				this.notificationCount = this.unreadNotifications(data.notifications).length;
-			} else {
-				this.notificationCount = data.count;
-			}
+			this.notificationCount = data.count;
 
 			if (unseen.length > 0) {
 				this.showToast(unseen[0]);
