@@ -8,6 +8,7 @@
     @php
         $requiredFormsCompleted = $requiredForms->isNotEmpty() && $requiredForms->every(fn ($form) => $form['status'] === 'completed');
         $bookingStatus = $requiredFormsCompleted || strtolower((string) ($monitoring->submission_status ?? 'pending')) === 'completed' ? __('Completed') : __('Pending');
+        $taskAgeDays = $monitoring->taskAgeInDays();
     @endphp
 
     <header class="document-header">
@@ -21,6 +22,7 @@
             <div class="detail"><dt>{{ __('Booking ID') }}</dt><dd>{{ $monitoring->id }}</dd></div>
             <div class="detail"><dt>{{ __('Status') }}</dt><dd class="status">{{ $bookingStatus }}</dd></div>
             <div class="detail"><dt>{{ __('Date Task Received') }}</dt><dd>{{ $monitoring->date_task_received?->format('F d, Y') ?? '—' }}</dd></div>
+            <div class="detail"><dt>{{ __('Task Age') }}</dt><dd>{{ $taskAgeDays ?? '—' }} {{ $taskAgeDays === null ? '' : ($taskAgeDays === 1 ? __('day') : __('days')) }}</dd></div>
             <div class="detail"><dt>{{ __('Client Name') }}</dt><dd>{{ $monitoring->client?->client_name ?? '—' }}</dd></div>
             <div class="detail"><dt>{{ __('Type of Task') }}</dt><dd>{{ $monitoring->task?->task_name ?? '—' }}</dd></div>
             <div class="detail"><dt>{{ __('Client Name') }}</dt><dd>{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</dd></div>

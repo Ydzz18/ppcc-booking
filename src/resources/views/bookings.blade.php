@@ -94,7 +94,7 @@
                                 <div id="required_forms_documents" class="mt-1 max-h-48 overflow-y-auto rounded-md border border-gray-300 p-3">
                                     <div class="space-y-2">
                                         @foreach ($forms as $form)
-                                            <div x-show="selectedTaskRequiredForms.includes('{{ $form->id }}')" x-cloak class="flex items-center gap-2 text-sm text-gray-700">
+                                            <div x-show="selectedTaskRequiredForms.includes('{{ $form->id }}')" x-cloak class="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
                                                 <input type="hidden" name="required_forms_documents[]" value="{{ $form->id }}" data-form-name="{{ $form->form_name }}" x-bind:disabled="!selectedTaskRequiredForms.includes('{{ $form->id }}')">
                                                 <span>{{ $form->form_name }}</span>
                                             </div>
