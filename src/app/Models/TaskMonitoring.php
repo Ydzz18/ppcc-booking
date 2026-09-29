@@ -57,6 +57,17 @@ class TaskMonitoring extends Model
         ];
     }
 
+    public function taskAgeInDays(): ?int
+    {
+        $receivedDate = $this->date_task_received;
+
+        if (!$receivedDate) {
+            return null;
+        }
+
+        return max(0, (int) $receivedDate->copy()->startOfDay()->diffInDays(today(), false));
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
