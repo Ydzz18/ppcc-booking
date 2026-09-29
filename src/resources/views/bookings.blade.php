@@ -137,9 +137,11 @@
                                             && $requiredFormIds->every(fn ($formId) => strtolower(trim((string) ($formStatusesByMonitoringAndForm[$monitoring->id.'-'.$formId] ?? 'pending'))) === 'completed');
                                         $submissionStatus = strtolower((string) ($monitoring->submission_status ?? 'pending'));
                                         $bookingStatus = $allRequiredFormsCompleted || $submissionStatus === 'completed' ? 'completed' : 'pending';
+                                        $taskAgeDays = $monitoring->taskAgeInDays();
+                                        $requiredFormNames = $requiredFormIds->map(fn ($formId) => $formNamesById[$formId] ?? null)->filter();
                                     @endphp
                                     <div x-data="{ expanded: false, actionsOpen: false }" class="bg-white">
-                                        <div class="grid items-center gap-4 px-4 py-4 sm:grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_120px_2rem]">
+                                        <div class="grid items-center gap-4 px-4 py-4 sm:grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_100px_120px_2rem]">
                                             <div class="relative order-first z-10 sm:col-start-1" x-on:click.outside="actionsOpen = false" :class="actionsOpen ? 'z-50' : 'z-10'">
                                                 <div class="inline-flex rounded-md shadow-sm">
                                                     <button type="button" x-on:click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen.toString()" class="inline-flex min-h-9 w-32 items-center justify-between rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -177,6 +179,10 @@
                                                 <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-left text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</button>
                                             </div>
                                             <div>
+                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Task Age') }}</p>
+                                                <p class="mt-1 text-sm font-semibold text-gray-900">{{ $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days')) }}</p>
+                                            </div>
+                                            <div>
                                                 <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Status') }}</p>
                                                 <span class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
                                                     {{ $bookingStatus === 'completed' ? __('Completed') : __('Pending') }}
@@ -187,6 +193,14 @@
                                                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75 0 01-1.08 0l-4.25-4.5a.75 0 01.02-1.06z" clip-rule="evenodd" />
                                                 </svg>
                                             </button>
+                                        </div>
+                                        <div class="border-t border-gray-100 px-4 py-3 text-sm">
+                                            <span class="font-medium text-gray-600">{{ __('Required Forms and Documents') }}:</span>
+                                            @if ($requiredFormNames->isEmpty())
+                                                <span class="text-gray-500">—</span>
+                                            @else
+                                                <span class="text-gray-800">{{ $requiredFormNames->join(', ') }}</span>
+                                            @endif
                                         </div>
                                         <div x-show="expanded" x-cloak class="border-t border-gray-200 bg-gray-50 px-4 py-4">
                                             <div class="grid gap-4 rounded-lg border border-gray-200 bg-white p-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
