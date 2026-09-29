@@ -36,7 +36,7 @@
                     @endif
 
                     <div id="job-task-entry-section" class="max-w-7xl mx-auto" x-show="activeMenu === 'entry'">
-                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ selectedAgency: '', selectedTaskId: '', selectedTaskRequiredForms: [], additionalFormsOpen: false, selectAgency() { const taskSelect = this.$root.querySelector('#type_of_task'); taskSelect.value = ''; this.selectedTaskId = ''; this.selectedTaskRequiredForms = []; this.additionalFormsOpen = false; }, selectTask(event) { const option = event.target.selectedOptions[0]; this.selectedAgency = option?.dataset.agency || this.selectedAgency; this.selectedTaskId = event.target.value; this.selectedTaskRequiredForms = JSON.parse(option?.dataset.requiredForms || '[]').map(String); this.additionalFormsOpen = false; } }" x-init="const taskSelect = $root.querySelector('#type_of_task'); if (taskSelect?.value) { selectedAgency = taskSelect.selectedOptions[0]?.dataset.agency || ''; selectTask({ target: taskSelect }); }">
+                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()), selectedAgency: '', selectedTaskId: @js((string) old('type_of_task', '')), selectedTaskRequiredForms: [], additionalFormsOpen: false, selectAgency() { this.selectedTaskId = ''; this.selectedTaskRequiredForms = []; this.additionalFormsOpen = false; }, selectTask(event) { const task = this.taskOptions.find(task => String(task.id) === String(event.target.value)); this.selectedAgency = task?.agency || this.selectedAgency; this.selectedTaskId = event.target.value; this.selectedTaskRequiredForms = (task?.required_forms_documents || []).map(String); this.additionalFormsOpen = false; } }" x-init="const initialTask = taskOptions.find(task => String(task.id) === selectedTaskId); if (initialTask) { selectedAgency = initialTask.agency; selectedTaskRequiredForms = (initialTask.required_forms_documents || []).map(String); }">
                             <div class="flex items-center justify-between gap-4">
                                 <h3 class="text-lg font-medium text-gray-900">{{ __('Task Entry') }}</h3>
                                 <x-primary-button form="task-entry-form">{{ __('Create Task') }}</x-primary-button>
@@ -62,9 +62,9 @@
                                         <x-input-label for="type_of_task" :value="__('Type of Task')" />
                                         <select id="type_of_task" name="type_of_task" x-on:change="selectTask($event)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                             <option value="">{{ __('Select Task') }}</option>
-                                            @foreach ($tasks as $task)
-                                                <option value="{{ $task->id }}" data-agency="{{ $task->agency }}" data-required-forms='@json($task->required_forms_documents ?? [])' x-bind:hidden="selectedAgency !== '' && $el.dataset.agency !== selectedAgency" @selected((string) old('type_of_task') === (string) $task->id)>{{ $task->task_name }}</option>
-                                            @endforeach
+                                            <template x-for="task in taskOptions.filter(task => selectedAgency === '' || task.agency === selectedAgency)" :key="task.id">
+                                                <option x-bind:value="task.id" x-bind:selected="String(task.id) === selectedTaskId" x-text="task.task_name"></option>
+                                            </template>
                                         </select>
                                         <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
                                     </div>
