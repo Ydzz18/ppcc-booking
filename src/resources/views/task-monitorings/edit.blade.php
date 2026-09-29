@@ -4,14 +4,119 @@
             <div class="max-h-[calc(100vh-3rem)] w-full overflow-y-auto rounded-lg bg-white shadow-xl">
                 <div class="p-6 text-gray-900" x-data="{ isNoteModalOpen: false, isSubmissionModalOpen: @js($errors->has('date_of_submission') || $errors->has('receiving_officer') || $errors->has('acknowledgement_receipt_reference_number')), isSubmissionDecisionModalOpen: @js($errors->has('submission_decision') || $errors->has('submission_notes') || $errors->has('submission_notes_input')), selectedFormId: '', selectedFormName: '', noteDate: '', noteStatus: 'pending', existingRemarks: '', notesRemarksInput: '', openNoteModal(button) { this.selectedFormId = button.dataset.formId; this.selectedFormName = button.dataset.formName; this.noteDate = button.dataset.noteDate || '{{ now()->format('Y-m-d') }}'; this.noteStatus = button.dataset.noteStatus || 'pending'; this.existingRemarks = button.dataset.notesRemarks || ''; this.notesRemarksInput = ''; this.isNoteModalOpen = true; }, closeNoteModal() { this.isNoteModalOpen = false; }, openSubmissionModal() { this.isSubmissionModalOpen = true; }, closeSubmissionModal() { this.isSubmissionModalOpen = false; }, openSubmissionDecisionModal() { this.isSubmissionDecisionModalOpen = true; }, closeSubmissionDecisionModal() { this.isSubmissionDecisionModalOpen = false; } }">
                     <div class="mb-6 flex items-center justify-between border-b border-gray-200 pb-4">
-                        <h2 id="update-task-monitoring-title" class="text-lg font-semibold text-gray-900">{{ __('Update Task Monitoring') }}</h2>
+                        <h2 id="update-task-monitoring-title" class="text-lg font-semibold text-gray-900">{{ __('Task Monitoring') }}</h2>
                         <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="text-2xl leading-none text-gray-400 hover:text-gray-600" aria-label="{{ __('Close update task monitoring') }}">&times;</a>
                     </div>
                     @if (session('status') === 'form-note-saved')
                         <p class="mb-4 text-sm text-green-600">{{ __('Form note saved successfully.') }}</p>
                     @endif
 
-                    <form method="POST" action="{{ route('bookings.update', $monitoring) }}" class="grid grid-cols-1 gap-6 md:grid-cols-2" data-confirm="Are you sure you want to update this entry?">
+                    <!-- Task Summary Row: 5 columns, 1 row -->
+                    <div class="mb-6 grid grid-cols-5 gap-4">
+                        <!-- Task ID Column -->
+                        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Task ID') }}</p>
+                            <p class="mt-2 text-lg font-semibold text-gray-900">{{ $monitoring->id }}</p>
+                        </div>
+
+                        <!-- Type of Task Column -->
+                        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Type of Task') }}</p>
+                            <p class="mt-2 text-sm font-medium text-gray-900">
+                                @foreach ($tasks as $task)
+                                    @if ((string) $task->id === (string) $monitoring->task_id)
+                                        {{ $task->task_name }}
+                                    @endif
+                                @endforeach
+                            </p>
+                        </div>
+
+                        <!-- Client Name Column -->
+                        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Client Name') }}</p>
+                            <p class="mt-2 text-sm font-medium text-gray-900">
+                                @foreach ($clients as $client)
+                                    @if ((string) $client->id === (string) $monitoring->client_id)
+                                        {{ $client->client_name }}
+                                    @endif
+                                @endforeach
+                            </p>
+                        </div>
+
+                        <!-- Task Age Column -->
+                        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Task Age') }}</p>
+                            <p class="mt-2 text-sm font-medium text-gray-900">
+                                @php
+                                    $taskAge = $monitoring->date_task_received ? \Carbon\Carbon::parse($monitoring->date_task_received)->diffInDays(now()) : 0;
+                                @endphp
+                                {{ $taskAge }} {{ $taskAge === 1 ? __('day') : __('days') }}
+                            </p>
+                        </div>
+
+                        <!-- Status Column -->
+                        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Status') }}</p>
+                            <p class="mt-2">
+                                @php
+                                    $submissionStatus = strtolower((string) $monitoring->submission_status);
+                                    $submissionDecision = strtolower((string) $monitoring->submission_decision);
+                                @endphp
+                                @if ($submissionStatus === 'completed')
+                                    <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">{{ __('Completed') }}</span>
+                                @elseif ($submissionDecision === 'accepted')
+                                    <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">{{ __('Accepted') }}</span>
+                                @elseif ($submissionDecision === 'declined')
+                                    <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">{{ __('Declined') }}</span>
+                                @else
+                                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-700">{{ __('Pending') }}</span>
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mb-6 flex flex-wrap items-center gap-3">
+                        <!-- Edit Button -->
+                        <a href="{{ route('bookings.edit', $monitoring) }}" class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M5.433 13.917l1.262-3.155A4 4 0 0113.58 9.42l6.92-6.92a2.001 2.001 0 00-2.83-2.83l-6.923 6.92a4 4 0 00-1.330 6.83l-3.996 3.996a1 1 0 00.17 1.41l2.583 2.583a1 1 0 001.41-.17z" />
+                            </svg>
+                            {{ __('Edit') }}
+                        </a>
+
+                        <!-- Print Button -->
+                        <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V4zm3 1h4v2H8V5zm0 4h4v2H8V9zm0 4h4v2H8v-2z" clip-rule="evenodd" />
+                            </svg>
+                            {{ __('Print') }}
+                        </a>
+
+                        <!-- Download PDF Button -->
+                        <a href="{{ route('bookings.pdf', $monitoring) }}" class="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            {{ __('Download PDF') }}
+                        </a>
+
+                        <!-- Delete Button (if user has permission) -->
+                        @can('manage-users')
+                            <form method="POST" action="{{ route('bookings.destroy', $monitoring) }}" class="inline" data-confirm="{{ __('Are you sure you want to delete this entry? This action cannot be undone.') }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    {{ __('Delete') }}
+                                </button>
+                            </form>
+                        @endcan
+                    </div>
+
+                    <form method="POST" action="{{ route('bookings.update', $monitoring) }}" class="grid grid-cols-1 gap-6" data-confirm="Are you sure you want to update this entry?">
                         @csrf
                         @method('patch')
 
@@ -58,7 +163,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('assigned_responsible_person')" />
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div>
                             <x-input-label for="required_forms_documents" :value="__('List of Required Forms and Documents')" />
                             @php
                                 $selectedFormIds = array_map('strval', old('required_forms_documents', $monitoring->required_forms_documents ?? []));
@@ -132,7 +237,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div>
                             @if ($allRequiredFormsCompleted)
                                 <div class="w-full">
                                     <x-input-label :value="__('Submission Details')" />
@@ -209,13 +314,6 @@
                             @endif
 
                             <div id="submission-action" class="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-gray-200 pt-4 sm:flex-row">
-                                <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 8V4h10v4M7 17H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M7 14h10v6H7z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 11h.01" />
-                                    </svg>
-                                    {{ __('Print') }}
-                                </a>
                                 <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                                     <span aria-hidden="true">&larr;</span>
                                     {{ __('Back to Monitoring') }}
