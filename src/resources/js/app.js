@@ -5,18 +5,45 @@ import { applyTheme, syncBrandLogos } from './theme';
 
 window.Alpine = Alpine;
 
-Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint) => ({
+Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, userId) => ({
 	notificationsOpen: false,
 	notificationCount: initialCount,
 	headerNotifications: initialNotifications,
 	seenNotificationIds: new Set(initialNotifications.map((notification) => notification.id)),
+	viewedAt: null,
+	storageKey: `ppcc-booking-notifications-viewed-at-${userId}`,
 	toast: null,
 	toastTimeout: null,
 	pollInterval: null,
 
 	start() {
+		try {
+			const storedViewedAt = Number(localStorage.getItem(this.storageKey));
+			this.viewedAt = Number.isFinite(storedViewedAt) && storedViewedAt > 0 ? storedViewedAt : null;
+			if (this.viewedAt) {
+				this.notificationCount = this.unreadNotifications(this.headerNotifications).length;
+			}
+		} catch {
+		}
+
 		this.pollInterval = window.setInterval(() => this.refresh(), 15000);
 		window.addEventListener('task-entry-created', () => this.refresh());
+	},
+
+	unreadNotifications(notifications) {
+		return notifications.filter((notification) => Date.parse(notification.created_at) > this.viewedAt);
+	},
+
+	markNotificationsViewed() {
+		const latestNotificationTime = Math.max(...this.headerNotifications.map((notification) => Date.parse(notification.created_at) || 0));
+		this.viewedAt = Math.max(Date.now(), latestNotificationTime);
+		this.notificationCount = 0;
+		this.headerNotifications.forEach((notification) => this.seenNotificationIds.add(notification.id));
+
+		try {
+			localStorage.setItem(this.storageKey, String(this.viewedAt));
+		} catch {
+		}
 	},
 
 	async refresh() {
@@ -29,13 +56,19 @@ Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint) 
 			if (!response.ok) return;
 
 			const data = await response.json();
-			const unseen = data.notifications.find((notification) => !this.seenNotificationIds.has(notification.id));
+			const unseen = data.notifications.filter((notification) => !this.seenNotificationIds.has(notification.id));
 
-			this.notificationCount = data.count;
 			this.headerNotifications = data.notifications;
-			data.notifications.forEach((notification) => this.seenNotificationIds.add(notification.id));
+			if (this.viewedAt) {
+				this.notificationCount = this.unreadNotifications(data.notifications).length;
+			} else {
+				this.notificationCount = data.count;
+			}
 
-			if (unseen) this.showToast(unseen);
+			if (unseen.length > 0) {
+				this.showToast(unseen[0]);
+				unseen.forEach((notification) => this.seenNotificationIds.add(notification.id));
+			}
 		} catch {
 		}
 	},
@@ -59,6 +92,84 @@ document.addEventListener('DOMContentLoaded', () => {
     const root = document.documentElement;
     applyTheme(initialTheme);
     syncBrandLogos();
+
+	const taskList = document.querySelector('#tasks-lists');
+	const taskSearchForm = document.querySelector('#task-search-form');
+
+	if (taskList && taskSearchForm) {
+		const feedback = document.querySelector('#task-search-feedback');
+		let requestSequence = 0;
+		let activeRequest = null;
+
+		const refreshTaskList = async (url, historyMode = 'replace') => {
+			const sequence = ++requestSequence;
+			activeRequest?.abort();
+			activeRequest = new AbortController();
+			taskList.setAttribute('aria-busy', 'true');
+			feedback?.classList.add('hidden');
+
+			try {
+				const response = await fetch(url, {
+					credentials: 'same-origin',
+					signal: activeRequest.signal,
+					headers: { Accept: 'text/html', 'X-Requested-With': 'XMLHttpRequest' },
+				});
+
+				if (!response.ok) throw new Error('Task search request failed.');
+
+				const responseDocument = new DOMParser().parseFromString(await response.text(), 'text/html');
+				const selectors = ['#task-table-container', '#task-edit-modals', '#task-pagination'];
+				const replacements = selectors.map((selector) => responseDocument.querySelector(selector));
+				const currentElements = selectors.map((selector) => taskList.querySelector(selector));
+
+				if (replacements.some((element) => !element) || currentElements.some((element) => !element)) {
+					throw new Error('Task search results were incomplete.');
+				}
+
+				if (sequence !== requestSequence) return;
+
+				currentElements.forEach((element, index) => element.replaceWith(replacements[index]));
+
+				for (const name of ['task_search', 'task_sort', 'task_order']) {
+					const currentField = taskSearchForm.elements.namedItem(name);
+					const responseField = responseDocument.querySelector(`#task-search-form [name="${name}"]`);
+					if (currentField && responseField) currentField.value = responseField.value;
+				}
+
+				if (historyMode !== 'none') {
+					window.history[historyMode === 'push' ? 'pushState' : 'replaceState']({}, '', response.url);
+				}
+			} catch (error) {
+				if (error.name !== 'AbortError' && sequence === requestSequence) {
+					feedback?.classList.remove('hidden');
+				}
+			} finally {
+				if (sequence === requestSequence) {
+					taskList.removeAttribute('aria-busy');
+				}
+			}
+		};
+
+		taskSearchForm.addEventListener('submit', (event) => {
+			event.preventDefault();
+			const url = new URL(taskSearchForm.action, window.location.href);
+			url.search = new URLSearchParams(new FormData(taskSearchForm)).toString();
+			url.searchParams.delete('tasks_page');
+			void refreshTaskList(url, event.submitter ? 'push' : 'replace');
+		});
+
+		taskList.addEventListener('click', (event) => {
+			const link = event.target.closest('#task-pagination a[href]');
+			if (!link || new URL(link.href).origin !== window.location.origin) return;
+
+			event.preventDefault();
+			void refreshTaskList(link.href, 'push');
+		});
+
+		window.addEventListener('popstate', () => {
+			void refreshTaskList(window.location.href, 'none');
+		});
+	}
 
     const themeObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {

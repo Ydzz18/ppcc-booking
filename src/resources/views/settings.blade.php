@@ -555,7 +555,7 @@
                         </div>
                     </div>
 
-                    <div id="tasks-lists" class="space-y-4" x-show="activeMenu === 'tasks'" x-data="{ taskSearchText: @js($taskSearch) }" style="{{ $activeSettingsTab !== 'tasks' ? 'display: none;' : '' }}">
+                    <div id="tasks-lists" class="space-y-4" x-show="activeMenu === 'tasks'" style="{{ $activeSettingsTab !== 'tasks' ? 'display: none;' : '' }}">
                                                 @if (session('error') === 'task-in-use')
                                                     <p class="text-sm text-red-600">{{ __('This task cannot be deleted because it is used by task monitoring records.') }}</p>
                                                 @endif
@@ -574,10 +574,10 @@
                             {{ __('ADD TASK') }}
                         </button>
 
-                        <form method="GET" action="{{ route('settings.index') }}" class="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_160px_auto]">
+                        <form id="task-search-form" method="GET" action="{{ route('settings.index') }}" class="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_160px_auto]">
                             <input type="hidden" name="tab" value="tasks">
                             <label class="sr-only" for="task_search">{{ __('Search tasks') }}</label>
-                            <input id="task_search" name="task_search" x-model="taskSearchText" value="{{ $taskSearch }}" type="search" placeholder="{{ __('Search agency or task name') }}" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
+                            <input id="task_search" name="task_search" x-on:input.debounce.400ms="$el.form.requestSubmit()" value="{{ $taskSearch }}" type="search" placeholder="{{ __('Search agency or task name') }}" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
                             <label class="sr-only" for="task_sort">{{ __('Sort tasks by') }}</label>
                             <select id="task_sort" name="task_sort" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
                                 <option value="task_name" @selected($taskSort === 'task_name')>{{ __('Task Name') }}</option>
@@ -590,6 +590,7 @@
                             </select>
                             <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">{{ __('Search') }}</button>
                         </form>
+                        <p id="task-search-feedback" class="hidden text-sm text-red-600" role="alert">{{ __('Unable to search tasks. Please try again.') }}</p>
 
                         <x-modal name="add-task" :show="$errors->hasAny(['agency', 'task_name', 'required_forms_documents', 'required_forms_documents.*'])" maxWidth="md" focusable>
                             <form method="POST" action="{{ route('tasks.store') }}" class="space-y-6 p-6" x-data="{ formSearch: '', formsModalOpen: false, formNames: @js($taskForms->pluck('form_name', 'id')), selectedForms: @js(array_map('strval', old('required_forms_documents', []))) }" data-confirm="Are you sure you want to save this task?">
@@ -654,7 +655,7 @@
                             </form>
                         </x-modal>
 
-                        <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <div id="task-table-container" class="overflow-x-auto border border-gray-200 rounded-lg">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
@@ -667,7 +668,7 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse ($tasks as $task)
-                                        <tr x-show="taskSearchText === '' || $el.dataset.agency.includes(taskSearchText.toLowerCase()) || $el.dataset.taskName.includes(taskSearchText.toLowerCase())" data-agency="{{ strtolower($task->agency) }}" data-task-name="{{ strtolower($task->task_name) }}">
+                                        <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $task->id }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $task->agency }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $task->task_name }}</td>
@@ -700,6 +701,7 @@
                             </table>
                         </div>
 
+                        <div id="task-edit-modals">
                         @foreach ($tasks as $task)
                             <x-modal name="edit-task-{{ $task->id }}" maxWidth="md" focusable>
                                 <form method="POST" action="{{ route('tasks.update', $task) }}" class="space-y-6 p-6" x-data="{ formSearch: '', formsModalOpen: false, formNames: @js($taskForms->pluck('form_name', 'id')), selectedForms: @js(array_map('strval', $task->required_forms_documents ?? [])) }" data-confirm="Are you sure you want to update this task?">
@@ -765,8 +767,9 @@
                                 </form>
                             </x-modal>
                         @endforeach
+                        </div>
 
-                        <div class="mt-4">
+                        <div id="task-pagination" class="mt-4">
                             {{ $tasks->appends(['tab' => 'tasks', 'task_search' => $taskSearch, 'task_sort' => $taskSort, 'task_order' => $taskOrder, 'users_page' => request('users_page'), 'clients_page' => request('clients_page'), 'forms_page' => request('forms_page')])->links() }}
                         </div>
                     </div>
