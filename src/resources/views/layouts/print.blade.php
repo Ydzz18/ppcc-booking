@@ -7,6 +7,7 @@
         <style>
             :root { color-scheme: light; font-family: Arial, sans-serif; }
             * { box-sizing: border-box; }
+            @page { margin: 14mm; }
             body { margin: 0; background: #f3f4f6; color: #111827; }
             .print-page { max-width: 1100px; margin: 0 auto; padding: 24px; }
             .print-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
@@ -20,7 +21,8 @@
             .document-header p { color: #6b7280; font-size: 13px; margin: 0; }
             .section { margin-top: 28px; }
             .section h2 { border-bottom: 1px solid #d1d5db; font-size: 15px; margin: 0 0 14px; padding-bottom: 8px; text-transform: uppercase; letter-spacing: .04em; }
-            .details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 28px; }
+            .details { border-collapse: collapse; table-layout: fixed; width: 100%; }
+            .details td { border: 0; font-size: 14px; padding: 0 14px 16px 0; text-align: left; vertical-align: top; width: 50%; }
             .detail dt { color: #6b7280; font-size: 11px; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; }
             .detail dd { font-size: 14px; margin: 0; white-space: pre-wrap; }
             table { border-collapse: collapse; width: 100%; }
@@ -30,16 +32,18 @@
             .empty { color: #6b7280; font-size: 13px; }
             .pdf-document .print-page { max-width: none; padding: 0; }
             .pdf-document .paper { border: 0; padding: 0; }
-            .pdf-document .details { display: block; width: 100%; }
-            .pdf-document .detail { display: inline-block; vertical-align: top; width: 48%; margin-bottom: 18px; padding-right: 18px; }
-            .pdf-document .detail dd { line-height: 1.35; }
+            .pdf-document { background: #fff; }
+            .pdf-document .section { margin-top: 24px; }
+            .pdf-document .section h2 { margin-bottom: 12px; padding-bottom: 6px; }
+            .pdf-document .details td { padding-bottom: 12px; }
+            .pdf-document .required-forms th,
+            .pdf-document .required-forms td { line-height: 1.2; padding: 7px 8px; }
             @media (max-width: 640px) {
                 .print-page { padding: 16px; }
                 .paper { padding: 24px 18px; }
                 .details { grid-template-columns: 1fr; }
             }
             @media print {
-                @page { margin: 14mm; }
                 body { background: #fff; }
                 .print-page { max-width: none; padding: 0; }
                 .print-toolbar { display: none; }

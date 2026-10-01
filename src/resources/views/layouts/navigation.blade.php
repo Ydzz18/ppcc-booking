@@ -33,6 +33,9 @@
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                         {{ __('Reports') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('expenses.index')" :active="request()->routeIs('expenses.*')">
+                        {{ __('Expenses') }}
+                    </x-nav-link>
                     @can('manage-users')
                         <x-nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')">
                             {{ __('Audit Logs') }}
@@ -124,6 +127,9 @@
             </div>
             <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                 {{ __('Reports') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('expenses.index')" :active="request()->routeIs('expenses.*')">
+                {{ __('Expenses') }}
             </x-responsive-nav-link>
             @can('manage-users')
                 <x-responsive-nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')">

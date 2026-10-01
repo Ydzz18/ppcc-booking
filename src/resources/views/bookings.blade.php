@@ -36,7 +36,7 @@
                     @endif
 
                     <div id="job-task-entry-section" class="max-w-7xl mx-auto" x-show="activeMenu === 'entry'">
-                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()), selectedAgency: '', selectedTaskId: @js((string) old('type_of_task', '')), selectedTaskRequiredForms: [], additionalFormsOpen: false, selectAgency() { this.selectedTaskId = ''; this.selectedTaskRequiredForms = []; this.additionalFormsOpen = false; }, selectTask(event) { const task = this.taskOptions.find(task => String(task.id) === String(event.target.value)); this.selectedAgency = task?.agency || this.selectedAgency; this.selectedTaskId = event.target.value; this.selectedTaskRequiredForms = (task?.required_forms_documents || []).map(String); this.additionalFormsOpen = false; } }" x-init="const initialTask = taskOptions.find(task => String(task.id) === selectedTaskId); if (initialTask) { selectedAgency = initialTask.agency; selectedTaskRequiredForms = (initialTask.required_forms_documents || []).map(String); }">
+                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()), formExpenseOptions: @js($forms->map(fn ($form) => ['id' => (string) $form->id, 'name' => $form->form_name, 'expense' => (float) $form->expense_amount])->values()), taskExpenses: @js($forms->mapWithKeys(fn ($form) => [(string) $form->id => (float) old('task_expenses.'.$form->id, $form->expense_amount)])->all()), selectedAgency: '', selectedTaskId: @js((string) old('type_of_task', '')), selectedTaskRequiredForms: [], additionalFormsOpen: false, totalSelectedExpenses() { return this.formExpenseOptions.filter(form => this.selectedTaskRequiredForms.includes(form.id)).reduce((total, form) => total + Number(this.taskExpenses[form.id] ?? form.expense ?? 0), 0); }, selectAgency() { this.selectedTaskId = ''; this.selectedTaskRequiredForms = []; this.additionalFormsOpen = false; }, selectTask(event) { const task = this.taskOptions.find(task => String(task.id) === String(event.target.value)); this.selectedAgency = task?.agency || this.selectedAgency; this.selectedTaskId = event.target.value; this.selectedTaskRequiredForms = (task?.required_forms_documents || []).map(String); this.additionalFormsOpen = false; } }" x-init="const initialTask = taskOptions.find(task => String(task.id) === selectedTaskId); if (initialTask) { selectedAgency = initialTask.agency; selectedTaskRequiredForms = (initialTask.required_forms_documents || []).map(String); }">
                             <div class="flex items-center justify-between gap-4">
                                 <h3 class="text-lg font-medium text-gray-900">{{ __('Task Entry') }}</h3>
                                 <x-primary-button form="task-entry-form">{{ __('Create Task') }}</x-primary-button>
@@ -74,7 +74,7 @@
 
                             <div>
                                 <x-input-label for="date_task_received" :value="__('Date Task Received')" />
-                                <x-text-input id="date_task_received" name="date_task_received" type="date" class="mt-1 block w-full" :value="old('date_task_received')" />
+                                <x-text-input id="date_task_received" name="date_task_received" type="date" class="mt-1 block w-full" :value="old('date_task_received', now()->toDateString())" />
                                 <x-input-error class="mt-2" :messages="$errors->get('date_task_received')" />
                             </div>
 
@@ -93,10 +93,18 @@
                                 <x-input-label for="required_forms_documents" :value="__('List of Required Forms and Documents')" />
                                 <div id="required_forms_documents" class="mt-1 max-h-48 overflow-y-auto rounded-md border border-gray-300 p-3">
                                     <div class="space-y-2">
+                                        <div class="flex items-center justify-between gap-4 px-3 text-xs font-semibold uppercase text-gray-500">
+                                            <span>{{ __('Form or Requirement') }}</span>
+                                            <span>{{ __('Expense') }}</span>
+                                        </div>
                                         @foreach ($forms as $form)
-                                            <div x-show="selectedTaskRequiredForms.includes('{{ $form->id }}')" x-cloak class="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                                            <div x-show="selectedTaskRequiredForms.includes('{{ $form->id }}')" x-cloak class="flex items-center justify-between gap-4 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
                                                 <input type="hidden" name="required_forms_documents[]" value="{{ $form->id }}" data-form-name="{{ $form->form_name }}" x-bind:disabled="!selectedTaskRequiredForms.includes('{{ $form->id }}')">
-                                                <span>{{ $form->form_name }}</span>
+                                                <span class="min-w-0 break-words">{{ $form->form_name }}</span>
+                                                <label class="flex shrink-0 items-center gap-2 font-medium">
+                                                    <span class="text-xs text-gray-500">PHP</span>
+                                                    <input type="number" name="task_expenses[{{ $form->id }}]" min="0" step="0.01" x-model.number="taskExpenses['{{ $form->id }}']" x-bind:disabled="!selectedTaskRequiredForms.includes('{{ $form->id }}')" class="w-28 rounded-md border-gray-300 py-1 text-right text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500" aria-label="{{ __('Expense for') }} {{ $form->form_name }}">
+                                                </label>
                                             </div>
                                         @endforeach
                                         <p x-show="selectedTaskRequiredForms.length === 0" x-cloak class="text-sm text-gray-500">{{ __('Select a task to view its required forms and documents.') }}</p>
@@ -118,6 +126,11 @@
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
 
+                                <div class="mt-3 flex items-center justify-between gap-4 rounded-md border border-gray-200 px-4 py-3 text-sm font-semibold">
+                                    <span>{{ __('Total Expenses') }}</span>
+                                    <span x-text="'PHP ' + totalSelectedExpenses().toFixed(2)"></span>
+                                </div>
+
                             </div>
 
                             </form>
@@ -138,66 +151,87 @@
                                         $submissionStatus = strtolower((string) ($monitoring->submission_status ?? 'pending'));
                                         $bookingStatus = $allRequiredFormsCompleted || $submissionStatus === 'completed' ? 'completed' : 'pending';
                                         $taskAgeDays = $monitoring->taskAgeInDays();
-                                        $requiredFormNames = $requiredFormIds->map(fn ($formId) => $formNamesById[$formId] ?? null)->filter();
+                                        $monitoringExpenses = collect($monitoring->expenses_breakdown ?? []);
+                                        if ($monitoringExpenses->isEmpty()) {
+                                            $monitoringExpenses = $requiredFormIds->map(fn ($formId) => [
+                                                'form_id' => (int) $formId,
+                                                'form_name' => $formNamesById[$formId] ?? __('Unknown form'),
+                                                'expense_amount' => (float) ($formExpensesById[$formId] ?? 0),
+                                            ]);
+                                        }
+                                        $monitoringExpensesByFormId = $monitoringExpenses->keyBy('form_id');
+                                        $totalExpenses = (float) $monitoringExpenses->sum('expense_amount');
                                     @endphp
-                                    <div x-data="{ expanded: false, actionsOpen: false }" class="bg-white">
-                                        <div class="grid task-monitoring-summary-grid items-center gap-4 px-4 py-4">
-                                            <div class="relative order-first z-10 sm:col-start-1" x-on:click.outside="actionsOpen = false" :class="actionsOpen ? 'z-50' : 'z-10'">
-                                                <div class="inline-flex rounded-md shadow-sm">
-                                                    <button type="button" x-on:click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen.toString()" class="inline-flex min-h-9 w-32 items-center justify-between rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                                        {{ __('Actions') }}
-                                                           <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
-                                                    </button>
-                                                </div>
-                                                <div x-show="actionsOpen" x-cloak class="absolute left-0 top-full z-50 mt-1 w-40 overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-lg">
-                                                    <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Print') }}</a>
-                                                    @if ($allRequiredFormsCompleted)
-                                                        <a href="{{ route('bookings.edit', ['monitoring' => $monitoring, 'show_submission_form' => 1]) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm {{ $submissionStatus === 'completed' ? 'text-green-700 hover:bg-green-50' : 'text-blue-700 hover:bg-blue-50' }}">{{ $submissionStatus === 'completed' ? __('View Details') : __('Submission Process') }}</a>
-                                                    @endif
-                                                    @unless ($allRequiredFormsCompleted)
-                                                        <a href="{{ route('bookings.edit', $monitoring) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Update') }}</a>
-                                                    @endunless
-                                                    @if (Auth::user()->isAdmin())
-                                                        <form method="POST" action="{{ route('bookings.destroy', $monitoring) }}" data-confirm="{{ __('Are you sure you want to delete this task monitoring entry?') }}">
-                                                            @csrf
-                                                            @method('delete')
-                                                            <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">{{ __('Delete') }}</button>
-                                                        </form>
-                                                    @endif
+                                    <div x-data="{ expanded: false }" class="bg-white">
+                                        <div class="task-monitoring-summary-grid px-4 py-4">
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Task ID') }}</span>
+                                                    <span class="task-monitoring-value">{{ $monitoring->id }}</span>
                                                 </div>
                                             </div>
-                                            <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Task ID') }}</p>
-                                                <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-sm font-semibold text-indigo-700 hover:underline">{{ $monitoring->id }}</button>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Date Booked') }}</span>
+                                                    <span class="task-monitoring-value">{{ $monitoring->date_task_received?->format('F d, Y') ?? '—' }}</span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Type of Task') }}</p>
-                                                <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-left text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->task?->task_name ?? '—' }}</button>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Client Name') }}</span>
+                                                    <span class="task-monitoring-value">{{ $monitoring->client?->client_name ?? '—' }}</span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Client Name') }}</p>
-                                                <button type="button" x-on:click="expanded = !expanded" class="mt-1 text-left text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</button>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Task') }}</span>
+                                                    <span class="task-monitoring-value">{{ $monitoring->task?->task_name ?? '—' }}</span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Status') }}</p>
-                                                <span class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
-                                                    {{ $bookingStatus === 'completed' ? __('Completed') : __('Pending') }}
-                                                </span>
-                                                <p class="mt-1 text-xs text-gray-500">{{ __('Task Age') }}: <span class="font-semibold text-gray-900">{{ $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days')) }}</span></p>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('No. of Days') }}</span>
+                                                    <span class="task-monitoring-value">{{ $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days')) }}</span>
+                                                </div>
                                             </div>
-                                            <button type="button" x-on:click="expanded = !expanded" :aria-expanded="expanded.toString()" aria-label="{{ __('Toggle task details') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:justify-self-end">
-                                                <svg class="h-4 w-4 transition-transform" :class="expanded ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75 0 01-1.08 0l-4.25-4.5a.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        <div class="border-t border-gray-100 px-4 py-3 text-sm">
-                                            <span class="font-medium text-gray-600">{{ __('Required Forms and Documents') }}:</span>
-                                            @if ($requiredFormNames->isEmpty())
-                                                <span class="text-gray-500">—</span>
-                                            @else
-                                                <span class="text-gray-800">{{ $requiredFormNames->join(', ') }}</span>
-                                            @endif
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Status') }}</span>
+                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                                                        {{ $bookingStatus === 'completed' ? __('Completed') : __('Pending') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="task-monitoring-actions">
+                                                <a href="{{ route('bookings.edit', $monitoring) }}" aria-label="{{ __('Update') }}" title="{{ __('Update') }}" class="task-monitoring-action task-monitoring-action-icon task-monitoring-action-update">
+                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5" />
+                                                    </svg>
+                                                </a>
+                                                <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" aria-label="{{ __('Print') }}" title="{{ __('Print') }}" class="task-monitoring-action task-monitoring-action-icon task-monitoring-action-print">
+                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 11h.01" />
+                                                    </svg>
+                                                </a>
+                                                @if (Auth::user()->isAdmin())
+                                                    <form method="POST" action="{{ route('bookings.destroy', $monitoring) }}" data-confirm="{{ __('Are you sure you want to delete this task monitoring entry?') }}">
+                                                        @csrf
+                                                        @method('delete')
+                                                        <button type="submit" aria-label="{{ __('Delete') }}" title="{{ __('Delete') }}" class="task-monitoring-action task-monitoring-action-icon task-monitoring-action-delete">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3" />
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                                <button type="button" x-on:click="expanded = !expanded" :aria-expanded="expanded.toString()" aria-label="{{ __('Toggle task details') }}" class="task-monitoring-toggle inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                    <svg class="h-4 w-4 transition-transform" :class="expanded ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div x-show="expanded" x-cloak class="border-t border-gray-200 bg-gray-50 px-4 py-4">
                                             <div class="grid gap-4 rounded-lg border border-gray-200 bg-white p-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
@@ -208,25 +242,41 @@
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Submission Status') }}</p><p class="mt-1 text-gray-900">{{ ucfirst($submissionStatus) }}</p></div>
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Release of Cert/Clearance') }}</p><p class="mt-1 text-gray-900">{{ '—' }}</p></div>
                                                 <div class="sm:col-span-2 lg:col-span-3">
-                                                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Required Forms and Documents') }}</p>
+                                                    <div class="task-monitoring-required-expense-header text-xs font-medium uppercase tracking-wide text-gray-500">
+                                                        <p>{{ __('Required Forms and Documents') }}</p>
+                                                        <p title="{{ __('Expense amount in Philippine pesos') }}">{{ __('PHP') }}</p>
+                                                    </div>
                                                     @if ($requiredFormIds->isEmpty())
-                                                        <p class="mt-2 rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ '—' }}</p>
+                                                        <div class="task-monitoring-required-expense-row mt-2">
+                                                            <p class="rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ '—' }}</p>
+                                                            <p class="task-monitoring-expense-row rounded-md border border-gray-200 text-gray-500">{{ '—' }}</p>
+                                                        </div>
                                                     @else
-                                                        <div class="mt-2 space-y-2">
+                                                        <div class="task-monitoring-required-expense-list mt-2">
                                                             @foreach ($requiredFormIds as $formId)
                                                                 @php
                                                                     $formName = $formNamesById[$formId] ?? null;
                                                                     $formStatus = strtolower(trim((string) ($formStatusesByMonitoringAndForm[$monitoring->id.'-'.$formId] ?? 'pending')));
                                                                     $formCompleted = $formStatus === 'completed';
+                                                                    $formExpense = (float) ($monitoringExpensesByFormId->get($formId)['expense_amount'] ?? 0);
                                                                 @endphp
 
                                                                 @if ($formName)
-                                                                    <div class="flex items-center justify-between gap-3 rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
-                                                                        <span class="required-form-name">{{ $formName }}</span>
-                                                                        <span class="shrink-0 text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
+                                                                    <div class="task-monitoring-required-expense-row">
+                                                                        <div class="task-monitoring-form-status-row rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
+                                                                            <span class="task-monitoring-form-expense-name required-form-name">{{ $formName }}</span>
+                                                                            <span class="task-monitoring-form-expense-status text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
+                                                                        </div>
+                                                                        <div class="task-monitoring-expense-row rounded-md border border-gray-200 text-gray-800">
+                                                                            <span class="task-monitoring-form-expense-amount font-medium" title="PHP {{ number_format($formExpense, 2) }}">{{ number_format($formExpense, 2) }}</span>
+                                                                        </div>
                                                                     </div>
                                                                 @endif
                                                             @endforeach
+                                                            <div class="task-monitoring-form-expense-total border-t border-gray-200 pt-2 font-semibold text-gray-900">
+                                                                <span>{{ __('Total Expenses') }}</span>
+                                                                <span class="task-monitoring-form-expense-amount" title="PHP {{ number_format($totalExpenses, 2) }}">{{ number_format($totalExpenses, 2) }}</span>
+                                                            </div>
                                                         </div>
                                                     @endif
                                                 </div>
@@ -248,7 +298,7 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Date Task Received') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Client Name') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Type of Task') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Client Name') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Assigned Responsible Person') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-200 border-r-0">{{ __('List of Required Forms and Documents') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-200 border-l-0">{{ __('Required Docs Status') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-200 border-r-0">{{ __('Submission Details') }}</th>
@@ -301,12 +351,6 @@
                                                     <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">{{ __('Pending') }}</span>
                                                 @endif
 
-                                                @if (!empty($latestFormNoteUpdatedAtByMonitoring[$monitoring->id] ?? null))
-                                                    <div class="mt-1 text-xs text-gray-500">
-                                                        <div>{{ __('Last updated:') }}</div>
-                                                        <div>{{ $latestFormNoteUpdatedAtByMonitoring[$monitoring->id] }}</div>
-                                                    </div>
-                                                @endif
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900 border border-gray-200 border-r-0">
                                                 @if ($allRequiredFormsCompleted)

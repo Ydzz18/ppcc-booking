@@ -16,5 +16,6 @@ class FormItem extends Model
      */
     protected $fillable = [
         'form_name',
+        'expense_amount',
     ];
 }

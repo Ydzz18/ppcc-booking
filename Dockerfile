@@ -32,8 +32,10 @@ COPY --chown=www-data:www-data src/ .
 # checkout does not depend on ignored vendor, node_modules, or public/build files.
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader \
     && npm install \
-    && npm run build
+    && npm run build \
+    && mkdir -p /opt/booking-build \
+    && cp -a public/build/. /opt/booking-build/
 
 EXPOSE 9000
 
-CMD ["sh", "-c", "mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && exec php-fpm"]
+CMD ["sh", "-c", "mkdir -p public/build && cp -a /opt/booking-build/. public/build/ && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && exec php-fpm"]

@@ -5,7 +5,7 @@ import { applyTheme, syncBrandLogos } from './theme';
 
 window.Alpine = Alpine;
 
-Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint) => ({
+Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, viewedEndpoint) => ({
 	notificationsOpen: false,
 	notificationCount: initialCount,
 	headerNotifications: initialNotifications,
@@ -19,6 +19,32 @@ Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint) 
 		window.addEventListener('task-entry-created', () => this.refresh());
 	},
 
+	async markNotificationsViewed() {
+		this.notificationCount = 0;
+		this.headerNotifications.forEach((notification) => this.seenNotificationIds.add(notification.id));
+
+		try {
+			const response = await fetch(viewedEndpoint, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					Accept: 'application/json',
+					'X-Requested-With': 'XMLHttpRequest',
+					'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+				},
+			});
+
+			if (!response.ok) throw new Error('Unable to save notification view state.');
+		} catch {
+			await this.refresh();
+		}
+	},
+
+	async visitNotification(url) {
+		await this.markNotificationsViewed();
+		window.location.assign(url);
+	},
+
 	async refresh() {
 		try {
 			const response = await fetch(endpoint, {
@@ -29,13 +55,15 @@ Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint) 
 			if (!response.ok) return;
 
 			const data = await response.json();
-			const unseen = data.notifications.find((notification) => !this.seenNotificationIds.has(notification.id));
+			const unseen = data.notifications.filter((notification) => !this.seenNotificationIds.has(notification.id));
 
-			this.notificationCount = data.count;
 			this.headerNotifications = data.notifications;
-			data.notifications.forEach((notification) => this.seenNotificationIds.add(notification.id));
+			this.notificationCount = data.count;
 
-			if (unseen) this.showToast(unseen);
+			if (unseen.length > 0) {
+				this.showToast(unseen[0]);
+				unseen.forEach((notification) => this.seenNotificationIds.add(notification.id));
+			}
 		} catch {
 		}
 	},
@@ -59,6 +87,84 @@ document.addEventListener('DOMContentLoaded', () => {
     const root = document.documentElement;
     applyTheme(initialTheme);
     syncBrandLogos();
+
+	const taskList = document.querySelector('#tasks-lists');
+	const taskSearchForm = document.querySelector('#task-search-form');
+
+	if (taskList && taskSearchForm) {
+		const feedback = document.querySelector('#task-search-feedback');
+		let requestSequence = 0;
+		let activeRequest = null;
+
+		const refreshTaskList = async (url, historyMode = 'replace') => {
+			const sequence = ++requestSequence;
+			activeRequest?.abort();
+			activeRequest = new AbortController();
+			taskList.setAttribute('aria-busy', 'true');
+			feedback?.classList.add('hidden');
+
+			try {
+				const response = await fetch(url, {
+					credentials: 'same-origin',
+					signal: activeRequest.signal,
+					headers: { Accept: 'text/html', 'X-Requested-With': 'XMLHttpRequest' },
+				});
+
+				if (!response.ok) throw new Error('Task search request failed.');
+
+				const responseDocument = new DOMParser().parseFromString(await response.text(), 'text/html');
+				const selectors = ['#task-table-container', '#task-edit-modals', '#task-pagination'];
+				const replacements = selectors.map((selector) => responseDocument.querySelector(selector));
+				const currentElements = selectors.map((selector) => taskList.querySelector(selector));
+
+				if (replacements.some((element) => !element) || currentElements.some((element) => !element)) {
+					throw new Error('Task search results were incomplete.');
+				}
+
+				if (sequence !== requestSequence) return;
+
+				currentElements.forEach((element, index) => element.replaceWith(replacements[index]));
+
+				for (const name of ['task_search', 'task_sort', 'task_order']) {
+					const currentField = taskSearchForm.elements.namedItem(name);
+					const responseField = responseDocument.querySelector(`#task-search-form [name="${name}"]`);
+					if (currentField && responseField) currentField.value = responseField.value;
+				}
+
+				if (historyMode !== 'none') {
+					window.history[historyMode === 'push' ? 'pushState' : 'replaceState']({}, '', response.url);
+				}
+			} catch (error) {
+				if (error.name !== 'AbortError' && sequence === requestSequence) {
+					feedback?.classList.remove('hidden');
+				}
+			} finally {
+				if (sequence === requestSequence) {
+					taskList.removeAttribute('aria-busy');
+				}
+			}
+		};
+
+		taskSearchForm.addEventListener('submit', (event) => {
+			event.preventDefault();
+			const url = new URL(taskSearchForm.action, window.location.href);
+			url.search = new URLSearchParams(new FormData(taskSearchForm)).toString();
+			url.searchParams.delete('tasks_page');
+			void refreshTaskList(url, event.submitter ? 'push' : 'replace');
+		});
+
+		taskList.addEventListener('click', (event) => {
+			const link = event.target.closest('#task-pagination a[href]');
+			if (!link || new URL(link.href).origin !== window.location.origin) return;
+
+			event.preventDefault();
+			void refreshTaskList(link.href, 'push');
+		});
+
+		window.addEventListener('popstate', () => {
+			void refreshTaskList(window.location.href, 'none');
+		});
+	}
 
     const themeObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {

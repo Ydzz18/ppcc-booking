@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\FormItemController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -117,9 +118,13 @@ Route::get('/dashboard', function (Request $request) {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('/expenses/print', [ExpenseController::class, 'print'])->name('expenses.print');
+    Route::get('/expenses/pdf', [ExpenseController::class, 'downloadPdf'])->name('expenses.pdf');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('can:manage-users')->name('audit-logs.index');
     Route::get('/notifications/live', [NotificationController::class, 'live'])->name('notifications.live');
+    Route::post('/notifications/viewed', [NotificationController::class, 'markViewed'])->name('notifications.viewed');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
     Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
@@ -140,7 +145,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->paginate(10, ['*'], 'users_page');
 
         $clients = Client::query()
-            ->select(['id', 'client_name', 'contact_person', 'address', 'tin', 'tel_phone_number', 'created_at'])
             ->latest('created_at')
             ->paginate(10, ['*'], 'clients_page');
 
@@ -161,7 +165,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $formSearch = trim((string) $request->query('form_search', ''));
         $formOrder = $request->query('form_order') === 'desc' ? 'desc' : 'asc';
         $forms = FormItem::query()
-            ->select(['id', 'form_name', 'created_at'])
+            ->select(['id', 'form_name', 'expense_amount', 'created_at'])
             ->when($formSearch !== '', function ($query) use ($formSearch): void {
                 $query->where('form_name', 'like', "%{$formSearch}%");
             })
@@ -196,6 +200,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/users/register', [UserController::class, 'store'])->name('users.store');
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
         Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
     });
 });

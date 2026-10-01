@@ -40,7 +40,7 @@ class BookingController extends Controller
             ->get();
 
         $forms = FormItem::query()
-            ->select(['id', 'form_name'])
+            ->select(['id', 'form_name', 'expense_amount'])
             ->orderBy('form_name')
             ->get();
 
@@ -50,7 +50,7 @@ class BookingController extends Controller
                 'client:id,client_name',
                 'task:id,task_name',
                 'assignedResponsiblePerson:id,contact_person',
-                'formNotes:task_monitoring_id,form_id,note_status,updated_at',
+                'formNotes:task_monitoring_id,form_id,note_status',
             ])
             ->latest('created_at')
             ->paginate(10, ['*'], 'monitorings_page');
@@ -59,18 +59,15 @@ class BookingController extends Controller
 
         // Build lookup maps from eager-loaded relations
         $formStatusesByMonitoringAndForm = [];
-        $latestFormNoteUpdatedAtByMonitoring = [];
-
         foreach ($monitorings as $monitoring) {
             foreach ($monitoring->formNotes as $note) {
                 $formStatusesByMonitoringAndForm[$monitoring->id.'-'.$note->form_id] = strtolower((string) $note->note_status);
-                $latestFormNoteUpdatedAtByMonitoring[$monitoring->id] = $note->updated_at
-                    ? Carbon::parse($note->updated_at)->format('F d, Y h:i A')
-                    : null;
             }
         }
 
-        return view('bookings', compact('clients', 'contactPersons', 'tasks', 'forms', 'monitorings', 'formNamesById', 'formStatusesByMonitoringAndForm', 'latestFormNoteUpdatedAtByMonitoring'));
+        $formExpensesById = $forms->pluck('expense_amount', 'id');
+
+        return view('bookings', compact('clients', 'contactPersons', 'tasks', 'forms', 'monitorings', 'formNamesById', 'formExpensesById', 'formStatusesByMonitoringAndForm'));
     }
 
     /**
@@ -84,6 +81,8 @@ class BookingController extends Controller
             'type_of_task' => ['required', 'integer', 'exists:tasks,id'],
             'required_forms_documents' => ['nullable', 'array'],
             'required_forms_documents.*' => ['integer', 'exists:forms,id'],
+            'task_expenses' => ['nullable', 'array'],
+            'task_expenses.*' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
         ]);
 
         TaskMonitoring::create([
@@ -92,6 +91,11 @@ class BookingController extends Controller
             'task_id' => $validated['type_of_task'],
             'assigned_responsible_person_id' => $validated['client_name'],
             'required_forms_documents' => $validated['required_forms_documents'] ?? [],
+            'expenses_breakdown' => $this->expenseBreakdown(
+                $validated['required_forms_documents'] ?? [],
+                [],
+                $validated['task_expenses'] ?? []
+            ),
             'submission_status' => 'pending',
         ]);
 
@@ -139,7 +143,6 @@ class BookingController extends Controller
                 'notes_remarks' => $note->notes_remarks,
                 'note_date' => $note->note_date ? Carbon::parse($note->note_date)->format('Y-m-d') : null,
                 'note_status' => $note->note_status,
-                'updated_at' => $note->updated_at ? Carbon::parse($note->updated_at)->format('F d, Y h:i A') : null,
             ]);
 
         $showSubmissionForm = $request->boolean('show_submission_form')
@@ -189,12 +192,15 @@ class BookingController extends Controller
             ->where('task_monitoring_id', $monitoring->id)
             ->get()
             ->keyBy('form_id');
+        $expensesByFormId = collect($monitoring->expenses_breakdown ?? [])
+            ->keyBy(fn (array $expense) => (int) ($expense['form_id'] ?? 0));
 
         return $requiredFormIds->map(fn (int $formId) => [
             'name' => $formsById->get($formId)?->form_name ?? __('Unknown form'),
             'status' => strtolower(trim((string) ($notesByForm->get($formId)?->note_status ?? 'pending'))),
             'note' => $notesByForm->get($formId)?->notes_remarks,
             'note_date' => $notesByForm->get($formId)?->note_date,
+            'expense_amount' => (float) ($expensesByFormId->get($formId)['expense_amount'] ?? $formsById->get($formId)?->expense_amount ?? 0),
         ]);
     }
 
@@ -225,19 +231,21 @@ class BookingController extends Controller
         $combinedSubmissionNotes = $existingSubmissionNotes;
 
         if ($newSubmissionNote !== '') {
-            $timestampedSubmissionNote = '['.now()->format('F d, Y h:i A').'] '.$newSubmissionNote;
-
             $combinedSubmissionNotes = $existingSubmissionNotes === ''
-                ? $timestampedSubmissionNote
-                : $existingSubmissionNotes."\n".$timestampedSubmissionNote;
+                ? $newSubmissionNote
+                : $existingSubmissionNotes."\n".$newSubmissionNote;
         }
+
+        $requiredFormIds = $validated['required_forms_documents'] ?? [];
+        $expensesBreakdown = $this->expenseBreakdown($requiredFormIds, $monitoring->expenses_breakdown ?? []);
 
         $monitoring->update([
             'date_task_received' => $validated['date_task_received'],
             'client_id' => $validated['client_name'],
             'task_id' => $validated['type_of_task'],
             'assigned_responsible_person_id' => $validated['assigned_responsible_person'],
-            'required_forms_documents' => $validated['required_forms_documents'] ?? [],
+            'required_forms_documents' => $requiredFormIds,
+            'expenses_breakdown' => $expensesBreakdown,
             'date_of_submission' => $validated['date_of_submission'] ?? null,
             'receiving_officer' => $validated['receiving_officer'] ?? null,
             'acknowledgement_receipt_reference_number' => $validated['acknowledgement_receipt_reference_number'] ?? null,
@@ -281,11 +289,9 @@ class BookingController extends Controller
         $combinedRemarks = $existingRemarks;
 
         if ($newRemark !== '') {
-            $timestampedRemark = '['.now()->format('F d, Y h:i A').'] '.$newRemark;
-
             $combinedRemarks = $existingRemarks === ''
-                ? $timestampedRemark
-                : $existingRemarks."\n".$timestampedRemark;
+                ? $newRemark
+                : $existingRemarks."\n".$newRemark;
         }
 
         TaskMonitoringFormNote::updateOrCreate(
@@ -301,5 +307,33 @@ class BookingController extends Controller
         );
 
         return Redirect::route('bookings.edit', $monitoring)->with('status', 'form-note-saved');
+    }
+
+    /** @param array<int, int|string> $formIds
+     *  @return array<int, array{form_id: int, form_name: string, expense_amount: float}>
+     */
+    private function expenseBreakdown(array $formIds, array $existingBreakdown = [], array $expenseOverrides = []): array
+    {
+        $existingByFormId = collect($existingBreakdown)
+            ->filter(fn ($expense) => isset($expense['form_id']))
+            ->keyBy(fn ($expense) => (int) $expense['form_id']);
+        $newFormIds = collect($formIds)
+            ->map(fn ($formId) => (int) $formId)
+            ->reject(fn (int $formId) => $existingByFormId->has($formId));
+        $formsById = FormItem::query()
+            ->whereIn('id', $newFormIds)
+            ->get(['id', 'form_name', 'expense_amount'])
+            ->keyBy('id');
+
+        return collect($formIds)
+            ->map(fn ($formId) => $existingByFormId->get((int) $formId) ?? $formsById->get((int) $formId))
+            ->filter()
+            ->map(fn ($form) => is_array($form) ? $form : [
+                'form_id' => (int) $form->id,
+                'form_name' => $form->form_name,
+                'expense_amount' => (float) ($expenseOverrides[$form->id] ?? $form->expense_amount),
+            ])
+            ->values()
+            ->all();
     }
 }

@@ -48,7 +48,7 @@
                             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Task Age') }}</p>
                             <p class="mt-2 text-sm font-medium text-gray-900">
                                 @php
-                                    $taskAge = $monitoring->date_task_received ? \Carbon\Carbon::parse($monitoring->date_task_received)->diffInDays(now()) : 0;
+                                    $taskAge = $monitoring->taskAgeInDays() ?? 0;
                                 @endphp
                                 {{ $taskAge }} {{ $taskAge === 1 ? __('day') : __('days') }}
                             </p>
@@ -78,12 +78,12 @@
                     <!-- Action Buttons -->
                     <div class="mb-6 flex flex-wrap items-center gap-3">
                         <!-- Edit Button -->
-                        <a href="{{ route('bookings.edit', $monitoring) }}" class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        <button type="button" x-on:click="$dispatch('enable-booking-fields')" class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path d="M5.433 13.917l1.262-3.155A4 4 0 0113.58 9.42l6.92-6.92a2.001 2.001 0 00-2.83-2.83l-6.923 6.92a4 4 0 00-1.330 6.83l-3.996 3.996a1 1 0 00.17 1.41l2.583 2.583a1 1 0 001.41-.17z" />
                             </svg>
                             {{ __('Edit') }}
-                        </a>
+                        </button>
 
                         <!-- Print Button -->
                         <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
@@ -116,7 +116,7 @@
                         @endcan
                     </div>
 
-                    <form method="POST" action="{{ route('bookings.update', $monitoring) }}" class="grid grid-cols-1 gap-6" data-confirm="Are you sure you want to update this entry?">
+                    <form method="POST" action="{{ route('bookings.update', $monitoring) }}" class="grid grid-cols-1 gap-6" data-confirm="Are you sure you want to update this entry?" x-data="{ isBookingFieldsEditable: false }" x-on:enable-booking-fields.window="isBookingFieldsEditable = true">
                         @csrf
                         @method('patch')
 
@@ -129,39 +129,27 @@
 
                         <div>
                             <x-input-label for="client_name" :value="__('Client Name')" />
-                            <select id="client_name" name="client_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" disabled>
+                            <select id="client_name" name="client_name" disabled x-bind:disabled="!isBookingFieldsEditable" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">{{ __('Select Client') }}</option>
                                 @foreach ($clients as $client)
                                     <option value="{{ $client->id }}" @selected((string) old('client_name', $monitoring->client_id) === (string) $client->id)>{{ $client->client_name }}</option>
                                 @endforeach
                             </select>
-                            <input type="hidden" name="client_name" value="{{ old('client_name', $monitoring->client_id) }}">
                             <x-input-error class="mt-2" :messages="$errors->get('client_name')" />
                         </div>
 
                         <div>
                             <x-input-label for="type_of_task" :value="__('Type of Task')" />
-                            <select id="type_of_task" name="type_of_task" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" disabled>
+                            <select id="type_of_task" name="type_of_task" disabled x-bind:disabled="!isBookingFieldsEditable" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">{{ __('Select Task') }}</option>
                                 @foreach ($tasks as $task)
                                     <option value="{{ $task->id }}" @selected((string) old('type_of_task', $monitoring->task_id) === (string) $task->id)>{{ $task->task_name }}</option>
                                 @endforeach
                             </select>
-                            <input type="hidden" name="type_of_task" value="{{ old('type_of_task', $monitoring->task_id) }}">
                             <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
                         </div>
 
-                        <div>
-                            <x-input-label for="assigned_responsible_person" :value="__('Client Name')" />
-                            <select id="assigned_responsible_person" name="assigned_responsible_person" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" disabled>
-                                <option value="">{{ __('Select Contact Person') }}</option>
-                                @foreach ($contactPersons as $contactPerson)
-                                    <option value="{{ $contactPerson->id }}" @selected((string) old('assigned_responsible_person', $monitoring->assigned_responsible_person_id) === (string) $contactPerson->id)>{{ $contactPerson->contact_person }}</option>
-                                @endforeach
-                            </select>
-                            <input type="hidden" name="assigned_responsible_person" value="{{ old('assigned_responsible_person', $monitoring->assigned_responsible_person_id) }}">
-                            <x-input-error class="mt-2" :messages="$errors->get('assigned_responsible_person')" />
-                        </div>
+                        <input type="hidden" name="assigned_responsible_person" value="{{ old('assigned_responsible_person', $monitoring->assigned_responsible_person_id) }}">
 
                         <div>
                             <x-input-label for="required_forms_documents" :value="__('List of Required Forms and Documents')" />
@@ -208,12 +196,6 @@
                                                         <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">{{ __('Pending') }}</span>
                                                     @else
                                                         <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700">{{ ucfirst($noteStatus) }}</span>
-                                                    @endif
-                                                    @if (!empty($note['updated_at'] ?? null))
-                                                        <div class="mt-1 text-xs text-gray-500">
-                                                            <div>{{ __('Last updated:') }}</div>
-                                                            <div>{{ $note['updated_at'] }}</div>
-                                                        </div>
                                                     @endif
                                                 </td>
                                                 <td class="px-4 py-2 text-sm text-gray-900 whitespace-pre-line">{{ $note['notes_remarks'] ?? '—' }}</td>
