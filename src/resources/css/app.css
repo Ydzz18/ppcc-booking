@@ -192,6 +192,9 @@ html[data-theme='dark'] .task-monitoring-value {
 
 .task-monitoring-toggle {
     flex: 0 0 2rem;
+    justify-self: end;
+    align-self: center;
+    margin-top: 0;
 }
 
 @media (max-width: 1023px) {
