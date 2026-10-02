@@ -17,14 +17,19 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
+<<<<<<< HEAD
     <body class="font-sans antialiased bg-gray-100 text-gray-900 transition-colors duration-200 min-h-screen md:h-screen md:overflow-hidden dark:bg-slate-950 dark:text-slate-100">
         <div class="app-shell min-h-screen bg-gray-100 flex flex-col md:h-full md:flex-row md:overflow-hidden dark:bg-slate-950" x-data="liveNotifications(@js($notificationCount ?? 0), @js(($headerNotifications ?? collect())->map(fn ($notification) => ['id' => $notification->id, 'task_name' => $notification->task?->task_name ?? __('Booking'), 'client_name' => $notification->client?->client_name ?? __('Unknown client'), 'status' => ucfirst($notification->submission_status ?: 'pending'), 'url' => route('bookings.edit', $notification), 'created_at' => $notification->created_at?->toIso8601String()])), @js(route('notifications.live')), @js(route('notifications.viewed')), @js(Auth::id()))" x-init="start()">
+=======
+    <body class="font-sans antialiased bg-gray-100 text-gray-900 transition-colors duration-200 min-h-screen lg:h-screen lg:overflow-hidden dark:bg-slate-950 dark:text-slate-100">
+        <div class="app-shell min-h-screen bg-gray-100 flex flex-col lg:h-full lg:flex-row lg:overflow-hidden dark:bg-slate-950" x-data="liveNotifications(@js($notificationCount ?? 0), @js(($headerNotifications ?? collect())->map(fn ($notification) => ['id' => $notification->id, 'task_name' => $notification->task?->task_name ?? __('Booking'), 'client_name' => $notification->client?->client_name ?? __('Unknown client'), 'status' => ucfirst($notification->submission_status ?: 'pending'), 'url' => route('bookings.edit', $notification)])), @js(route('notifications.live')), @js(route('notifications.viewed')))" x-init="start()">
+>>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
             @include('layouts.navigation')
 
-            <div class="min-w-0 flex-1 md:flex md:h-full md:min-h-0 md:flex-col">
+            <div class="min-w-0 flex-1 lg:flex lg:h-full lg:min-h-0 lg:flex-col">
                 @isset($header)
-                    <header class="w-full shrink-0 border-b border-gray-200 bg-white md:sticky md:top-0 md:z-20 md:flex md:h-20 md:items-center dark:border-slate-800 dark:bg-slate-900">
-                        <div class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-6 sm:px-6 md:px-8 md:py-0">
+                    <header class="w-full shrink-0 border-b border-gray-200 bg-white lg:sticky lg:top-0 lg:z-20 lg:flex lg:h-20 lg:items-center dark:border-slate-800 dark:bg-slate-900">
+                        <div class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:px-8 lg:py-0">
                             <div class="min-w-0 flex-1">
                                 {{ $header }}
                             </div>
@@ -75,7 +80,7 @@
                                     </div>
                                 </div>
 
-                                <a href="{{ route('profile.edit') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 bg-white text-slate-600 transition hover:border-yellow-400/50 hover:bg-gray-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:bg-slate-900/70 dark:hover:text-yellow-300" aria-label="Profile" title="Profile">
+                                <a href="{{ route('profile.edit') }}" class="app-header-profile hidden h-9 w-9 items-center justify-center rounded-lg border border-gray-300 bg-white text-slate-600 transition hover:border-yellow-400/50 hover:bg-gray-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:bg-slate-900/70 dark:hover:text-yellow-300 md:inline-flex" aria-label="Profile" title="Profile">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0"/>
                                     </svg>
@@ -85,7 +90,7 @@
                     </header>
                 @endisset
 
-                <main class="app-main min-h-screen overflow-y-auto md:min-h-0 md:flex-1">
+                <main class="app-main min-h-screen overflow-y-auto lg:min-h-0 lg:flex-1">
                     {{ $slot }}
                 </main>
             </div>

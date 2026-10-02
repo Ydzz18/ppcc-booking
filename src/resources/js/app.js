@@ -5,31 +5,25 @@ import { applyTheme, syncBrandLogos } from './theme';
 
 window.Alpine = Alpine;
 
+<<<<<<< HEAD
 Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, viewedEndpoint, userId) => ({
+=======
+Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, viewedEndpoint) => ({
+>>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
 	notificationsOpen: false,
 	notificationCount: initialCount,
 	headerNotifications: initialNotifications,
 	seenNotificationIds: new Set(initialNotifications.map((notification) => notification.id)),
-	viewedAt: null,
-	storageKey: `ppcc-booking-notifications-viewed-at-${userId}`,
 	toast: null,
 	toastTimeout: null,
 	pollInterval: null,
 
 	start() {
-		try {
-			const storedViewedAt = Number(localStorage.getItem(this.storageKey));
-			this.viewedAt = Number.isFinite(storedViewedAt) && storedViewedAt > 0 ? storedViewedAt : null;
-			if (this.viewedAt) {
-				this.notificationCount = this.unreadNotifications(this.headerNotifications).length;
-			}
-		} catch {
-		}
-
 		this.pollInterval = window.setInterval(() => this.refresh(), 15000);
 		window.addEventListener('task-entry-created', () => this.refresh());
 	},
 
+<<<<<<< HEAD
 	unreadNotifications(notifications) {
 		if (this.viewedAt === null) return notifications;
 		return notifications.filter((notification) => Date.parse(notification.created_at) > this.viewedAt);
@@ -38,11 +32,17 @@ Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, 
 	async markNotificationsViewed() {
 		const latestNotificationTime = Math.max(...this.headerNotifications.map((notification) => Date.parse(notification.created_at) || 0), 0);
 		this.viewedAt = Math.max(Date.now(), latestNotificationTime);
+=======
+	async markNotificationsViewed() {
+>>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
 		this.notificationCount = 0;
 		this.headerNotifications.forEach((notification) => this.seenNotificationIds.add(notification.id));
 
 		try {
+<<<<<<< HEAD
 			localStorage.setItem(this.storageKey, String(this.viewedAt));
+=======
+>>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
 			const response = await fetch(viewedEndpoint, {
 				method: 'POST',
 				credentials: 'same-origin',
@@ -77,11 +77,7 @@ Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, 
 			const unseen = data.notifications.filter((notification) => !this.seenNotificationIds.has(notification.id));
 
 			this.headerNotifications = data.notifications;
-			if (this.viewedAt) {
-				this.notificationCount = this.unreadNotifications(data.notifications).length;
-			} else {
-				this.notificationCount = data.count;
-			}
+			this.notificationCount = data.count;
 
 			if (unseen.length > 0) {
 				this.showToast(unseen[0]);

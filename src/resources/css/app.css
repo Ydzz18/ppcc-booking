@@ -2,6 +2,189 @@
 @tailwind components;
 @tailwind utilities;
 
+.mobile-sidebar-icon {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .app-header-profile {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1023px) {
+    .app-shell {
+        flex-direction: row !important;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .app-shell > nav {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        width: 4rem;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    .landscape-desktop-sidebar {
+        display: flex !important;
+        width: 4rem;
+        height: 100vh !important;
+        height: 100dvh !important;
+        min-height: 0 !important;
+    }
+
+    .mobile-sidebar-brand {
+        justify-content: center;
+        height: 4rem;
+        padding: 0;
+    }
+
+    .mobile-sidebar-brand a {
+        justify-content: center;
+    }
+
+    .mobile-sidebar-nav-list {
+        overflow-y: auto;
+        padding: 0.5rem;
+    }
+
+    .mobile-sidebar-nav-list > p {
+        display: none;
+    }
+
+    .mobile-sidebar-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .mobile-sidebar-icon {
+        display: block;
+        flex: none;
+    }
+
+    .mobile-sidebar-nav-list > div > a {
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        padding: 0;
+    }
+
+    .mobile-sidebar-group {
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        padding: 0;
+    }
+
+    .mobile-sidebar-subnav {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-left: 0;
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    .mobile-sidebar-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        padding: 0;
+    }
+
+    .mobile-sidebar-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .mobile-sidebar-footer > div {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .mobile-sidebar-user {
+        display: none;
+    }
+
+    .landscape-mobile-header {
+        display: none !important;
+    }
+
+    .landscape-mobile-menu {
+        display: none !important;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 600px) and (min-width: 768px) {
+    body {
+        height: auto !important;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow-y: auto !important;
+    }
+
+    .app-shell {
+        height: auto !important;
+        min-height: 100vh;
+        min-height: 100dvh;
+        flex-direction: row !important;
+        overflow: visible !important;
+    }
+
+    .app-shell > nav {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 40;
+        width: 4rem;
+        height: 100vh !important;
+        height: 100dvh !important;
+        overflow: hidden !important;
+    }
+
+    .landscape-desktop-sidebar {
+        display: flex !important;
+        width: 4rem;
+        height: 100vh !important;
+        height: 100dvh !important;
+        min-height: 0 !important;
+    }
+
+    .landscape-mobile-header {
+        display: none !important;
+    }
+
+    .landscape-mobile-menu {
+        display: none !important;
+    }
+
+    .app-shell > div.flex-1 {
+        height: auto !important;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .app-main {
+        min-height: 0 !important;
+        overflow-y: visible !important;
+    }
+}
+
 [x-cloak] {
     display: none !important;
 }
@@ -128,6 +311,7 @@ html[data-theme='dark'] .task-monitoring-value {
     color: var(--text-primary);
 }
 
+<<<<<<< HEAD
 .task-monitoring-required-expense-header,
 .task-monitoring-required-expense-row {
     display: grid;
@@ -137,6 +321,8 @@ html[data-theme='dark'] .task-monitoring-value {
     row-gap: 0.5rem;
 }
 
+=======
+>>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
 .task-monitoring-form-status-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 7rem;
@@ -150,6 +336,7 @@ html[data-theme='dark'] .task-monitoring-value {
     row-gap: 0.5rem;
 }
 
+<<<<<<< HEAD
 .task-monitoring-expense-row {
     display: flex;
     min-height: 2.5rem;
@@ -166,18 +353,24 @@ html[data-theme='dark'] .task-monitoring-value {
     padding-top: 0.5rem;
 }
 
+=======
+>>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
 .task-monitoring-form-expense-name {
     min-width: 0;
     overflow-wrap: anywhere;
 }
 
+<<<<<<< HEAD
 .task-monitoring-form-expense-amount,
+=======
+>>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
 .task-monitoring-form-expense-status {
     text-align: right;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
 
+<<<<<<< HEAD
 .task-monitoring-form-expense-amount {
     font-size: 0.5625rem;
 }
@@ -185,6 +378,10 @@ html[data-theme='dark'] .task-monitoring-value {
 @media (max-width: 639px) {
     .task-monitoring-form-status-row,
     .task-monitoring-form-expense-total {
+=======
+@media (max-width: 639px) {
+    .task-monitoring-form-status-row {
+>>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
         grid-template-columns: minmax(0, 1fr) 3.5rem;
         column-gap: 0.75rem;
     }
@@ -192,9 +389,12 @@ html[data-theme='dark'] .task-monitoring-value {
 
 .task-monitoring-toggle {
     flex: 0 0 2rem;
+<<<<<<< HEAD
     justify-self: end;
     align-self: center;
     margin-top: 0;
+=======
+>>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
 }
 
 @media (max-width: 1023px) {
