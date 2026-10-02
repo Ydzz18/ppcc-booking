@@ -1,6 +1,6 @@
-<nav x-data="{ open: false }" class="shrink-0 md:sticky md:top-0 md:h-screen md:self-start md:overflow-hidden">
+<nav x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false" class="relative z-40 shrink-0 md:sticky md:top-0 md:z-auto md:h-screen md:self-start md:overflow-hidden">
     <!-- Primary Navigation Menu -->
-    <div class="relative hidden h-full min-h-screen w-64 flex-col border-r border-gray-200 bg-white md:flex">
+    <div class="landscape-desktop-sidebar relative hidden h-full min-h-screen w-64 flex-col border-r border-gray-200 bg-white md:flex">
         <div class="flex h-20 items-center border-b border-gray-100 px-6">
             <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-3">
                 <x-application-logo class="block h-9 w-9 shrink-0 object-contain" />
@@ -32,6 +32,9 @@
                     </div>
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                         {{ __('Reports') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('expenses.index')" :active="request()->routeIs('expenses.*')">
+                        {{ __('Expenses') }}
                     </x-nav-link>
                     @can('manage-users')
                         <x-nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')">
@@ -77,7 +80,7 @@
             </div>
     </div>
 
-    <div class="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden">
+    <div class="landscape-mobile-header flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden">
         <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-3">
             <x-application-logo class="block h-9 w-9 shrink-0 object-contain" />
             <span class="truncate text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-100">{{ config('app.name', 'PPCC Booking') }}</span>
@@ -89,7 +92,7 @@
                     <path class="hidden dark:block" stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A8.8 8.8 0 0 1 11.2 3a9 9 0 1 0 9.8 9.8Z" />
                 </svg>
             </button>
-            <button @click="open = ! open" type="button" class="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" aria-label="{{ __('Toggle navigation') }}">
+            <button @click="open = ! open" type="button" class="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" aria-label="{{ __('Toggle navigation') }}" aria-controls="mobile-navigation-menu" :aria-expanded="open.toString()">
                 <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                     <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -97,7 +100,7 @@
             </button>
         </div>
     </div>
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden border-b border-gray-200 bg-white p-4 md:hidden">
+    <div id="mobile-navigation-menu" :class="{'block': open, 'hidden': ! open}" class="landscape-mobile-menu absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto hidden border-b border-gray-200 bg-white p-4 shadow-xl md:hidden">
         <div class="pt-2 pb-3 space-y-1" x-data="{ settingsOpen: true }">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
@@ -124,6 +127,9 @@
             </div>
             <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                 {{ __('Reports') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('expenses.index')" :active="request()->routeIs('expenses.*')">
+                {{ __('Expenses') }}
             </x-responsive-nav-link>
             @can('manage-users')
                 <x-responsive-nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')">

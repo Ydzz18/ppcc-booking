@@ -36,7 +36,7 @@
                     @endif
 
                     <div id="job-task-entry-section" class="max-w-7xl mx-auto" x-show="activeMenu === 'entry'">
-                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()), selectedAgency: '', selectedTaskId: @js((string) old('type_of_task', '')), selectedTaskRequiredForms: [], additionalFormsOpen: false, selectAgency() { this.selectedTaskId = ''; this.selectedTaskRequiredForms = []; this.additionalFormsOpen = false; }, selectTask(event) { const task = this.taskOptions.find(task => String(task.id) === String(event.target.value)); this.selectedAgency = task?.agency || this.selectedAgency; this.selectedTaskId = event.target.value; this.selectedTaskRequiredForms = (task?.required_forms_documents || []).map(String); this.additionalFormsOpen = false; } }" x-init="const initialTask = taskOptions.find(task => String(task.id) === selectedTaskId); if (initialTask) { selectedAgency = initialTask.agency; selectedTaskRequiredForms = (initialTask.required_forms_documents || []).map(String); }">
+                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()), formExpenseOptions: @js($forms->map(fn ($form) => ['id' => (string) $form->id, 'expense' => (float) $form->expense_amount])->values()), selectedAgency: '', selectedTaskIds: @js(array_map('strval', (array) old('type_of_task', []))), selectedTaskRequiredForms: @js(array_map('strval', (array) old('required_forms_documents', []))), selectedFormIds: @js(array_map('strval', (array) old('required_forms_documents', []))), preserveInitialFormSelection: @js(old('type_of_task') !== null), formSelectionInitialized: false, totalSelectedExpenses() { return this.formExpenseOptions.filter(form => this.selectedFormIds.includes(form.id)).reduce((total, form) => total + Number(form.expense || 0), 0); }, updateSelectedTasks() { const hasPreviousSelection = this.formSelectionInitialized; const previousRequiredFormIds = new Set(this.selectedTaskRequiredForms); const previouslyIncludedFormIds = new Set(this.selectedFormIds); const requiredFormIds = new Set(); this.taskOptions.filter(task => this.selectedTaskIds.includes(String(task.id))).forEach(task => (task.required_forms_documents || []).forEach(formId => requiredFormIds.add(String(formId)))); const availableFormIds = Array.from(requiredFormIds); this.selectedFormIds = availableFormIds.filter(id => hasPreviousSelection ? (!previousRequiredFormIds.has(id) || previouslyIncludedFormIds.has(id)) : (this.preserveInitialFormSelection ? previouslyIncludedFormIds.has(id) : true)); this.selectedTaskRequiredForms = availableFormIds; this.formSelectionInitialized = true; } }" x-init="selectedTaskIds = selectedTaskIds.map(String); updateSelectedTasks()">
                             <div class="flex items-center justify-between gap-4">
                                 <h3 class="text-lg font-medium text-gray-900">{{ __('Task Entry') }}</h3>
                                 <x-primary-button form="task-entry-form">{{ __('Create Task') }}</x-primary-button>
@@ -60,21 +60,24 @@
                                     </div>
                                     <div>
                                         <x-input-label for="type_of_task" :value="__('Type of Task')" />
-                                        <select id="type_of_task" name="type_of_task" x-on:change="selectTask($event)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                            <option value="">{{ __('Select Task') }}</option>
+                                        <div id="type_of_task" class="mt-1 h-40 space-y-2 overflow-y-auto rounded-md border border-gray-300 p-3">
                                             <template x-for="task in taskOptions.filter(task => selectedAgency === '' || task.agency === selectedAgency)" :key="task.id">
-                                                <option x-bind:value="task.id" x-bind:selected="String(task.id) === selectedTaskId" x-text="task.task_name"></option>
+                                                <label class="flex items-start gap-2 text-sm text-gray-700">
+                                                    <input type="checkbox" name="type_of_task[]" x-model="selectedTaskIds" x-on:change="updateSelectedTasks()" x-bind:value="String(task.id)" class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                                    <span x-text="task.task_name"></span>
+                                                </label>
                                             </template>
-                                        </select>
+                                            <p x-show="taskOptions.filter(task => selectedAgency === '' || task.agency === selectedAgency).length === 0" class="text-sm text-gray-500">{{ __('No task types available.') }}</p>
+                                        </div>
                                         <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
                                     </div>
                                 </div>
-                                <p class="mt-2 text-xs text-gray-500">{{ __('Choose an agency to filter task types, then select a task to load its required forms and documents.') }}</p>
+                                <p class="mt-2 text-xs text-gray-500">{{ __('Choose one or more task types. Required forms and documents update to include each selection.') }}</p>
                             </div>
 
                             <div>
                                 <x-input-label for="date_task_received" :value="__('Date Task Received')" />
-                                <x-text-input id="date_task_received" name="date_task_received" type="date" class="mt-1 block w-full" :value="old('date_task_received')" />
+                                <x-text-input id="date_task_received" name="date_task_received" type="date" class="mt-1 block w-full" :value="old('date_task_received', now()->toDateString())" />
                                 <x-input-error class="mt-2" :messages="$errors->get('date_task_received')" />
                             </div>
 
@@ -93,30 +96,28 @@
                                 <x-input-label for="required_forms_documents" :value="__('List of Required Forms and Documents')" />
                                 <div id="required_forms_documents" class="mt-1 max-h-48 overflow-y-auto rounded-md border border-gray-300 p-3">
                                     <div class="space-y-2">
+                                        <div class="flex items-center justify-between gap-4 px-3 text-xs font-semibold uppercase text-gray-500">
+                                            <span>{{ __('Form or Requirement') }}</span>
+                                            <span>{{ __('Expense') }}</span>
+                                        </div>
                                         @foreach ($forms as $form)
-                                            <div x-show="selectedTaskRequiredForms.includes('{{ $form->id }}')" x-cloak class="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
-                                                <input type="hidden" name="required_forms_documents[]" value="{{ $form->id }}" data-form-name="{{ $form->form_name }}" x-bind:disabled="!selectedTaskRequiredForms.includes('{{ $form->id }}')">
-                                                <span>{{ $form->form_name }}</span>
+                                            <div x-show="selectedTaskRequiredForms.includes('{{ $form->id }}')" x-cloak class="flex items-center justify-between gap-4 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                                                <span class="min-w-0 flex-1 break-words">{{ $form->form_name }}</span>
+                                                <label class="flex shrink-0 items-center gap-2 text-xs text-gray-500">
+                                                    <input type="checkbox" name="required_forms_documents[]" x-model="selectedFormIds" value="{{ $form->id }}" aria-label="{{ __('Include') }} {{ $form->form_name }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                                    <span>PHP {{ number_format((float) $form->expense_amount, 2) }}</span>
+                                                </label>
                                             </div>
                                         @endforeach
                                         <p x-show="selectedTaskRequiredForms.length === 0" x-cloak class="text-sm text-gray-500">{{ __('Select a task to view its required forms and documents.') }}</p>
                                     </div>
                                 </div>
-                                <button type="button" x-on:click="additionalFormsOpen = !additionalFormsOpen" x-bind:disabled="!selectedTaskId" class="mt-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
-                                    {{ __('Add Additional Form') }}
-                                </button>
-                                <div x-show="additionalFormsOpen" x-cloak class="mt-3 rounded-md border border-gray-200 p-3">
-                                    <p class="mb-2 text-sm font-medium text-gray-700">{{ __('Select additional forms and documents') }}</p>
-                                    <div class="max-h-48 space-y-1 overflow-y-auto">
-                                        @foreach ($forms as $form)
-                                            <button type="button" x-show="!selectedTaskRequiredForms.includes('{{ $form->id }}')" x-on:click="selectedTaskRequiredForms.push('{{ $form->id }}')" class="block w-full rounded px-2 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-100">
-                                                {{ $form->form_name }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                    <button type="button" x-on:click="additionalFormsOpen = false" class="mt-2 text-sm font-medium text-gray-600 hover:text-gray-900">{{ __('Done') }}</button>
-                                </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
+
+                                <div class="mt-3 flex items-center justify-between gap-4 rounded-md border border-gray-200 px-4 py-3 text-sm font-semibold">
+                                    <span>{{ __('Total Expenses') }}</span>
+                                    <span x-text="'PHP ' + totalSelectedExpenses().toFixed(2)"></span>
+                                </div>
 
                             </div>
 
@@ -138,12 +139,58 @@
                                         $submissionStatus = strtolower((string) ($monitoring->submission_status ?? 'pending'));
                                         $bookingStatus = $allRequiredFormsCompleted || $submissionStatus === 'completed' ? 'completed' : 'pending';
                                         $taskAgeDays = $monitoring->taskAgeInDays();
-                                        $requiredFormNames = $requiredFormIds->map(fn ($formId) => $formNamesById[$formId] ?? null)->filter();
+                                        $monitoringTaskNames = collect($monitoring->task_ids ?: [$monitoring->task_id])
+                                            ->map(fn ($taskId) => $taskNamesById->get($taskId))
+                                            ->filter()
+                                            ->implode(', ') ?: '—';
                                     @endphp
                                     <div x-data="{ expanded: false }" class="bg-white">
                                         <div class="task-monitoring-summary-grid px-4 py-4">
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Task ID') }}</span>
+                                                    <span class="task-monitoring-value">{{ $monitoring->id }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Date Booked') }}</span>
+                                                    <span class="task-monitoring-value">{{ $monitoring->date_task_received?->format('F d, Y') ?? '—' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Client Name') }}</span>
+                                                    <span class="task-monitoring-value">{{ $monitoring->client?->client_name ?? '—' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Task') }}</span>
+                                                    <span class="task-monitoring-value">{{ $monitoring->task?->task_name ?? '—' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('No. of Days') }}</span>
+                                                    <span class="task-monitoring-value">{{ $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days')) }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="task-monitoring-metric">
+                                                <div class="task-monitoring-pair">
+                                                    <span class="task-monitoring-label">{{ __('Status') }}</span>
+                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                                                        {{ $bookingStatus === 'completed' ? __('Completed') : __('Pending') }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <div class="task-monitoring-actions">
-                                                <a href="{{ route('bookings.edit', $monitoring) }}" class="task-monitoring-action task-monitoring-action-update">{{ __('Update') }}</a>
+                                                <a href="{{ route('bookings.edit', $monitoring) }}" aria-label="{{ __('Update') }}" title="{{ __('Update') }}" class="task-monitoring-action task-monitoring-action-icon task-monitoring-action-update">
+                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5" />
+                                                    </svg>
+                                                </a>
                                                 <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" aria-label="{{ __('Print') }}" title="{{ __('Print') }}" class="task-monitoring-action task-monitoring-action-icon task-monitoring-action-print">
                                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z" />
@@ -161,53 +208,18 @@
                                                         </button>
                                                     </form>
                                                 @endif
+                                                <button type="button" x-on:click="expanded = !expanded" :aria-expanded="expanded.toString()" aria-label="{{ __('Toggle task details') }}" class="task-monitoring-toggle inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                    <svg class="h-4 w-4 transition-transform" :class="expanded ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
                                             </div>
-                                            <div class="task-monitoring-metric">
-                                                <div class="task-monitoring-pair">
-                                                    <span class="task-monitoring-label">{{ __('Task ID') }}</span>
-                                                    <button type="button" x-on:click="expanded = !expanded" class="task-monitoring-value text-indigo-700 hover:underline">{{ $monitoring->id }}</button>
-                                                </div>
-                                            </div>
-                                            <div class="task-monitoring-metric">
-                                                <div class="task-monitoring-pair">
-                                                    <span class="task-monitoring-label">{{ __('Type of Task') }}</span>
-                                                    <button type="button" x-on:click="expanded = !expanded" class="task-monitoring-value text-left text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->task?->task_name ?? '—' }}</button>
-                                                </div>
-                                            </div>
-                                            <div class="task-monitoring-metric">
-                                                <div class="task-monitoring-pair">
-                                                    <span class="task-monitoring-label">{{ __('Client Name') }}</span>
-                                                    <button type="button" x-on:click="expanded = !expanded" class="task-monitoring-value text-left text-gray-900 hover:text-indigo-700 hover:underline">{{ $monitoring->client?->client_name ?? '—' }}</button>
-                                                </div>
-                                            </div>
-                                            <div class="task-monitoring-metric">
-                                                <div class="task-monitoring-pair">
-                                                    <span class="task-monitoring-label">{{ __('Status') }}</span>
-                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
-                                                        {{ $bookingStatus === 'completed' ? __('Completed') : __('Pending') }}
-                                                    </span>
-                                                </div>
-                                                <p class="mt-1 text-xs text-gray-500">{{ __('Task Age') }}: <span class="font-semibold text-gray-900">{{ $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days')) }}</span></p>
-                                            </div>
-                                            <button type="button" x-on:click="expanded = !expanded" :aria-expanded="expanded.toString()" aria-label="{{ __('Toggle task details') }}" class="task-monitoring-toggle inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                <svg class="h-4 w-4 transition-transform" :class="expanded ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        <div class="border-t border-gray-100 px-4 py-3 text-sm">
-                                            <span class="font-medium text-gray-600">{{ __('Required Forms and Documents') }}:</span>
-                                            @if ($requiredFormNames->isEmpty())
-                                                <span class="text-gray-500">—</span>
-                                            @else
-                                                <span class="text-gray-800">{{ $requiredFormNames->join(', ') }}</span>
-                                            @endif
                                         </div>
                                         <div x-show="expanded" x-cloak class="border-t border-gray-200 bg-gray-50 px-4 py-4">
                                             <div class="grid gap-4 rounded-lg border border-gray-200 bg-white p-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Date Task Received') }}</p><p class="mt-1 text-gray-900">{{ $monitoring->date_task_received?->format('F d, Y') ?? '—' }}</p></div>
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Client Name') }}</p><p class="mt-1 text-gray-900">{{ $monitoring->client?->client_name ?? '—' }}</p></div>
-                                                <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Type of Task') }}</p><p class="mt-1 text-gray-900">{{ $monitoring->task?->task_name ?? '—' }}</p></div>
+                                                <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Type of Task') }}</p><p class="mt-1 text-gray-900">{{ $monitoringTaskNames }}</p></div>
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Required Docs Status') }}</p><p class="mt-1 text-gray-900">{{ $allRequiredFormsCompleted ? __('Completed') : ($requiredFormIds->isEmpty() ? __('N/A') : __('Pending')) }}</p></div>
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Submission Status') }}</p><p class="mt-1 text-gray-900">{{ ucfirst($submissionStatus) }}</p></div>
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Release of Cert/Clearance') }}</p><p class="mt-1 text-gray-900">{{ '—' }}</p></div>
@@ -216,7 +228,7 @@
                                                     @if ($requiredFormIds->isEmpty())
                                                         <p class="mt-2 rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ '—' }}</p>
                                                     @else
-                                                        <div class="mt-2 space-y-2">
+                                                        <div class="task-monitoring-required-expense-list mt-2">
                                                             @foreach ($requiredFormIds as $formId)
                                                                 @php
                                                                     $formName = $formNamesById[$formId] ?? null;
@@ -225,9 +237,9 @@
                                                                 @endphp
 
                                                                 @if ($formName)
-                                                                    <div class="flex items-center justify-between gap-3 rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
-                                                                        <span class="required-form-name">{{ $formName }}</span>
-                                                                        <span class="shrink-0 text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
+                                                                    <div class="task-monitoring-form-status-row rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
+                                                                        <span class="task-monitoring-form-expense-name required-form-name">{{ $formName }}</span>
+                                                                        <span class="task-monitoring-form-expense-status text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
                                                                     </div>
                                                                 @endif
                                                             @endforeach
@@ -305,12 +317,6 @@
                                                     <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">{{ __('Pending') }}</span>
                                                 @endif
 
-                                                @if (!empty($latestFormNoteUpdatedAtByMonitoring[$monitoring->id] ?? null))
-                                                    <div class="mt-1 text-xs text-gray-500">
-                                                        <div>{{ __('Last updated:') }}</div>
-                                                        <div>{{ $latestFormNoteUpdatedAtByMonitoring[$monitoring->id] }}</div>
-                                                    </div>
-                                                @endif
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900 border border-gray-200 border-r-0">
                                                 @if ($allRequiredFormsCompleted)

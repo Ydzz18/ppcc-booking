@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
@@ -35,8 +36,10 @@ class TaskMonitoring extends Model
         'date_task_received',
         'client_id',
         'task_id',
+        'task_ids',
         'assigned_responsible_person_id',
         'required_forms_documents',
+        'expenses_breakdown',
         'submission_status',
         'date_of_submission',
         'receiving_officer',
@@ -52,9 +55,23 @@ class TaskMonitoring extends Model
     {
         return [
             'date_task_received' => 'date',
+            'task_ids' => 'array',
             'required_forms_documents' => 'array',
+            'expenses_breakdown' => 'array',
             'date_of_submission' => 'date',
         ];
+    }
+
+    protected function submissionNotes(): Attribute
+    {
+        return Attribute::get(fn (?string $value) => $this->withoutAddedAtTimestamps($value));
+    }
+
+    private function withoutAddedAtTimestamps(?string $value): ?string
+    {
+        return $value === null
+            ? null
+            : preg_replace('/^\[[A-Z][a-z]+ \d{2}, \d{4} \d{2}:\d{2} [AP]M\] /m', '', $value);
     }
 
     public function taskAgeInDays(): ?int

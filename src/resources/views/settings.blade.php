@@ -210,11 +210,11 @@
                             {{ __('ADD CLIENT') }}
                         </button>
 
-                        <x-modal name="add-client" :show="$errors->hasAny(['client_name', 'business_name', 'address', 'residential_address', 'tin', 'tel_phone_number', 'email_address', 'id_presented', 'fathers_name', 'mothers_maiden_name', 'date_of_birth', 'place_of_birth', 'civil_status', 'religion', 'capitalization', 'notes', 'business_registrations', 'business_registrations.*', 'additional_requirements', 'additional_requirements.*'])" maxWidth="2xl" focusable>
-                            <form method="POST" action="{{ route('clients.store') }}" class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2" x-data="{ step: 1, showRequirementForm: false, newRequirement: '', invalidFields: [], additionalRequirements: @js(old('additional_requirements', [])), clientDetails: { tin: @js(old('tin')), name: @js(old('client_name')), businessName: @js(old('business_name')), address: @js(old('address')), residentialAddress: @js(old('residential_address')), contact: @js(old('tel_phone_number')), email: @js(old('email_address')), idPresented: @js(old('id_presented')), fathersName: @js(old('fathers_name')), mothersMaidenName: @js(old('mothers_maiden_name')), dateOfBirth: @js(old('date_of_birth')), placeOfBirth: @js(old('place_of_birth')), civilStatus: @js(old('civil_status')), religion: @js(old('religion')), capitalization: @js(old('capitalization')) }, validateClientDetails() { this.invalidFields = Object.entries(this.clientDetails).filter(([, value]) => !String(value ?? '').trim()).map(([field]) => field); if (this.invalidFields.length) { this.invalidFields.forEach((field) => { const input = this.$refs[field]; if (input) { input.classList.remove('animate-shake'); void input.offsetWidth; input.classList.add('animate-shake'); } }); return; } this.step = 2; } }" data-confirm="Are you sure you want to save this client?">
+                        <x-modal name="add-client" :show="$errors->hasAny(['client_name', 'business_name', 'contact_person', 'address', 'residential_address', 'tin', 'tel_phone_number', 'email_address', 'id_presented', 'fathers_name', 'mothers_maiden_name', 'date_of_birth', 'place_of_birth', 'civil_status', 'religion', 'capitalization', 'notes', 'additional_requirements', 'additional_requirements.*'])" maxWidth="2xl" focusable>
+                            <form method="POST" action="{{ route('clients.store') }}" class="flex max-h-[calc(100dvh-3rem)] flex-col gap-3 overflow-y-auto p-4 sm:gap-4 sm:p-5" style="max-height: calc(100dvh - 3rem);" x-data="{ step: 1, showRequirementForm: false, newRequirement: '', invalidFields: [], additionalRequirements: @js(old('additional_requirements', [])), clientDetails: { tin: @js(old('tin')), name: @js(old('client_name')), businessName: @js(old('business_name')), contactPerson: @js(old('contact_person')), address: @js(old('address')), residentialAddress: @js(old('residential_address')), contact: @js(old('tel_phone_number')), email: @js(old('email_address')), idPresented: @js(old('id_presented')), fathersName: @js(old('fathers_name')), mothersMaidenName: @js(old('mothers_maiden_name')), dateOfBirth: @js(old('date_of_birth')), placeOfBirth: @js(old('place_of_birth')), civilStatus: @js(old('civil_status')), religion: @js(old('religion')), capitalization: @js(old('capitalization')) }, validateClientDetails() { this.invalidFields = Object.entries(this.clientDetails).filter(([, value]) => !String(value ?? '').trim()).map(([field]) => field); if (this.invalidFields.length) { this.invalidFields.forEach((field) => { const input = this.$refs[field]; if (input) { input.classList.remove('animate-shake'); void input.offsetWidth; input.classList.add('animate-shake'); } }); return; } this.step = 2; } }" data-confirm="Are you sure you want to save this client?">
                                 @csrf
 
-                                <div class="md:col-span-2 flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
+                                <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-3">
                                     <div>
                                         <h2 class="text-lg font-semibold text-gray-900">{{ __('Add Client') }}</h2>
                                         <p class="mt-1 text-sm text-gray-500">{{ __('Enter the client details below.') }}</p>
@@ -224,17 +224,17 @@
                                     </button>
                                 </div>
 
-                                <div class="md:col-span-2 flex items-center gap-2 border-b border-gray-200 pb-5" aria-label="{{ __('Client creation progress') }}">
-                                    <template x-for="module in [{ number: 1, label: '{{ __('Client Details') }}' }, { number: 2, label: '{{ __('Business Registration') }}' }, { number: 3, label: '{{ __('Additional Requirements') }}' }]" :key="module.number">
+                                <div class="flex items-center gap-2 border-b border-gray-200 pb-3" aria-label="{{ __('Client creation progress') }}">
+                                    <template x-for="module in [{ number: 1, label: '{{ __('Client Details') }}' }, { number: 2, label: '{{ __('Additional Requirements') }}' }]" :key="module.number">
                                         <div class="flex min-w-0 flex-1 items-center gap-2">
                                             <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold" :class="step >= module.number ? 'border-gray-800 bg-gray-800 text-white' : 'border-gray-300 bg-white text-gray-500'" x-text="module.number"></div>
                                             <span class="hidden truncate text-xs font-medium sm:block" :class="step >= module.number ? 'text-gray-900' : 'text-gray-500'" x-text="module.label"></span>
-                                            <div x-show="module.number < 3" class="h-px flex-1 bg-gray-200"></div>
+                                            <div x-show="module.number < 2" class="h-px flex-1 bg-gray-200"></div>
                                         </div>
                                     </template>
                                 </div>
 
-                                <div class="md:col-span-2 grid grid-cols-1 gap-6 md:grid-cols-2" x-show="step === 1" x-cloak>
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" x-show="step === 1" x-cloak>
                                 <div>
                                     <x-input-label for="tin"><span>{{ __('TIN') }} <span class="text-red-600" aria-hidden="true">*</span></span></x-input-label>
                                     <x-text-input id="tin" name="tin" type="text" x-ref="tin" x-model="clientDetails.tin" class="mt-1 block w-full" :value="old('tin')" required />
@@ -251,6 +251,12 @@
                                     <x-input-label for="business_name"><span>{{ __('Business Name') }} <span class="text-red-600" aria-hidden="true">*</span></span></x-input-label>
                                     <x-text-input id="business_name" name="business_name" type="text" x-ref="businessName" x-model="clientDetails.businessName" class="mt-1 block w-full" :value="old('business_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('business_name')" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="contact_person"><span>{{ __('Contact Person') }} <span class="text-red-600" aria-hidden="true">*</span></span></x-input-label>
+                                    <x-text-input id="contact_person" name="contact_person" type="text" x-ref="contactPerson" x-model="clientDetails.contactPerson" class="mt-1 block w-full" :value="old('contact_person')" required />
+                                    <x-input-error class="mt-2" :messages="$errors->get('contact_person')" />
                                 </div>
 
                                 <div>
@@ -325,43 +331,22 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('capitalization')" />
                                 </div>
 
-                                <div class="md:col-span-2">
+                                </div>
+
+                                <div class="mt-3" x-show="step === 1" x-cloak>
                                     <x-input-label for="notes" :value="__('Notes')" />
                                     <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('notes') }}</textarea>
                                     <x-input-error class="mt-2" :messages="$errors->get('notes')" />
                                 </div>
 
-                                <div class="md:col-span-2 flex items-center justify-between border-t border-gray-200 pt-6">
+                                <div class="flex items-center justify-between border-t border-gray-200 pt-3" x-show="step === 1" x-cloak>
                                     <span class="text-sm text-gray-500">{{ __('Complete the required fields to continue.') }}</span>
                                     <button type="button" x-on:click="validateClientDetails()" class="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                                         {{ __('Next') }}
                                     </button>
                                 </div>
-                                </div>
 
-                                <div class="md:col-span-2 border-t border-gray-200 pt-6" x-show="step === 2" x-cloak>
-                                    <h3 class="text-base font-semibold text-gray-900">{{ __('Business Registration') }}</h3>
-                                    <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                        @foreach (['BIR FORM 2303 / COR', 'DTI BN REGISTRATION', 'SEC CERTIFICATE OF INCORPORATION', 'ARTICLES OF INCORPORATION & BY LAWS', "MAYOR'S PERMIT"] as $registration)
-                                            <label class="flex items-start gap-3 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                                <input type="checkbox" name="business_registrations[]" value="{{ $registration }}" @checked(in_array($registration, old('business_registrations', []), true)) class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                                <span>{{ $registration }}</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    <x-input-error class="mt-2" :messages="$errors->get('business_registrations')" />
-
-                                    <div class="mt-6 flex items-center justify-between">
-                                        <button type="button" x-on:click="step = 1" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                            {{ __('Back') }}
-                                        </button>
-                                        <button type="button" x-on:click="step = 3" class="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                            {{ __('Next') }}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="md:col-span-2 border-t border-gray-200 pt-6" x-show="step === 3" x-cloak>
+                                <div class="border-t border-gray-200 pt-4" x-show="step === 2" x-cloak>
                                     <div class="flex items-center justify-between gap-4">
                                         <div>
                                             <h3 class="text-base font-semibold text-gray-900">{{ __('Additional Requirements') }}</h3>
@@ -410,8 +395,8 @@
                                     </div>
                                 </div>
 
-                                <div class="md:col-span-2 flex items-center justify-between gap-3" x-show="step === 3" x-cloak>
-                                    <button type="button" x-on:click="step = 2" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                <div class="flex items-center justify-between gap-3" x-show="step === 2" x-cloak>
+                                    <button type="button" x-on:click="step = 1" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                         {{ __('Back') }}
                                     </button>
                                     <div class="flex items-center gap-3">
@@ -424,30 +409,39 @@
                             </form>
                         </x-modal>
 
-                        <div class="hidden overflow-x-auto border border-gray-200 rounded-lg md:block">
-                            <table class="min-w-full divide-y divide-gray-200">
+                        <div class="hidden overflow-hidden rounded-lg border border-gray-200 md:block">
+                            <table class="w-full table-fixed divide-y divide-gray-200">
+                                <colgroup>
+                                    <col class="w-[5%]">
+                                    <col class="w-[15%]">
+                                    <col class="w-[19%]">
+                                    <col class="w-[13%]">
+                                    <col class="w-[9%]">
+                                    <col class="w-[16%]">
+                                    <col class="w-[23%]">
+                                </colgroup>
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Client Name') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Address') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Contact Person') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('TIN') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Tel/Phone Number') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Action') }}</th>
+                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('ID') }}</th>
+                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Client Name') }}</th>
+                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Address') }}</th>
+                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Contact Person') }}</th>
+                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('TIN') }}</th>
+                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Tel/Phone Number') }}</th>
+                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse ($clients as $client)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $client->id }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $client->client_name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $client->address }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $client->contact_person }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $client->tin }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $client->tel_phone_number }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                <div class="flex items-center gap-2">
+                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->id }}</td>
+                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->client_name }}</td>
+                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->address }}</td>
+                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->contact_person }}</td>
+                                            <td class="break-all px-2 py-3 text-xs text-gray-900">{{ $client->tin }}</td>
+                                            <td class="break-all px-2 py-3 text-xs text-gray-900">{{ $client->tel_phone_number }}</td>
+                                            <td class="px-2 py-3 text-xs text-gray-900">
+                                                <div class="flex flex-wrap items-center gap-2">
                                                     <a href="{{ route('clients.edit', $client) }}" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                                         {{ __('Edit') }}
                                                     </a>
@@ -494,6 +488,7 @@
                                         @foreach ([
                                             __('TIN') => $client->tin,
                                             __('Business Name') => $client->business_name,
+                                            __('Contact Person') => $client->contact_person,
                                             __('Business Address') => $client->address,
                                             __('Residential Address') => $client->residential_address,
                                             __('Contact Number') => $client->tel_phone_number,
@@ -513,10 +508,6 @@
                                                 <dd class="mt-1 break-words text-gray-900">{{ $value ?: '—' }}</dd>
                                             </div>
                                         @endforeach
-                                        <div class="sm:col-span-2 lg:col-span-3">
-                                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Business Registration') }}</dt>
-                                            <dd class="mt-1 break-words text-gray-900">{{ !empty($client->business_registrations) ? implode(', ', $client->business_registrations) : '—' }}</dd>
-                                        </div>
                                         <div class="sm:col-span-2 lg:col-span-3">
                                             <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Additional Requirements') }}</dt>
                                             <dd class="mt-1 break-words text-gray-900">{{ !empty($client->additional_requirements) ? implode(', ', $client->additional_requirements) : '—' }}</dd>
@@ -823,29 +814,32 @@
                             <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">{{ __('Search') }}</button>
                         </form>
 
-                        <x-modal name="add-form" :show="$errors->hasAny(['form_name', 'form_names', 'form_names.*'])" maxWidth="md" focusable>
-                            <form method="POST" action="{{ route('forms.store') }}" class="space-y-6 p-6" x-data="{ formNames: @js(old('form_names', [''])) }" data-confirm="{{ __('Are you sure you want to save these forms?') }}">
+                        <x-modal name="add-form" :show="$errors->hasAny(['form_name', 'form_names', 'form_names.*', 'form_expenses', 'form_expenses.*'])" maxWidth="md" focusable>
+                            <form method="POST" action="{{ route('forms.store') }}" class="space-y-6 p-6" x-data="{ formNames: @js(old('form_names', [''])), formExpenses: @js(old('form_expenses', ['0'])) }" data-confirm="{{ __('Are you sure you want to save these forms?') }}">
                                 @csrf
                                 <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
                                     <div>
                                         <h2 class="text-lg font-semibold text-gray-900">{{ __('Add Form') }}</h2>
-                                        <p class="mt-1 text-sm text-gray-500">{{ __('Add a required form or document.') }}</p>
+                                        <p class="mt-1 text-sm text-gray-500">{{ __('Add a required form or document and its expense.') }}</p>
                                     </div>
                                     <button type="button" x-on:click="$dispatch('close-modal', 'add-form')" aria-label="{{ __('Close') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600">&times;</button>
                                 </div>
                                 <div>
-                                    <x-input-label :value="__('Form Names')" />
+                                    <x-input-label :value="__('Forms and Expenses')" />
                                     <div class="mt-2 space-y-3">
                                         <template x-for="(formName, index) in formNames" :key="index">
-                                            <div class="flex items-start gap-2">
-                                                <x-text-input x-model="formNames[index]" name="form_names[]" type="text" class="block w-full" required autofocus />
-                                                <button type="button" x-show="formNames.length > 1" x-on:click="formNames.splice(index, 1)" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="{{ __('Remove form') }}">&times;</button>
+                                            <div class="grid grid-cols-[minmax(0,1fr)_8rem_auto] items-start gap-2">
+                                                <x-text-input x-model="formNames[index]" name="form_names[]" type="text" class="block w-full" placeholder="{{ __('Form name') }}" required autofocus />
+                                                <x-text-input x-model="formExpenses[index]" name="form_expenses[]" type="number" min="0" step="0.01" class="block w-full" placeholder="{{ __('Expense') }}" required />
+                                                <button type="button" x-show="formNames.length > 1" x-on:click="formNames.splice(index, 1); formExpenses.splice(index, 1)" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="{{ __('Remove form') }}">&times;</button>
                                             </div>
                                         </template>
                                     </div>
-                                    <button type="button" x-on:click="formNames.push('')" class="mt-3 text-sm font-semibold text-indigo-700 hover:text-indigo-900">+ {{ __('Add another form') }}</button>
+                                    <button type="button" x-on:click="formNames.push(''); formExpenses.push('0')" class="mt-3 text-sm font-semibold text-indigo-700 hover:text-indigo-900">+ {{ __('Add another form') }}</button>
                                     <x-input-error class="mt-2" :messages="$errors->get('form_names')" />
                                     <x-input-error class="mt-2" :messages="$errors->get('form_names.*')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('form_expenses')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('form_expenses.*')" />
                                 </div>
                                 <div class="flex items-center justify-end gap-3">
                                     <button type="button" x-on:click="$dispatch('close-modal', 'add-form')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">{{ __('Cancel') }}</button>
@@ -860,6 +854,7 @@
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Form Name') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Expense') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Action') }}</th>
                                     </tr>
                                 </thead>
@@ -868,6 +863,7 @@
                                         <tr x-show="formSearchText === '' || $el.dataset.formName.toLowerCase().includes(formSearchText.toLowerCase())" data-form-name="{{ $form->form_name }}">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $form->id }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $form->form_name }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">PHP {{ number_format((float) $form->expense_amount, 2) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 <button type="button" x-on:click="$dispatch('open-modal', 'edit-form-{{ $form->id }}')" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                                     {{ __('Edit') }}
@@ -876,7 +872,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="3" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('No forms found.') }}</td>
+                                            <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('No forms found.') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -884,10 +880,11 @@
                         </div>
 
                         @foreach ($forms as $form)
-                            <x-modal name="edit-form-{{ $form->id }}" maxWidth="md" focusable>
+                            <x-modal name="edit-form-{{ $form->id }}" :show="$errors->hasAny(['form_name', 'expense_amount']) && (string) old('editing_form_id') === (string) $form->id" maxWidth="md" focusable>
                                 <form method="POST" action="{{ route('forms.update', $form) }}" class="space-y-6 p-6" data-confirm="{{ __('Are you sure you want to update this form?') }}">
                                     @csrf
                                     @method('patch')
+                                    <input type="hidden" name="editing_form_id" value="{{ $form->id }}">
                                     <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
                                         <div>
                                             <h2 class="text-lg font-semibold text-gray-900">{{ __('Edit Form') }}</h2>
@@ -897,8 +894,13 @@
                                     </div>
                                     <div>
                                         <x-input-label for="edit_form_name_{{ $form->id }}" :value="__('Form Name')" />
-                                        <x-text-input id="edit_form_name_{{ $form->id }}" name="form_name" type="text" class="mt-2 block w-full" :value="old('form_name', $form->form_name)" required />
+                                        <x-text-input id="edit_form_name_{{ $form->id }}" name="form_name" type="text" class="mt-2 block w-full" :value="old('editing_form_id') == $form->id ? old('form_name') : $form->form_name" required />
                                         <x-input-error class="mt-2" :messages="$errors->get('form_name')" />
+                                    </div>
+                                    <div>
+                                        <x-input-label for="edit_form_expense_{{ $form->id }}" :value="__('Expense')" />
+                                        <x-text-input id="edit_form_expense_{{ $form->id }}" name="expense_amount" type="number" min="0" step="0.01" class="mt-2 block w-full" :value="old('editing_form_id') == $form->id ? old('expense_amount') : $form->expense_amount" required />
+                                        <x-input-error class="mt-2" :messages="$errors->get('expense_amount')" />
                                     </div>
                                     <div class="flex items-center justify-end gap-3">
                                         <button type="button" x-on:click="$dispatch('close-modal', 'edit-form-{{ $form->id }}')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">{{ __('Cancel') }}</button>
@@ -914,6 +916,7 @@
                                     <div class="min-w-0">
                                         <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Form') }} #{{ $form->id }}</p>
                                         <h3 class="mt-1 break-words text-sm font-semibold text-gray-900">{{ $form->form_name }}</h3>
+                                        <p class="mt-1 text-sm text-gray-600">PHP {{ number_format((float) $form->expense_amount, 2) }}</p>
                                     </div>
                                     <a href="{{ route('forms.edit', $form) }}" class="inline-flex shrink-0 items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                         {{ __('Edit') }}

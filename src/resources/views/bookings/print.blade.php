@@ -1,5 +1,5 @@
 @extends('layouts.print', [
-    'title' => __('Booking Details'),
+    'title' => __('Booking ID').': '.$monitoring->id,
     'backUrl' => route('bookings.index', ['tab' => 'monitoring']),
     'downloadUrl' => route('bookings.pdf', $monitoring),
 ])
@@ -9,28 +9,42 @@
         $requiredFormsCompleted = $requiredForms->isNotEmpty() && $requiredForms->every(fn ($form) => $form['status'] === 'completed');
         $bookingStatus = $requiredFormsCompleted || strtolower((string) ($monitoring->submission_status ?? 'pending')) === 'completed' ? __('Completed') : __('Pending');
         $taskAgeDays = $monitoring->taskAgeInDays();
+        $bookingDetails = [
+            [__('Status'), $bookingStatus],
+            [__('Task Age'), $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days'))],
+            [__('Submission Status'), ucfirst((string) ($monitoring->submission_status ?? 'pending'))],
+        ];
     @endphp
 
     <header class="document-header">
-        <h1>{{ __('Booking Details') }}</h1>
-        <p>{{ config('app.name', 'PPCC Booking') }}</p>
+        <h1>{{ __('Booking ID') }}: {{ $monitoring->id }}</h1>
+        <p class="document-subheader">{{ __('Date Task Received') }}: {{ $monitoring->date_task_received?->format('F d, Y') ?? '—' }}</p>
     </header>
 
     <section class="section">
-        <h2>{{ __('Booking Information') }}</h2>
-        <dl class="details">
-            <div class="detail"><dt>{{ __('Booking ID') }}</dt><dd>{{ $monitoring->id }}</dd></div>
-            <div class="detail"><dt>{{ __('Status') }}</dt><dd class="status">{{ $bookingStatus }}</dd></div>
-            <div class="detail"><dt>{{ __('Date Task Received') }}</dt><dd>{{ $monitoring->date_task_received?->format('F d, Y') ?? '—' }}</dd></div>
-            <div class="detail"><dt>{{ __('Task Age') }}</dt><dd>{{ $taskAgeDays ?? '—' }} {{ $taskAgeDays === null ? '' : ($taskAgeDays === 1 ? __('day') : __('days')) }}</dd></div>
-            <div class="detail"><dt>{{ __('Client Name') }}</dt><dd>{{ $monitoring->client?->client_name ?? '—' }}</dd></div>
-            <div class="detail"><dt>{{ __('Type of Task') }}</dt><dd>{{ $monitoring->task?->task_name ?? '—' }}</dd></div>
-            <div class="detail"><dt>{{ __('Client Name') }}</dt><dd>{{ $monitoring->assignedResponsiblePerson?->contact_person ?? '—' }}</dd></div>
-            <div class="detail"><dt>{{ __('Submission Status') }}</dt><dd class="status">{{ ucfirst((string) ($monitoring->submission_status ?? 'pending')) }}</dd></div>
-            <div class="detail"><dt>{{ __('Date of Submission') }}</dt><dd>{{ $monitoring->date_of_submission?->format('F d, Y') ?? '—' }}</dd></div>
-            <div class="detail"><dt>{{ __('Receiving Officer') }}</dt><dd>{{ $monitoring->receiving_officer ?? '—' }}</dd></div>
-            <div class="detail"><dt>{{ __('Acknowledgement Receipt / Reference') }}</dt><dd>{{ $monitoring->acknowledgement_receipt_reference_number ?? '—' }}</dd></div>
-        </dl>
+        <div class="booking-info-heading">
+            <h2>{{ $monitoring->client?->client_name ?? '—' }}</h2>
+            <h2>{{ __('Type of Task') }}: {{ $taskNames }}</h2>
+        </div>
+        <table class="details">
+            <tbody>
+                @foreach (array_chunk($bookingDetails, 2) as $detailsRow)
+                    <tr>
+                        @foreach ($detailsRow as [$label, $value])
+                            <td>
+                                <dl class="detail">
+                                    <dt>{{ $label }}</dt>
+                                    <dd @class(['status' => in_array($label, [__('Status'), __('Submission Status')], true)])>{{ $value ?: '—' }}</dd>
+                                </dl>
+                            </td>
+                        @endforeach
+                        @if (count($detailsRow) === 1)
+                            <td></td>
+                        @endif
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </section>
 
     <section class="section">
@@ -38,9 +52,9 @@
         @if ($requiredForms->isEmpty())
             <p class="empty">{{ __('No forms or documents required.') }}</p>
         @else
-            <table>
+            <table class="required-forms">
                 <thead>
-                    <tr><th>{{ __('Form / Document') }}</th><th>{{ __('Status') }}</th><th>{{ __('Notes / Remarks') }}</th><th>{{ __('Note Date') }}</th></tr>
+                    <tr><th>{{ __('Form / Document') }}</th><th>{{ __('Status') }}</th><th>{{ __('Notes / Remarks') }}</th><th>{{ __('Note Date') }}</th><th>{{ __('Amount (PHP)') }}</th></tr>
                 </thead>
                 <tbody>
                     @foreach ($requiredForms as $form)
@@ -49,9 +63,16 @@
                             <td class="status">{{ $form['status'] === 'completed' ? __('Completed') : __('Pending') }}</td>
                             <td>{{ $form['note'] ?: '—' }}</td>
                             <td>{{ $form['note_date']?->format('F d, Y') ?? '—' }}</td>
+                            <td>{{ number_format($form['expense_amount'], 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4">{{ __('Total Expenses') }}</th>
+                        <th>PHP {{ number_format((float) $requiredForms->sum('expense_amount'), 2) }}</th>
+                    </tr>
+                </tfoot>
             </table>
         @endif
     </section>

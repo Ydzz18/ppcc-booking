@@ -24,7 +24,7 @@
                 <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                     <p class="text-sm text-gray-500">{{ __('Total bookings') }}</p>
                     <p class="mt-3 text-3xl font-semibold tracking-tight text-gray-900">{{ $bookingTotal }}</p>
-                    <a href="{{ route('bookings.index') }}" class="mt-4 inline-flex text-sm font-medium text-indigo-700 hover:text-indigo-900">{{ __('View bookings') }} &rarr;</a>
+                    <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="mt-4 inline-flex text-sm font-medium text-indigo-700 hover:text-indigo-900">{{ __('View bookings') }} &rarr;</a>
                 </div>
                 <div class="status-card-pending rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
                     <p class="text-sm text-amber-800">{{ __('Pending') }}</p>
