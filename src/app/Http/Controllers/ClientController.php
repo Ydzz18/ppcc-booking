@@ -19,7 +19,7 @@ class ClientController extends Controller
         $validated = $request->validate([
             'client_name' => ['required', 'string', 'max:255'],
             'business_name' => ['required', 'string', 'max:255'],
-            'contact_person' => ['nullable', 'string', 'max:255'],
+            'contact_person' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'residential_address' => ['required', 'string', 'max:255'],
             'tin' => ['required', 'string', 'max:255'],
@@ -34,8 +34,6 @@ class ClientController extends Controller
             'religion' => ['required', 'string', 'max:255'],
             'capitalization' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'business_registrations' => ['nullable', 'array'],
-            'business_registrations.*' => ['string', 'max:255'],
             'additional_requirements' => ['nullable', 'array'],
             'additional_requirements.*' => ['string', 'max:255'],
         ]);
@@ -63,7 +61,7 @@ class ClientController extends Controller
         $validated = $request->validate([
             'client_name' => ['required', 'string', 'max:255'],
             'business_name' => ['required', 'string', 'max:255'],
-            'contact_person' => ['nullable', 'string', 'max:255'],
+            'contact_person' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'residential_address' => ['required', 'string', 'max:255'],
             'tin' => ['required', 'string', 'max:255'],
@@ -78,8 +76,6 @@ class ClientController extends Controller
             'religion' => ['required', 'string', 'max:255'],
             'capitalization' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'business_registrations' => ['nullable', 'array'],
-            'business_registrations.*' => ['string', 'max:255'],
             'additional_requirements' => ['nullable', 'array'],
             'additional_requirements.*' => ['string', 'max:255'],
         ]);

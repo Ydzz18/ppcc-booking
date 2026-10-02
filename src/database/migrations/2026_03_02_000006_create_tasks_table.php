@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->string('task_name');
+            $table->string('agency')->default('');
+            $table->json('required_forms_documents')->nullable();
             $table->timestamps();
         });
     }

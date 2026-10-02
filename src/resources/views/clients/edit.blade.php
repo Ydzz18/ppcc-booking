@@ -36,6 +36,12 @@
                         </div>
 
                         <div>
+                            <x-input-label for="contact_person"><span>{{ __('Contact Person') }} <span class="text-red-600">*</span></span></x-input-label>
+                            <x-text-input id="contact_person" name="contact_person" type="text" class="mt-1 block w-full" :value="old('contact_person', $client->contact_person)" required />
+                            <x-input-error class="mt-2" :messages="$errors->get('contact_person')" />
+                        </div>
+
+                        <div>
                             <x-input-label for="address"><span>{{ __('Business Address') }} <span class="text-red-600">*</span></span></x-input-label>
                             <x-text-input id="address" name="address" type="text" class="mt-1 block w-full" :value="old('address', $client->address)" required />
                             <x-input-error class="mt-2" :messages="$errors->get('address')" />
@@ -111,18 +117,6 @@
                             <x-input-label for="notes" :value="__('Notes')" />
                             <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('notes', $client->notes) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('notes')" />
-                        </div>
-
-                        <div class="md:col-span-2 border-t border-gray-200 pt-6">
-                            <h3 class="text-base font-semibold text-gray-900">{{ __('Business Registration') }}</h3>
-                            <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                @foreach (['BIR FORM 2303 / COR', 'DTI BN REGISTRATION', 'SEC CERTIFICATE OF INCORPORATION', 'ARTICLES OF INCORPORATION & BY LAWS', "MAYOR'S PERMIT"] as $registration)
-                                    <label class="flex items-start gap-3 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                        <input type="checkbox" name="business_registrations[]" value="{{ $registration }}" @checked(in_array($registration, old('business_registrations', $client->business_registrations ?? []), true)) class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                        <span>{{ $registration }}</span>
-                                    </label>
-                                @endforeach
-                            </div>
                         </div>
 
                         <div class="md:col-span-2 border-t border-gray-200 pt-6">
