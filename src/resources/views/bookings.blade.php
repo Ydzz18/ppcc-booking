@@ -36,7 +36,7 @@
                     @endif
 
                     <div id="job-task-entry-section" class="max-w-7xl mx-auto" x-show="activeMenu === 'entry'">
-                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()), formExpenseOptions: @js($forms->map(fn ($form) => ['id' => (string) $form->id, 'expense' => (float) $form->expense_amount])->values()), selectedAgency: '', selectedTaskIds: @js(array_map('strval', (array) old('type_of_task', []))), selectedTaskRequiredForms: @js(array_map('strval', (array) old('required_forms_documents', []))), selectedFormIds: @js(array_map('strval', (array) old('required_forms_documents', []))), preserveInitialFormSelection: @js(old('type_of_task') !== null), formSelectionInitialized: false, totalSelectedExpenses() { return this.formExpenseOptions.filter(form => this.selectedFormIds.includes(form.id)).reduce((total, form) => total + Number(form.expense || 0), 0); }, updateSelectedTasks() { const hasPreviousSelection = this.formSelectionInitialized; const previousRequiredFormIds = new Set(this.selectedTaskRequiredForms); const previouslyIncludedFormIds = new Set(this.selectedFormIds); const requiredFormIds = new Set(); this.taskOptions.filter(task => this.selectedTaskIds.includes(String(task.id))).forEach(task => (task.required_forms_documents || []).forEach(formId => requiredFormIds.add(String(formId)))); const availableFormIds = Array.from(requiredFormIds); this.selectedFormIds = availableFormIds.filter(id => hasPreviousSelection ? (!previousRequiredFormIds.has(id) || previouslyIncludedFormIds.has(id)) : (this.preserveInitialFormSelection ? previouslyIncludedFormIds.has(id) : true)); this.selectedTaskRequiredForms = availableFormIds; this.formSelectionInitialized = true; } }" x-init="selectedTaskIds = selectedTaskIds.map(String); updateSelectedTasks()">
+                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()), formExpenseOptions: @js($forms->map(fn ($form) => ['id' => (string) $form->id, 'name' => $form->form_name, 'expense' => (float) $form->expense_amount])->values()), taskExpenses: @js($forms->mapWithKeys(fn ($form) => [(string) $form->id => (float) old('task_expenses.'.$form->id, $form->expense_amount)])->all()), selectedAgency: '', selectedTaskIds: @js(array_map('strval', (array) old('type_of_task', []))), selectedTaskRequiredForms: [], selectedFormIds: @js(array_map('strval', (array) old('required_forms_documents', []))), preserveInitialFormSelection: @js(old('type_of_task') !== null), formSelectionInitialized: false, totalSelectedExpenses() { return this.formExpenseOptions.filter(form => this.selectedFormIds.includes(form.id)).reduce((total, form) => total + Number(this.taskExpenses[form.id] ?? form.expense ?? 0), 0); }, selectAgency() { this.selectedTaskIds = this.selectedTaskIds.filter(id => this.taskOptions.some(task => String(task.id) === id && task.agency === this.selectedAgency)); this.updateSelectedTasks(); }, updateSelectedTasks() { const hasPreviousSelection = this.formSelectionInitialized; const previousRequiredFormIds = new Set(this.selectedTaskRequiredForms); const previouslyIncludedFormIds = new Set(this.selectedFormIds); const requiredFormIds = new Set(); this.taskOptions.filter(task => this.selectedTaskIds.includes(String(task.id))).forEach(task => (task.required_forms_documents || []).forEach(formId => requiredFormIds.add(String(formId)))); const availableFormIds = Array.from(requiredFormIds); this.selectedFormIds = availableFormIds.filter(id => hasPreviousSelection ? (!previousRequiredFormIds.has(id) || previouslyIncludedFormIds.has(id)) : (this.preserveInitialFormSelection ? previouslyIncludedFormIds.has(id) : true)); this.selectedTaskRequiredForms = availableFormIds; this.formSelectionInitialized = true; } }" x-init="selectedTaskIds = selectedTaskIds.map(String); selectedFormIds = selectedFormIds.map(String); updateSelectedTasks()">
                             <div class="flex items-center justify-between gap-4">
                                 <h3 class="text-lg font-medium text-gray-900">{{ __('Task Entry') }}</h3>
                                 <x-primary-button form="task-entry-form">{{ __('Create Task') }}</x-primary-button>
@@ -105,7 +105,11 @@
                                                 <span class="min-w-0 flex-1 break-words">{{ $form->form_name }}</span>
                                                 <label class="flex shrink-0 items-center gap-2 text-xs text-gray-500">
                                                     <input type="checkbox" name="required_forms_documents[]" x-model="selectedFormIds" value="{{ $form->id }}" aria-label="{{ __('Include') }} {{ $form->form_name }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                                    <span>PHP {{ number_format((float) $form->expense_amount, 2) }}</span>
+                                                    <span>{{ __('Include') }}</span>
+                                                </label>
+                                                <label class="flex shrink-0 items-center gap-2 font-medium">
+                                                    <span class="text-xs text-gray-500">PHP</span>
+                                                    <input type="number" name="task_expenses[{{ $form->id }}]" min="0" step="0.01" x-model.number="taskExpenses['{{ $form->id }}']" x-bind:disabled="!selectedFormIds.includes('{{ $form->id }}')" class="w-28 rounded-md border-gray-300 py-1 text-right text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500" aria-label="{{ __('Expense for') }} {{ $form->form_name }}">
                                                 </label>
                                             </div>
                                         @endforeach
@@ -143,6 +147,16 @@
                                             ->map(fn ($taskId) => $taskNamesById->get($taskId))
                                             ->filter()
                                             ->implode(', ') ?: '—';
+                                        $monitoringExpenses = collect($monitoring->expenses_breakdown ?? []);
+                                        if ($monitoringExpenses->isEmpty()) {
+                                            $monitoringExpenses = $requiredFormIds->map(fn ($formId) => [
+                                                'form_id' => (int) $formId,
+                                                'form_name' => $formNamesById[$formId] ?? __('Unknown form'),
+                                                'expense_amount' => (float) ($formExpensesById[$formId] ?? 0),
+                                            ]);
+                                        }
+                                        $monitoringExpensesByFormId = $monitoringExpenses->keyBy('form_id');
+                                        $totalExpenses = (float) $monitoringExpenses->sum('expense_amount');
                                     @endphp
                                     <div x-data="{ expanded: false }" class="bg-white">
                                         <div class="task-monitoring-summary-grid px-4 py-4">
@@ -224,9 +238,15 @@
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Submission Status') }}</p><p class="mt-1 text-gray-900">{{ ucfirst($submissionStatus) }}</p></div>
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Release of Cert/Clearance') }}</p><p class="mt-1 text-gray-900">{{ '—' }}</p></div>
                                                 <div class="sm:col-span-2 lg:col-span-3">
-                                                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Required Forms and Documents') }}</p>
+                                                    <div class="task-monitoring-required-expense-header text-xs font-medium uppercase tracking-wide text-gray-500">
+                                                        <p>{{ __('Required Forms and Documents') }}</p>
+                                                        <p title="{{ __('Expense amount in Philippine pesos') }}">{{ __('PHP') }}</p>
+                                                    </div>
                                                     @if ($requiredFormIds->isEmpty())
-                                                        <p class="mt-2 rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ '—' }}</p>
+                                                        <div class="task-monitoring-required-expense-row mt-2">
+                                                            <p class="rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ '—' }}</p>
+                                                            <p class="task-monitoring-expense-row rounded-md border border-gray-200 text-gray-500">{{ '—' }}</p>
+                                                        </div>
                                                     @else
                                                         <div class="task-monitoring-required-expense-list mt-2">
                                                             @foreach ($requiredFormIds as $formId)
@@ -234,15 +254,25 @@
                                                                     $formName = $formNamesById[$formId] ?? null;
                                                                     $formStatus = strtolower(trim((string) ($formStatusesByMonitoringAndForm[$monitoring->id.'-'.$formId] ?? 'pending')));
                                                                     $formCompleted = $formStatus === 'completed';
+                                                                    $formExpense = (float) ($monitoringExpensesByFormId->get($formId)['expense_amount'] ?? 0);
                                                                 @endphp
 
                                                                 @if ($formName)
-                                                                    <div class="task-monitoring-form-status-row rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
-                                                                        <span class="task-monitoring-form-expense-name required-form-name">{{ $formName }}</span>
-                                                                        <span class="task-monitoring-form-expense-status text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
+                                                                    <div class="task-monitoring-required-expense-row">
+                                                                        <div class="task-monitoring-form-status-row rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
+                                                                            <span class="task-monitoring-form-expense-name required-form-name">{{ $formName }}</span>
+                                                                            <span class="task-monitoring-form-expense-status text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
+                                                                        </div>
+                                                                        <div class="task-monitoring-expense-row rounded-md border border-gray-200 text-gray-800">
+                                                                            <span class="task-monitoring-form-expense-amount font-medium" title="PHP {{ number_format($formExpense, 2) }}">{{ number_format($formExpense, 2) }}</span>
+                                                                        </div>
                                                                     </div>
                                                                 @endif
                                                             @endforeach
+                                                            <div class="task-monitoring-form-expense-total border-t border-gray-200 pt-2 font-semibold text-gray-900">
+                                                                <span>{{ __('Total Expenses') }}</span>
+                                                                <span class="task-monitoring-form-expense-amount" title="PHP {{ number_format($totalExpenses, 2) }}">{{ number_format($totalExpenses, 2) }}</span>
+                                                            </div>
                                                         </div>
                                                     @endif
                                                 </div>

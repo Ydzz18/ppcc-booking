@@ -912,7 +912,7 @@
 
                         <div class="grid gap-3 md:hidden">
                             @forelse ($forms as $form)
-                                <article class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                                    <article class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                                     <div class="min-w-0">
                                         <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Form') }} #{{ $form->id }}</p>
                                         <h3 class="mt-1 break-words text-sm font-semibold text-gray-900">{{ $form->form_name }}</h3>

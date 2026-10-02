@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql
--- Generation Time: Sep 28, 2026 at 08:14 AM
+-- Generation Time: Oct 01, 2026 at 02:32 AM
 -- Server version: 8.0.46
 -- PHP Version: 8.3.26
 
@@ -32,14 +32,14 @@ USE `booking`;
 CREATE TABLE `audit_logs` (
   `id` bigint UNSIGNED NOT NULL,
   `actor_id` bigint UNSIGNED DEFAULT NULL,
-  `actor_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `event` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `subject_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `subject_id` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actor_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `event` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subject_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `changed_fields` json DEFAULT NULL,
-  `route_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `route_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -65,7 +65,77 @@ INSERT INTO `audit_logs` (`id`, `actor_id`, `actor_name`, `event`, `subject_type
 (18, 5, 'Ydrian', 'created', 'App\\Models\\TaskMonitoringFormNote', '7', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-28 07:20:52'),
 (19, 5, 'Ydrian', 'created', 'App\\Models\\TaskMonitoring', '10', '[\"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"id\"]', 'bookings.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-28 07:46:43'),
 (20, 5, 'Ydrian', 'created', 'App\\Models\\TaskMonitoring', '11', '[\"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"id\"]', 'bookings.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-28 07:47:32'),
-(21, 5, 'Ydrian', 'created', 'App\\Models\\TaskMonitoring', '12', '[\"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"id\"]', 'bookings.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-28 07:51:55');
+(21, 5, 'Ydrian', 'created', 'App\\Models\\TaskMonitoring', '12', '[\"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"id\"]', 'bookings.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-28 07:51:55'),
+(22, 6, 'Andre', 'auth.login', 'App\\Models\\User', '6', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-28 09:42:31'),
+(23, 6, 'Andre', 'auth.login', 'App\\Models\\User', '6', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-28 09:51:47'),
+(24, 6, 'Andre', 'updated', 'App\\Models\\User', '6', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-28 09:52:18'),
+(25, 6, 'Andre', 'auth.logout', 'App\\Models\\User', '6', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-28 09:52:18'),
+(26, 2, 'Mimi Jardin', 'auth.login', 'App\\Models\\User', '2', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-28 09:52:34'),
+(27, 2, 'Mimi Jardin', 'auth.logout', 'App\\Models\\User', '2', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-28 09:59:48'),
+(28, 5, 'Ydrian', 'auth.login', 'App\\Models\\User', '5', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-29 01:19:51'),
+(29, 5, 'Ydrian', 'auth.login', 'App\\Models\\User', '5', NULL, 'login', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-29 01:19:51'),
+(30, 5, 'Ydrian', 'deleted', 'App\\Models\\TaskMonitoring', '12', '[\"id\", \"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"date_of_submission\", \"receiving_officer\", \"acknowledgement_receipt_reference_number\", \"submission_decision\", \"submission_notes\"]', 'bookings.destroy', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-29 01:32:40'),
+(31, 5, 'Ydrian', 'deleted', 'App\\Models\\TaskMonitoring', '11', '[\"id\", \"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"date_of_submission\", \"receiving_officer\", \"acknowledgement_receipt_reference_number\", \"submission_decision\", \"submission_notes\"]', 'bookings.destroy', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-29 01:32:44'),
+(32, 5, 'Ydrian', 'deleted', 'App\\Models\\TaskMonitoring', '10', '[\"id\", \"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"date_of_submission\", \"receiving_officer\", \"acknowledgement_receipt_reference_number\", \"submission_decision\", \"submission_notes\"]', 'bookings.destroy', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-29 01:32:48'),
+(33, 6, 'Andre', 'auth.login', 'App\\Models\\User', '6', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 01:34:38'),
+(34, 3, 'Aires Rodriguez', 'auth.login', 'App\\Models\\User', '3', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 02:22:58'),
+(35, 3, 'Aires Rodriguez', 'auth.logout', 'App\\Models\\User', '3', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 02:27:00'),
+(36, 3, 'Aires Rodriguez', 'updated', 'App\\Models\\User', '3', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 02:33:56'),
+(37, 3, 'Aires Rodriguez', 'auth.login', 'App\\Models\\User', '3', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 02:33:56'),
+(38, 3, 'Aires Rodriguez', 'updated', 'App\\Models\\User', '3', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 02:34:42'),
+(39, 3, 'Aires Rodriguez', 'auth.logout', 'App\\Models\\User', '3', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 02:34:42'),
+(40, 3, 'Aires Rodriguez', 'auth.login', 'App\\Models\\User', '3', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 02:36:45'),
+(41, 6, 'Andre', 'deleted', 'App\\Models\\TaskMonitoring', '9', '[\"id\", \"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"date_of_submission\", \"receiving_officer\", \"acknowledgement_receipt_reference_number\", \"submission_decision\", \"submission_notes\"]', 'bookings.destroy', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 02:46:35'),
+(42, 6, 'Andre', 'updated', 'App\\Models\\User', '6', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 02:49:06'),
+(43, 6, 'Andre', 'auth.logout', 'App\\Models\\User', '6', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 02:49:06'),
+(44, 2, 'Mimi Jardin', 'auth.login', 'App\\Models\\User', '2', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 02:49:21'),
+(45, 2, 'Mimi Jardin', 'created', 'App\\Models\\TaskMonitoring', '13', '[\"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"id\"]', 'bookings.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 02:49:43'),
+(46, 2, 'Mimi Jardin', 'auth.logout', 'App\\Models\\User', '2', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 02:50:11'),
+(47, 1, 'Admin', 'auth.login', 'App\\Models\\User', '1', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 02:50:31'),
+(48, 1, 'Admin', 'deleted', 'App\\Models\\TaskMonitoring', '13', '[\"id\", \"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"date_of_submission\", \"receiving_officer\", \"acknowledgement_receipt_reference_number\", \"submission_decision\", \"submission_notes\"]', 'bookings.destroy', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 02:50:40'),
+(49, 5, 'Ydrian', 'created', 'App\\Models\\TaskMonitoring', '14', '[\"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"id\"]', 'bookings.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-29 03:24:35'),
+(50, 1, 'Admin', 'deleted', 'App\\Models\\TaskMonitoring', '14', '[\"id\", \"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"date_of_submission\", \"receiving_officer\", \"acknowledgement_receipt_reference_number\", \"submission_decision\", \"submission_notes\"]', 'bookings.destroy', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 04:00:55'),
+(51, 1, 'Admin', 'created', 'App\\Models\\TaskMonitoring', '15', '[\"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"id\"]', 'bookings.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 04:11:04'),
+(52, 3, 'Aires Rodriguez', 'updated', 'App\\Models\\User', '3', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 06:00:06'),
+(53, 3, 'Aires Rodriguez', 'auth.logout', 'App\\Models\\User', '3', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 06:00:06'),
+(54, 1, 'Admin', 'created', 'App\\Models\\Task', '31', '[\"agency\", \"task_name\", \"required_forms_documents\", \"id\"]', 'tasks.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 06:03:21'),
+(55, 1, 'Admin', 'created', 'App\\Models\\Task', '32', '[\"agency\", \"task_name\", \"required_forms_documents\", \"id\"]', 'tasks.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 06:06:36'),
+(56, 1, 'Admin', 'created', 'App\\Models\\FormItem', '54', '[\"form_name\", \"id\"]', 'forms.store', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 06:09:08'),
+(57, 1, 'Admin', 'updated', 'App\\Models\\Task', '19', '[\"required_forms_documents\"]', 'tasks.update', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 06:10:35'),
+(58, 1, 'Admin', 'auth.login', 'App\\Models\\User', '1', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 08:10:11'),
+(59, 1, 'Admin', 'auth.login', 'App\\Models\\User', '1', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 08:57:49'),
+(60, 1, 'Admin', 'auth.login', 'App\\Models\\User', '1', NULL, 'login', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 08:57:49'),
+(61, 3, 'Aires Rodriguez', 'auth.login', 'App\\Models\\User', '3', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 09:02:45'),
+(62, 1, 'Admin', 'auth.login', 'App\\Models\\User', '1', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.139.1 Chrome/150.0.7871.250 Electron/43.6.0 Safari/537.36', '2026-09-29 09:06:44'),
+(63, 1, 'Admin', 'auth.login', 'App\\Models\\User', '1', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.139.1 Chrome/150.0.7871.250 Electron/43.6.0 Safari/537.36', '2026-09-29 09:26:21'),
+(64, 1, 'Admin', 'auth.login', 'App\\Models\\User', '1', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 09:27:33'),
+(65, 1, 'Admin', 'deleted', 'App\\Models\\TaskMonitoring', '15', '[\"id\", \"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"date_of_submission\", \"receiving_officer\", \"acknowledgement_receipt_reference_number\", \"submission_decision\", \"submission_notes\"]', 'bookings.destroy', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', '2026-09-29 09:27:50'),
+(66, 5, 'Ydrian', 'auth.login', 'App\\Models\\User', '5', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-29 09:31:49'),
+(67, 5, 'Ydrian', 'auth.login', 'App\\Models\\User', '5', NULL, 'login', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-29 09:31:50'),
+(68, 5, 'Ydrian', 'updated', 'App\\Models\\User', '3', '[\"role\"]', 'users.update', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-29 09:32:06'),
+(69, 3, 'Aires Rodriguez', 'created', 'App\\Models\\Client', '4', '[\"client_name\", \"business_name\", \"address\", \"residential_address\", \"tin\", \"tel_phone_number\", \"email_address\", \"id_presented\", \"fathers_name\", \"mothers_maiden_name\", \"date_of_birth\", \"place_of_birth\", \"civil_status\", \"religion\", \"capitalization\", \"notes\", \"id\"]', 'clients.store', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 10:06:37'),
+(70, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoring', '16', '[\"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"id\"]', 'bookings.store', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 10:08:04'),
+(71, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoringFormNote', '8', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 10:08:53'),
+(72, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoringFormNote', '9', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 10:09:27'),
+(73, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoringFormNote', '10', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 10:11:00'),
+(74, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoringFormNote', '11', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 10:11:13'),
+(75, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoringFormNote', '12', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 10:11:45'),
+(76, 3, 'Aires Rodriguez', 'created', 'App\\Models\\Client', '5', '[\"client_name\", \"business_name\", \"address\", \"residential_address\", \"tin\", \"tel_phone_number\", \"email_address\", \"id_presented\", \"fathers_name\", \"mothers_maiden_name\", \"date_of_birth\", \"place_of_birth\", \"civil_status\", \"religion\", \"capitalization\", \"notes\", \"id\"]', 'clients.store', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 11:09:22'),
+(77, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoring', '17', '[\"date_task_received\", \"client_id\", \"task_id\", \"assigned_responsible_person_id\", \"required_forms_documents\", \"submission_status\", \"id\"]', 'bookings.store', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 11:09:52'),
+(78, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoringFormNote', '13', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 11:10:27'),
+(79, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoringFormNote', '14', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 11:10:46'),
+(80, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoringFormNote', '15', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 11:11:39'),
+(81, 3, 'Aires Rodriguez', 'created', 'App\\Models\\TaskMonitoringFormNote', '16', '[\"task_monitoring_id\", \"form_id\", \"notes_remarks\", \"note_date\", \"note_status\", \"id\"]', 'bookings.form-note.save', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 11:12:02'),
+(82, 3, 'Aires Rodriguez', 'updated', 'App\\Models\\User', '3', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 11:23:58'),
+(83, 3, 'Aires Rodriguez', 'auth.logout', 'App\\Models\\User', '3', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-29 11:23:58'),
+(84, 5, 'Ydrian', 'auth.login', 'App\\Models\\User', '5', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-30 01:04:11'),
+(85, 5, 'Ydrian', 'auth.login', 'App\\Models\\User', '5', NULL, 'login', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-30 01:04:11'),
+(86, 1, 'Admin', 'auth.login', 'App\\Models\\User', '1', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-30 01:05:38'),
+(87, 1, 'Admin', 'deleted', 'App\\Models\\Client', '1', '[\"id\", \"client_name\", \"business_name\", \"contact_person\", \"address\", \"residential_address\", \"tin\", \"tel_phone_number\", \"email_address\", \"id_presented\", \"fathers_name\", \"mothers_maiden_name\", \"date_of_birth\", \"place_of_birth\", \"civil_status\", \"religion\", \"capitalization\", \"notes\", \"business_registrations\", \"additional_requirements\"]', 'clients.destroy', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-30 02:21:49'),
+(88, 3, 'Aires Rodriguez', 'auth.login', 'App\\Models\\User', '3', NULL, NULL, '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-30 03:10:03'),
+(89, 5, 'Ydrian', 'updated', 'App\\Models\\User', '2', '[\"role\"]', 'users.update', '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', '2026-09-30 03:27:19'),
+(90, 3, 'Aires Rodriguez', 'updated', 'App\\Models\\User', '3', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-30 09:13:11'),
+(91, 3, 'Aires Rodriguez', 'auth.logout', 'App\\Models\\User', '3', NULL, 'logout', '172.18.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15', '2026-09-30 09:13:11');
 
 -- --------------------------------------------------------
 
@@ -135,9 +205,10 @@ CREATE TABLE `clients` (
 --
 
 INSERT INTO `clients` (`id`, `client_name`, `business_name`, `contact_person`, `address`, `residential_address`, `tin`, `tel_phone_number`, `email_address`, `id_presented`, `fathers_name`, `mothers_maiden_name`, `date_of_birth`, `place_of_birth`, `civil_status`, `religion`, `capitalization`, `notes`, `business_registrations`, `additional_requirements`, `created_at`, `updated_at`) VALUES
-(1, 'The Bored Creations', NULL, 'Omar Rabang', '399 Rizal Avenue Puerto Princesa City', NULL, '0000000000', '09359141800', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-03-02 19:14:47', '2026-03-02 19:14:47'),
 (2, 'RODELYN DANAS', NULL, 'RODELYN DANAS', 'Narra Palawan', NULL, '123456789', '09563077596', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-03-09 13:03:28', '2026-03-09 13:03:28'),
-(3, 'Anna May T. So', NULL, 'Anna May T. So', 'Brooke\'s Point', NULL, '248-504-962', '09175226363', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-03-10 06:04:50', '2026-03-10 06:04:50');
+(3, 'Anna May T. So', NULL, 'Anna May T. So', 'Brooke\'s Point', NULL, '248-504-962', '09175226363', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-03-10 06:04:50', '2026-03-10 06:04:50'),
+(4, 'ARB Gas Station Inc.', 'ARB Gas Station Inc.', NULL, 'Poblacion, Taytay, Palawan', 'Poblacion, Taytay, Palawan', '645-633-799-00000', '09274887674', 'arbgasstationinc@gmail.com', 'n/a', 'n/a', 'n/a', '2024-02-25', 'n/a', 'n/a', 'n/a', '1,500,000.00', NULL, NULL, NULL, '2026-09-29 10:06:37', '2026-09-29 10:06:37'),
+(5, 'RLB Properties OPC', 'RLB Properties OPC', NULL, 'Poblacion, Taytay, Palawan', 'N/A', '010-898-393-00000', '0927-488-7674', 'arbgasstationinc@gmail.com', 'N/A', 'N/A', 'N/A', '2025-05-15', 'N/A', 'N/A', 'N/A', '500,000.00', NULL, NULL, NULL, '2026-09-29 11:09:21', '2026-09-29 11:09:21');
 
 -- --------------------------------------------------------
 
@@ -164,6 +235,7 @@ CREATE TABLE `failed_jobs` (
 CREATE TABLE `forms` (
   `id` bigint UNSIGNED NOT NULL,
   `form_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expense_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -172,58 +244,59 @@ CREATE TABLE `forms` (
 -- Dumping data for table `forms`
 --
 
-INSERT INTO `forms` (`id`, `form_name`, `created_at`, `updated_at`) VALUES
-(1, 'Duly Accomplished Application Form', '2026-03-02 19:32:23', '2026-03-02 19:32:23'),
-(2, 'Certificate of Registration (BIR Form 2303)', '2026-03-02 19:33:02', '2026-03-02 19:33:02'),
-(3, 'Letter of Request', '2026-03-02 19:33:17', '2026-03-02 19:33:17'),
-(4, 'Proof of Payment', '2026-03-02 19:33:34', '2026-03-02 19:33:34'),
-(5, 'Barangay Certification', '2026-03-09 13:04:58', '2026-09-28 05:31:14'),
-(6, 'Occupancy Permit', '2026-03-09 13:05:39', '2026-03-09 13:05:39'),
-(7, 'BIR Form 1905', '2026-09-28 02:56:40', '2026-09-28 02:56:40'),
-(8, 'Lease Contract (For Renting)', '2026-09-28 02:59:05', '2026-09-28 02:59:05'),
-(9, 'SPA or SEC Cert', '2026-09-28 02:59:40', '2026-09-28 02:59:40'),
-(10, 'DTI or SEC Registration', '2026-09-28 03:00:32', '2026-09-28 03:00:32'),
-(12, 'Valid ID', '2026-09-28 03:24:26', '2026-09-28 03:24:26'),
-(13, 'Mayors Permit', '2026-09-28 03:24:26', '2026-09-28 03:24:26'),
-(14, 'Last Booklet', '2026-09-28 03:25:58', '2026-09-28 03:25:58'),
-(15, 'Latest ATP', '2026-09-28 03:25:58', '2026-09-28 03:25:58'),
-(17, 'Valid ID of Signatory', '2026-09-28 03:25:58', '2026-09-28 03:25:58'),
-(18, 'Official Email Address', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(19, 'Letter Request', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(20, 'BIR Form 2303 / COR', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(21, 'Change Address: Lease Contract or Mayors Permit', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(22, 'Original COR', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(23, 'Original Notice to Issue Receipt', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(24, 'Inventory of Unused Receipts', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(25, 'Books if Applicable', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(26, 'DTI or Mayors Closure', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(27, 'Sworn Declaration', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(28, 'TIN of EE', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(29, 'Birth Certificate for EE w/o TIN', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(30, 'Sworn Declaration Form from DTI', '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
-(31, 'See List from Form', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(32, 'Application Form', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(33, 'Previous Year Business Permit', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(34, 'Previous Year Gross Receipts', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(35, 'Lease Contract or Occupancy Permit', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(36, 'Closure from Barangay', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(37, '3 Years ITR', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(38, 'SSS ER Forms', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(39, 'DTI/SEC Registration', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(40, 'Passbook or Bank Statement', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(41, 'Birth Certificate', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(42, 'Copy of Resignation Letter', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(43, 'Copy of Appointment Letter', '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
-(44, 'EDD Note from OBGyne', '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
-(45, 'Disbursement Voucher', '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
-(46, 'PHIC ER Forms', '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
-(47, 'HDMF ER Forms', '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
-(48, 'HDMF EE Forms', '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
-(49, 'Letter Request for Closure', '2026-09-28 05:15:53', '2026-09-28 05:15:53'),
-(50, 'SSS EE Forms', '2026-09-28 05:34:36', '2026-09-28 05:34:36'),
-(51, 'DTI', '2026-09-28 05:41:13', '2026-09-28 05:41:13'),
-(52, 'SSS Registration', '2026-09-28 05:41:33', '2026-09-28 05:41:33'),
-(53, 'PHIC EE Forms', '2026-09-28 05:48:14', '2026-09-28 05:48:14');
+INSERT INTO `forms` (`id`, `form_name`, `expense_amount`, `created_at`, `updated_at`) VALUES
+(1, 'Duly Accomplished Application Form', 0.00, '2026-03-02 19:32:23', '2026-03-02 19:32:23'),
+(2, 'Certificate of Registration (BIR Form 2303)', 0.00, '2026-03-02 19:33:02', '2026-03-02 19:33:02'),
+(3, 'Letter of Request', 0.00, '2026-03-02 19:33:17', '2026-03-02 19:33:17'),
+(4, 'Proof of Payment', 0.00, '2026-03-02 19:33:34', '2026-03-02 19:33:34'),
+(5, 'Barangay Certification', 0.00, '2026-03-09 13:04:58', '2026-09-28 05:31:14'),
+(6, 'Occupancy Permit', 0.00, '2026-03-09 13:05:39', '2026-03-09 13:05:39'),
+(7, 'BIR Form 1905', 0.00, '2026-09-28 02:56:40', '2026-09-28 02:56:40'),
+(8, 'Lease Contract (For Renting)', 0.00, '2026-09-28 02:59:05', '2026-09-28 02:59:05'),
+(9, 'SPA or SEC Cert', 0.00, '2026-09-28 02:59:40', '2026-09-28 02:59:40'),
+(10, 'DTI or SEC Registration', 0.00, '2026-09-28 03:00:32', '2026-09-28 03:00:32'),
+(12, 'Valid ID', 0.00, '2026-09-28 03:24:26', '2026-09-28 03:24:26'),
+(13, 'Mayors Permit', 0.00, '2026-09-28 03:24:26', '2026-09-28 03:24:26'),
+(14, 'Last Booklet', 0.00, '2026-09-28 03:25:58', '2026-09-28 03:25:58'),
+(15, 'Latest ATP', 0.00, '2026-09-28 03:25:58', '2026-09-28 03:25:58'),
+(17, 'Valid ID of Signatory', 0.00, '2026-09-28 03:25:58', '2026-09-28 03:25:58'),
+(18, 'Official Email Address', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(19, 'Letter Request', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(20, 'BIR Form 2303 / COR', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(21, 'Change Address: Lease Contract or Mayors Permit', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(22, 'Original COR', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(23, 'Original Notice to Issue Receipt', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(24, 'Inventory of Unused Receipts', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(25, 'Books if Applicable', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(26, 'DTI or Mayors Closure', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(27, 'Sworn Declaration', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(28, 'TIN of EE', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(29, 'Birth Certificate for EE w/o TIN', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(30, 'Sworn Declaration Form from DTI', 0.00, '2026-09-28 03:35:24', '2026-09-28 03:35:24'),
+(31, 'See List from Form', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(32, 'Application Form', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(33, 'Previous Year Business Permit', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(34, 'Previous Year Gross Receipts', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(35, 'Lease Contract or Occupancy Permit', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(36, 'Closure from Barangay', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(37, '3 Years ITR', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(38, 'SSS ER Forms', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(39, 'DTI/SEC Registration', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(40, 'Passbook or Bank Statement', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(41, 'Birth Certificate', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(42, 'Copy of Resignation Letter', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(43, 'Copy of Appointment Letter', 0.00, '2026-09-28 03:40:40', '2026-09-28 03:40:40'),
+(44, 'EDD Note from OBGyne', 0.00, '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
+(45, 'Disbursement Voucher', 0.00, '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
+(46, 'PHIC ER Forms', 0.00, '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
+(47, 'HDMF ER Forms', 0.00, '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
+(48, 'HDMF EE Forms', 0.00, '2026-09-28 03:42:43', '2026-09-28 03:42:43'),
+(49, 'Letter Request for Closure', 0.00, '2026-09-28 05:15:53', '2026-09-28 05:15:53'),
+(50, 'SSS EE Forms', 0.00, '2026-09-28 05:34:36', '2026-09-28 05:34:36'),
+(51, 'DTI', 0.00, '2026-09-28 05:41:13', '2026-09-28 05:41:13'),
+(52, 'SSS Registration', 0.00, '2026-09-28 05:41:33', '2026-09-28 05:41:33'),
+(53, 'PHIC EE Forms', 0.00, '2026-09-28 05:48:14', '2026-09-28 05:48:14'),
+(54, 'BIR Form 1904', 0.00, '2026-09-29 06:09:08', '2026-09-29 06:09:08');
 
 -- --------------------------------------------------------
 
@@ -295,7 +368,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (16, '2026_03_05_000015_add_submission_decision_and_notes_to_task_monitorings_table', 1),
 (17, '2026_09_24_000016_add_client_information_fields_to_clients_table', 2),
 (18, '2026_09_24_000017_add_client_requirements_to_clients_table', 3),
-(19, '2026_09_28_000018_create_audit_logs_table', 4);
+(19, '2026_09_28_000018_create_audit_logs_table', 4),
+(20, '2026_09_29_000019_create_user_notification_views_table', 5),
+(21, '2026_09_30_000020_add_expenses_to_forms_and_task_monitorings_tables', 6);
 
 -- --------------------------------------------------------
 
@@ -329,19 +404,7 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('2N0a9Ly6e4wdcqI0aPPSAdMGzbW2WvGpQCIbEvtG', 1, '172.21.0.1', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoidFVJMFNkb2w1eUdDTGx5aU9nMnRpRlFhZ2lUZ05hcUk2T0o2OWY5diI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDA6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9zZXR0aW5ncz90YWI9dXNlcnMiO3M6NToicm91dGUiO3M6MTQ6InNldHRpbmdzLmluZGV4Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1773959307),
-('4C8wpaeKe3usvO7yyYh0pxILbhWgnxpUZJjjzdZN', NULL, '172.18.0.1', 'curl/8.21.0', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiTEdWa1J6dXJtYWhjTEk5OFJQaXo5YVlOSk9WMm1udTZFa0M5VEhJTyI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6Mjc6Imh0dHA6Ly9sb2NhbGhvc3Q6OTA5MC9sb2dpbiI7czo1OiJyb3V0ZSI7czo1OiJsb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1790216760),
-('4vLNrMKiVAv2EL32d0Dr9OJf7JEJQUP3JknbXP5T', NULL, '172.21.0.1', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiWmNReFU1OGNYaFRQYWpWdVF1NFA0Y1FyRXNJVVZUUVc0dDhWcXEzUyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6Mzg6Imh0dHA6Ly9hcnAudGhlYm9yZWRjcmVhdGlvbnMuY29tL2xvZ2luIjtzOjU6InJvdXRlIjtzOjU6ImxvZ2luIjt9fQ==', 1773069938),
-('5GehHlMeECK12Pqvi5YNNaWEVvaYK1n6e7f5KLCJ', NULL, '172.21.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiUDJJaXBnd2lDdEcwU1JMeHowZ0I1a3pCVEtIZGYzUEhoM3MxbzczMyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6Mzg6Imh0dHA6Ly9hcnAudGhlYm9yZWRjcmVhdGlvbnMuY29tL2xvZ2luIjtzOjU6InJvdXRlIjtzOjU6ImxvZ2luIjt9fQ==', 1773122901),
-('fSi3S9lBDvDo9ooPt5yD63nc7LxdWbQhPV49DPrO', 2, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoibm1YeW1xVmprQkRyd0ZzT1M0bDNqTnE2a3hEeFFhRGs3RGhHY09raiI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDU6Imh0dHA6Ly9sb2NhbGhvc3Q6OTA5MC9ib29raW5ncz90YWI9bW9uaXRvcmluZyI7czo1OiJyb3V0ZSI7czoxNDoiYm9va2luZ3MuaW5kZXgiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToyO30=', 1790216656),
-('gDy8Oe19Y83FkSRQ2S3AmBSwjw9V6UYTBA9klMAn', 2, '172.21.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiNWhRSG8ySEc3aG1iRkZ4c0xlUjZoUHJuR3M3Znk2RTE1bDdkcjhRSSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NzE6Imh0dHA6Ly9hcnAudGhlYm9yZWRjcmVhdGlvbnMuY29tL2Jvb2tpbmdzLzQvZWRpdD9zaG93X3N1Ym1pc3Npb25fZm9ybT0xIjtzOjU6InJvdXRlIjtzOjEzOiJib29raW5ncy5lZGl0Ijt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6Mjt9', 1773132736),
-('gN2P55p27n59KSDh1aZjlVwUjBuKlF9J5EgXlllP', NULL, '172.21.0.1', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiRFFMYzg1WmFIcWdVcGUxVGlPRmdOMGI1bDJ5Y3l5N25UZUg1TDFLUSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6Mjc6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9sb2dpbiI7czo1OiJyb3V0ZSI7czo1OiJsb2dpbiI7fX0=', 1773144863),
-('irwmhJjXpGDvPQcb42wGZftsPK8Afr3fRoCJO2ux', NULL, '172.18.0.1', 'curl/8.21.0', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiWE8yTVZPWXl2SEpGekZxa21qMlg0RlJlN0VGQ3ZpejEwUGhDVW11cCI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6Mjc6Imh0dHA6Ly9sb2NhbGhvc3Q6OTA5MC9sb2dpbiI7czo1OiJyb3V0ZSI7czo1OiJsb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1790216737),
-('mlhKG9TvasLL4XEQmp3gWkqm8PTVOCEckBAaG95I', NULL, '172.21.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiN0Z6cUFxU0lMdjlpYkZJckJZWm9mYThFazdNRWdoNm1BOEZoc2pIayI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czo3MToiaHR0cDovL2FycC50aGVib3JlZGNyZWF0aW9ucy5jb20vYm9va2luZ3MvNC9lZGl0P3Nob3dfc3VibWlzc2lvbl9mb3JtPTEiO31zOjk6Il9wcmV2aW91cyI7YToyOntzOjM6InVybCI7czozODoiaHR0cDovL2FycC50aGVib3JlZGNyZWF0aW9ucy5jb20vbG9naW4iO3M6NToicm91dGUiO3M6NToibG9naW4iO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1773141363),
-('pcuctz0cZHV4AyA2xmwLjOorxEoSUU2k2IkPFMXP', NULL, '172.21.0.1', 'Mozilla/5.0 (iPad; CPU OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/FBIOS;FBAV/549.1.0.40.107;FBBV/886965988;FBDV/iPad15,7;FBMD/iPad;FBSN/iPadOS;FBSV/26.2;FBSS/2;FBCR/;FBID/tablet;FBLC/en_US;FBOP/80]', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiMkt5YnlzdVVXWUtvSkVaWDlLZHp1M1dud0NnUFdINVI3UXdvNnd3aiI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6Mzg6Imh0dHA6Ly9hcnAudGhlYm9yZWRjcmVhdGlvbnMuY29tL2xvZ2luIjtzOjU6InJvdXRlIjtzOjU6ImxvZ2luIjt9fQ==', 1773062779),
-('shITu0Wl57aj9P2wFHD6KdtH8s9mIgQbCs5pY7EC', 1, '172.21.0.1', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiY3RRTDJWWjJYSm1QV1ZtZ1ZiRmRyaEhmQ2NwcnVKQlZVYTdhS3RjMCI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzA6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9ib29raW5ncyI7czo1OiJyb3V0ZSI7czoxNDoiYm9va2luZ3MuaW5kZXgiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1773945395),
-('skdsNKDUI5buu5XygCjd8ka2mb2cA3kCbK6NUEJa', 1, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiVVQ2RWR3T3hLTWNYS3NPUlFuVjR3WmJkdmhmM3pZVU1OZUVaUDBjViI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzA6Imh0dHA6Ly9sb2NhbGhvc3Q6OTA5MC9zZXR0aW5ncyI7czo1OiJyb3V0ZSI7czoxNDoic2V0dGluZ3MuaW5kZXgiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1790151685),
-('TlyX3kjA4ltXmvkzm5UHH9ZrHBDEq6WToQJnTfZ9', NULL, '172.18.0.1', 'curl/8.21.0', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiUEhSUUNZS1BxdUNTbWozdERFZ0w2bkt0c0g5MkphRGR6VE9vZnJkNyI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6Mjc6Imh0dHA6Ly9sb2NhbGhvc3Q6OTA5MC9sb2dpbiI7czo1OiJyb3V0ZSI7czo1OiJsb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1790216745);
+('qz4cNhNONs5IxAl472LlobGFFyNUNzKGkc08tNkh', 1, '172.18.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoidzdyR1Jrcjl0Smo1WlRTUnhqZkpBM1VkUVRGbER6ZWFhSXJyWVc2UCI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDA6Imh0dHA6Ly9sb2NhbGhvc3Q6OTA5MC9ub3RpZmljYXRpb25zL2xpdmUiO3M6NToicm91dGUiO3M6MTg6Im5vdGlmaWNhdGlvbnMubGl2ZSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7fQ==', 1790821923);
 
 -- --------------------------------------------------------
 
@@ -351,7 +414,7 @@ INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, 
 
 CREATE TABLE `tasks` (
   `id` bigint UNSIGNED NOT NULL,
-  `agency` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `agency` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `task_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `required_forms_documents` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -379,7 +442,7 @@ INSERT INTO `tasks` (`id`, `agency`, `task_name`, `required_forms_documents`, `c
 (16, 'SSS', 'EE Registration', '[\"50\", \"41\"]', '2026-09-28 05:34:55', '2026-09-28 05:37:13'),
 (17, 'BIR', 'Non-Vat or Vat Application', '[\"27\", \"9\", \"17\", \"22\", \"24\", \"19\"]', '2026-09-28 05:35:44', '2026-09-28 05:35:44'),
 (18, 'SSS', 'EE Update', '[\"50\", \"41\", \"42\", \"43\"]', '2026-09-28 05:36:47', '2026-09-28 05:36:47'),
-(19, 'BIR', 'Enrollment of EE', '[\"7\", \"28\", \"12\", \"29\"]', '2026-09-28 05:36:50', '2026-09-28 05:36:50'),
+(19, 'BIR', 'Enrollment of EE', '[\"28\", \"12\", \"29\", \"54\"]', '2026-09-28 05:36:50', '2026-09-29 06:10:35'),
 (20, 'DTI', 'BN Registration', '[\"12\"]', '2026-09-28 05:37:36', '2026-09-28 05:37:36'),
 (21, 'SSS', 'EE Maternity Notifications', '[\"44\"]', '2026-09-28 05:38:15', '2026-09-28 05:38:15'),
 (22, 'DTI', 'Cancellation', '[\"30\"]', '2026-09-28 05:38:25', '2026-09-28 05:38:25'),
@@ -389,7 +452,9 @@ INSERT INTO `tasks` (`id`, `agency`, `task_name`, `required_forms_documents`, `c
 (27, 'PHIC', 'EE Update (Resignation)', '[\"53\", \"42\", \"43\"]', '2026-09-28 05:51:05', '2026-09-28 05:51:05'),
 (28, 'HDMF', 'ER Registration', '[\"47\", \"51\", \"13\", \"9\", \"17\"]', '2026-09-28 05:52:07', '2026-09-28 05:52:07'),
 (29, 'HDMF', 'EE Registration', '[\"48\"]', '2026-09-28 05:52:39', '2026-09-28 05:52:39'),
-(30, 'HDMF', 'EE Update (Resignation)', '[\"48\"]', '2026-09-28 05:53:15', '2026-09-28 05:53:15');
+(30, 'HDMF', 'EE Update (Resignation)', '[\"48\"]', '2026-09-28 05:53:15', '2026-09-28 05:53:15'),
+(31, 'BIR', 'ATP', '[\"14\", \"15\", \"9\", \"17\"]', '2026-09-29 06:03:21', '2026-09-29 06:03:21'),
+(32, 'BIR', 'Registration', '[\"7\", \"8\", \"9\", \"10\", \"12\", \"13\"]', '2026-09-29 06:06:35', '2026-09-29 06:06:35');
 
 -- --------------------------------------------------------
 
@@ -404,6 +469,7 @@ CREATE TABLE `task_monitorings` (
   `task_id` bigint UNSIGNED NOT NULL,
   `assigned_responsible_person_id` bigint UNSIGNED NOT NULL,
   `required_forms_documents` json DEFAULT NULL,
+  `expenses_breakdown` json DEFAULT NULL,
   `submission_status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `date_of_submission` date DEFAULT NULL,
   `receiving_officer` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -418,11 +484,9 @@ CREATE TABLE `task_monitorings` (
 -- Dumping data for table `task_monitorings`
 --
 
-INSERT INTO `task_monitorings` (`id`, `date_task_received`, `client_id`, `task_id`, `assigned_responsible_person_id`, `required_forms_documents`, `submission_status`, `date_of_submission`, `receiving_officer`, `acknowledgement_receipt_reference_number`, `submission_decision`, `submission_notes`, `created_at`, `updated_at`) VALUES
-(9, '2026-09-28', 3, 4, 3, '[\"7\", \"9\", \"17\"]', 'pending', NULL, NULL, NULL, NULL, NULL, '2026-09-28 07:20:19', '2026-09-28 07:20:19'),
-(10, '2026-09-28', 3, 20, 3, '[\"12\"]', 'pending', NULL, NULL, NULL, NULL, NULL, '2026-09-28 07:46:43', '2026-09-28 07:46:43'),
-(11, '2026-09-26', 1, 4, 1, '[\"7\", \"9\", \"17\"]', 'pending', NULL, NULL, NULL, NULL, NULL, '2026-09-28 07:47:32', '2026-09-28 07:47:32'),
-(12, '2026-09-29', 2, 29, 2, '[\"48\"]', 'pending', NULL, NULL, NULL, NULL, NULL, '2026-09-28 07:51:55', '2026-09-28 07:51:55');
+INSERT INTO `task_monitorings` (`id`, `date_task_received`, `client_id`, `task_id`, `assigned_responsible_person_id`, `required_forms_documents`, `expenses_breakdown`, `submission_status`, `date_of_submission`, `receiving_officer`, `acknowledgement_receipt_reference_number`, `submission_decision`, `submission_notes`, `created_at`, `updated_at`) VALUES
+(16, '2026-09-29', 4, 32, 4, '[\"7\", \"10\", \"8\", \"13\", \"9\", \"12\"]', NULL, 'pending', NULL, NULL, NULL, NULL, NULL, '2026-09-29 10:08:04', '2026-09-29 10:08:04'),
+(17, '2026-09-29', 5, 32, 5, '[\"7\", \"10\", \"8\", \"13\", \"9\", \"12\"]', NULL, 'pending', NULL, NULL, NULL, NULL, NULL, '2026-09-29 11:09:52', '2026-09-29 11:09:52');
 
 -- --------------------------------------------------------
 
@@ -446,7 +510,15 @@ CREATE TABLE `task_monitoring_form_notes` (
 --
 
 INSERT INTO `task_monitoring_form_notes` (`id`, `task_monitoring_id`, `form_id`, `notes_remarks`, `note_date`, `note_status`, `created_at`, `updated_at`) VALUES
-(7, 9, 7, NULL, '2026-09-28', 'completed', '2026-09-28 07:20:52', '2026-09-28 07:20:52');
+(8, 16, 9, '[September 29, 2026 10:08 AM] Secretary\'s Certificate already notarized', '2026-09-29', 'completed', '2026-09-29 10:08:53', '2026-09-29 10:08:53'),
+(9, 16, 10, '[September 29, 2026 10:09 AM] Please see SEC Registration on File (GDrive)', '2026-09-29', 'completed', '2026-09-29 10:09:27', '2026-09-29 10:09:27'),
+(10, 16, 8, '[September 29, 2026 10:11 AM] Not Applicable', '2026-09-29', 'completed', '2026-09-29 10:11:00', '2026-09-29 10:11:00'),
+(11, 16, 13, NULL, '2026-09-29', 'completed', '2026-09-29 10:11:13', '2026-09-29 10:11:13'),
+(12, 16, 12, '[September 29, 2026 10:11 AM] Valid ID of corp\'s signatory', '2026-09-29', 'completed', '2026-09-29 10:11:45', '2026-09-29 10:11:45'),
+(13, 17, 10, '[September 29, 2026 11:10 AM] SEC Registration on File (GDrive)', '2026-09-29', 'completed', '2026-09-29 11:10:27', '2026-09-29 11:10:27'),
+(14, 17, 8, '[September 29, 2026 11:10 AM] Not Applicable', '2026-09-29', 'completed', '2026-09-29 11:10:46', '2026-09-29 11:10:46'),
+(15, 17, 13, NULL, '2026-09-29', 'completed', '2026-09-29 11:11:39', '2026-09-29 11:11:39'),
+(16, 17, 9, '[September 29, 2026 11:12 AM] Notarized Secretary\'s Certificate', '2026-09-29', 'completed', '2026-09-29 11:12:02', '2026-09-29 11:12:02');
 
 -- --------------------------------------------------------
 
@@ -473,11 +545,33 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `role`, `status`, `remember_token`, `created_at`, `updated_at`) VALUES
 (1, 'Admin', 'admin@example.com', NULL, '$2y$12$MsBeiq1zzjLJ2JWyNycvOuee8OwbGknJqZXKMBTtCf8NRtyisDEnO', 'admin', 'active', 'lDOhDQpTLkzx5klzp7CaG2euUtkdTrAarnFu4uigcbWsTmiDqzdb2crPQRAb', '2026-09-23 05:41:52', '2026-09-25 14:41:42'),
-(2, 'Mimi Jardin', 'mimi@gmail.com', NULL, '$2y$12$OzWrIHdDoHzTi29rAkcwJO0KoFs4ckFTvD0K5wrw50Y2sICYWWydy', 'requester', 'active', NULL, '2026-03-02 18:32:15', '2026-03-04 20:25:14'),
-(3, 'Aires Rodriguez', 'aires@gmail.com', NULL, '$2y$12$WE005C8fHGJeu7p2UXUvd.7Rm1ulOGv8ors1ueJjSuyM2SNTQiXFa', 'approver', 'active', NULL, '2026-03-02 18:32:47', '2026-09-28 01:42:29'),
+(2, 'Mimi Jardin', 'mimi@gmail.com', NULL, '$2y$12$OzWrIHdDoHzTi29rAkcwJO0KoFs4ckFTvD0K5wrw50Y2sICYWWydy', 'admin', 'active', NULL, '2026-03-02 18:32:15', '2026-09-30 03:27:19'),
+(3, 'Aires Rodriguez', 'aires@gmail.com', NULL, '$2y$12$WE005C8fHGJeu7p2UXUvd.7Rm1ulOGv8ors1ueJjSuyM2SNTQiXFa', 'admin', 'active', 'BgcNYQNkhDVwRrntbfyJGG1xW5veAkZOgLG4QKJYPJHsD3FptrQifTTXynYn', '2026-03-02 18:32:47', '2026-09-29 09:32:06'),
 (4, 'Bossing Tina', 'tina@gmail.com', NULL, '$2y$12$qJYI7i7UIuNasOfudHUZl.A/dikLn4YF4hje0KRClCQLjqc.gz0DW', 'admin', 'active', NULL, '2026-03-04 20:18:33', '2026-03-04 20:18:33'),
 (5, 'Ydrian', 'ydrian@gmail.com', NULL, '$2y$12$qcSp6T.s3MQubm9.8FiuV.gi57h9tu8slZr51RBbuI1cUtENNM5fq', 'admin', 'active', 'KnocGyN1hDc76eHxz4Wnvdyxfj819esPr2W58acdPtHuSjsRNDG2hh65l7zq', '2026-09-28 01:25:11', '2026-09-28 01:25:11'),
-(6, 'Andre', 'andre@gmail.com', NULL, '$2y$12$cibmcjy5ph4LdR9ZXzFvI.LDz.8j00F5R.M2HT77.fZED.TAIc6O.', 'admin', 'active', 'yixcDJe26yGW8S0S2GG4LRrXhTTNK0rPrDBYUNYToSEYxdEBuOuDvaux2TdV', '2026-09-28 01:25:52', '2026-09-28 01:25:52');
+(6, 'Andre', 'andre@gmail.com', NULL, '$2y$12$cibmcjy5ph4LdR9ZXzFvI.LDz.8j00F5R.M2HT77.fZED.TAIc6O.', 'admin', 'active', 'ftNSgbZAQTUMVhay4uqWDv8txqSSSC8zEoUr2CTi7kRKJJjH3e18pkIvvsQa', '2026-09-28 01:25:52', '2026-09-28 01:25:52');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_notification_views`
+--
+
+CREATE TABLE `user_notification_views` (
+  `user_id` bigint UNSIGNED NOT NULL,
+  `viewed_at` timestamp(6) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `user_notification_views`
+--
+
+INSERT INTO `user_notification_views` (`user_id`, `viewed_at`, `created_at`, `updated_at`) VALUES
+(1, '2026-09-30 01:40:05.000000', '2026-09-30 01:40:05', '2026-09-30 01:40:05'),
+(3, '2026-09-29 11:09:57.000000', '2026-09-29 11:09:57', '2026-09-29 11:09:57'),
+(5, '2026-09-30 01:05:04.000000', '2026-09-30 01:05:04', '2026-09-30 01:05:04');
 
 --
 -- Indexes for dumped tables
@@ -590,6 +684,12 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `users_email_unique` (`email`);
 
 --
+-- Indexes for table `user_notification_views`
+--
+ALTER TABLE `user_notification_views`
+  ADD PRIMARY KEY (`user_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -597,13 +697,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
 
 --
 -- AUTO_INCREMENT for table `clients`
 --
 ALTER TABLE `clients`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -615,7 +715,7 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `forms`
 --
 ALTER TABLE `forms`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `jobs`
@@ -627,25 +727,25 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `task_monitorings`
 --
 ALTER TABLE `task_monitorings`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `task_monitoring_form_notes`
 --
 ALTER TABLE `task_monitoring_form_notes`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -671,6 +771,12 @@ ALTER TABLE `task_monitorings`
 ALTER TABLE `task_monitoring_form_notes`
   ADD CONSTRAINT `task_monitoring_form_notes_form_id_foreign` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `task_monitoring_form_notes_task_monitoring_id_foreign` FOREIGN KEY (`task_monitoring_id`) REFERENCES `task_monitorings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `user_notification_views`
+--
+ALTER TABLE `user_notification_views`
+  ADD CONSTRAINT `user_notification_views_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

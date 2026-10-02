@@ -66,8 +66,9 @@ class BookingController extends Controller
         }
 
         $taskNamesById = $tasks->pluck('task_name', 'id');
+        $formExpensesById = $forms->pluck('expense_amount', 'id');
 
-        return view('bookings', compact('clients', 'contactPersons', 'tasks', 'forms', 'monitorings', 'formNamesById', 'formStatusesByMonitoringAndForm', 'taskNamesById'));
+        return view('bookings', compact('clients', 'contactPersons', 'tasks', 'forms', 'monitorings', 'formNamesById', 'formExpensesById', 'formStatusesByMonitoringAndForm', 'taskNamesById'));
     }
 
     /**
@@ -85,6 +86,8 @@ class BookingController extends Controller
             'type_of_task.*' => ['integer', 'distinct', 'exists:tasks,id'],
             'required_forms_documents' => ['nullable', 'array'],
             'required_forms_documents.*' => ['integer', 'exists:forms,id'],
+            'task_expenses' => ['nullable', 'array'],
+            'task_expenses.*' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
         ]);
 
         $requiredFormIds = collect($validated['required_forms_documents'] ?? [])->map(fn ($id) => (int) $id)->unique()->values()->all();
@@ -99,6 +102,7 @@ class BookingController extends Controller
             'expenses_breakdown' => $this->expenseBreakdown(
                 $requiredFormIds,
                 [],
+                $validated['task_expenses'] ?? []
             ),
             'submission_status' => 'pending',
         ]);
@@ -340,7 +344,7 @@ class BookingController extends Controller
      *  @param array<int, array<string, mixed>> $existingBreakdown
      *  @return array<int, array{form_id: int, form_name: string, expense_amount: float}>
      */
-    private function expenseBreakdown(array $formIds, array $existingBreakdown = []): array
+    private function expenseBreakdown(array $formIds, array $existingBreakdown = [], array $expenseOverrides = []): array
     {
         $existingByFormId = collect($existingBreakdown)
             ->filter(fn ($expense) => isset($expense['form_id']))
@@ -359,7 +363,7 @@ class BookingController extends Controller
             ->map(fn ($form) => is_array($form) ? $form : [
                 'form_id' => (int) $form->id,
                 'form_name' => $form->form_name,
-                'expense_amount' => (float) $form->expense_amount,
+                'expense_amount' => (float) ($expenseOverrides[$form->id] ?? $form->expense_amount),
             ])
             ->values()
             ->all();

@@ -18,7 +18,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased bg-gray-100 text-gray-900 transition-colors duration-200 min-h-screen md:h-screen md:overflow-hidden dark:bg-slate-950 dark:text-slate-100">
-        <div class="app-shell min-h-screen bg-gray-100 flex flex-col md:h-full md:flex-row md:overflow-hidden dark:bg-slate-950" x-data="liveNotifications(@js($notificationCount ?? 0), @js(($headerNotifications ?? collect())->map(fn ($notification) => ['id' => $notification->id, 'task_name' => $notification->task?->task_name ?? __('Booking'), 'client_name' => $notification->client?->client_name ?? __('Unknown client'), 'status' => ucfirst($notification->submission_status ?: 'pending'), 'url' => route('bookings.edit', $notification)])), @js(route('notifications.live')), @js(route('notifications.viewed')))" x-init="start()">
+        <div class="app-shell min-h-screen bg-gray-100 flex flex-col md:h-full md:flex-row md:overflow-hidden dark:bg-slate-950" x-data="liveNotifications(@js($notificationCount ?? 0), @js(($headerNotifications ?? collect())->map(fn ($notification) => ['id' => $notification->id, 'task_name' => $notification->task?->task_name ?? __('Booking'), 'client_name' => $notification->client?->client_name ?? __('Unknown client'), 'status' => ucfirst($notification->submission_status ?: 'pending'), 'url' => route('bookings.edit', $notification), 'created_at' => $notification->created_at?->toIso8601String()])), @js(route('notifications.live')), @js(route('notifications.viewed')), @js(Auth::id()))" x-init="start()">
             @include('layouts.navigation')
 
             <div class="min-w-0 flex-1 md:flex md:h-full md:min-h-0 md:flex-col">

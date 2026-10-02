@@ -60,7 +60,8 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Form or Requirement')
             ->assertSee('required_forms_documents[]')
             ->assertSee('selectedFormIds')
-            ->assertDontSee('task_expenses[');
+            ->assertSee('task_expenses[')
+            ->assertSee('taskExpenses');
 
         $this->actingAs($user)
             ->postJson(route('bookings.store'), [
@@ -68,6 +69,7 @@ class BookingExpensesTest extends TestCase
                 'client_name' => $client->id,
                 'type_of_task' => $task->id,
                 'required_forms_documents' => [$form->id],
+                'task_expenses' => [$form->id => '42.75'],
             ])
             ->assertCreated();
 
@@ -77,7 +79,7 @@ class BookingExpensesTest extends TestCase
             [
                 'form_id' => $form->id,
                 'form_name' => 'Permit Form',
-                'expense_amount' => 125.5,
+                'expense_amount' => 42.75,
             ],
         ], $monitoring->expenses_breakdown);
         $this->assertSame(125.5, (float) $form->fresh()->expense_amount);
@@ -85,13 +87,12 @@ class BookingExpensesTest extends TestCase
         $this->actingAs($user)
             ->get(route('bookings.index', ['tab' => 'monitoring']))
             ->assertOk()
-            ->assertSee('125.50')
-            ->assertSee('PHP 125.50')
+            ->assertSee('42.75')
             ->assertSee('Required Forms and Documents')
             ->assertSee('task-monitoring-form-status-row')
+            ->assertSee('task-monitoring-expense-row')
+            ->assertSee('task-monitoring-required-expense-row')
             ->assertSee('PHP')
-            ->assertDontSee('task-monitoring-expense-row')
-            ->assertDontSee('task-monitoring-required-expense-row')
             ->assertDontSee('Expenses Breakdown')
             ->assertDontSee('task-monitoring-label">Expenses');
 
@@ -100,9 +101,9 @@ class BookingExpensesTest extends TestCase
             ->assertOk()
             ->assertSee('Permit Form')
             ->assertDontSee('Unselected Form')
-            ->assertSee('Amount (PHP)')
-            ->assertSee('125.50')
-            ->assertSee('PHP 125.50');
+            ->assertSee('Expenses')
+            ->assertSee('42.75')
+            ->assertSee('PHP 42.75');
 
         $this->actingAs($user)
             ->get(route('bookings.pdf', $monitoring))
@@ -120,7 +121,7 @@ class BookingExpensesTest extends TestCase
             ])
             ->assertSessionHasNoErrors();
 
-        $this->assertSame(125.5, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
+        $this->assertSame(42.75, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
     }
 
     public function test_client_contact_person_can_be_saved(): void
