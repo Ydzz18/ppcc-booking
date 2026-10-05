@@ -1,4 +1,7 @@
 <x-app-layout>
+    @php
+        $selectedTaskIds = array_map('strval', (array) old('type_of_task', $monitoring->task_ids ?: [$monitoring->task_id]));
+    @endphp
     <div class="fixed inset-0 z-40 overflow-y-auto bg-gray-900/50 px-4 py-6 sm:px-6" role="dialog" aria-modal="true" aria-labelledby="update-task-monitoring-title">
         <div class="mx-auto flex min-h-full max-w-5xl items-center">
             <div class="max-h-[calc(100vh-3rem)] w-full overflow-y-auto rounded-lg bg-white shadow-xl">
@@ -22,7 +25,11 @@
                         <!-- Type of Task Column -->
                         <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
                             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Type of Task') }}</p>
-                            <p class="mt-2 text-sm font-medium text-gray-900">{{ $taskNames ?: '—' }}</p>
+                            <p class="mt-2 text-sm font-medium text-gray-900">
+                                @foreach ($tasks->filter(fn ($task) => in_array((string) $task->id, $selectedTaskIds, true)) as $task)
+                                    {{ $task->task_name }}@unless ($loop->last), @endunless
+                                @endforeach
+                            </p>
                         </div>
 
                         <!-- Client Name Column -->
@@ -134,12 +141,14 @@
 
                         <div>
                             <x-input-label for="type_of_task" :value="__('Type of Task')" />
-                            <select id="type_of_task" name="type_of_task" disabled x-bind:disabled="!isBookingFieldsEditable" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">{{ __('Select Task') }}</option>
+                            <fieldset id="type_of_task" disabled x-bind:disabled="!isBookingFieldsEditable" class="mt-1 max-h-40 space-y-2 overflow-y-auto rounded-md border border-gray-300 p-3">
                                 @foreach ($tasks as $task)
-                                    <option value="{{ $task->id }}" @selected((string) old('type_of_task', $monitoring->task_id) === (string) $task->id)>{{ $task->task_name }}</option>
+                                    <label class="flex items-start gap-2 text-sm text-gray-700">
+                                        <input type="checkbox" name="type_of_task[]" value="{{ $task->id }}" @checked(in_array((string) $task->id, $selectedTaskIds, true)) class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                        <span>{{ $task->task_name }}</span>
+                                    </label>
                                 @endforeach
-                            </select>
+                            </fieldset>
                             <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
                         </div>
 
@@ -148,7 +157,7 @@
                         <div>
                             <x-input-label for="required_forms_documents" :value="__('List of Required Forms and Documents')" />
                             @php
-                                $selectedFormIds = array_map('strval', old('required_forms_documents', $monitoring->required_forms_documents ?? []));
+                                $selectedFormIds = array_values(array_unique(array_map('strval', old('required_forms_documents', $monitoring->required_forms_documents ?? []))));
                                 $expenseBreakdownByFormId = collect($monitoring->expenses_breakdown ?? [])->keyBy(fn (array $expense) => (int) ($expense['form_id'] ?? 0));
                                 $expenseAmounts = $forms->mapWithKeys(fn ($form) => [(string) $form->id => (float) ($expenseBreakdownByFormId->get($form->id)['expense_amount'] ?? $form->expense_amount ?? 0)])->all();
                                 $selectedExpenseIds = $selectedFormIds;
@@ -186,7 +195,11 @@
                                                 $isCompleted = $noteStatus === 'completed';
                                             @endphp
                                             <tr>
-                                                <td class="px-4 py-2 text-sm text-gray-900">{{ $form->form_name }}</td>
+                                                <td class="px-4 py-2 text-sm text-gray-900">
+                                                    {{ $form->form_name }}@if (($monitoring->required_forms_quantities[$form->id] ?? 1) > 1) x {{ $monitoring->required_forms_quantities[$form->id] }}@endif
+                                                    <input type="hidden" name="required_forms_documents[]" value="{{ $form->id }}">
+                                                    <input type="hidden" name="required_forms_quantities[{{ $form->id }}]" value="{{ old('required_forms_quantities.'.$form->id, $monitoring->required_forms_quantities[$form->id] ?? 1) }}">
+                                                </td>
                                                 <td class="px-4 py-2 text-sm text-gray-900">
                                                     @if ($noteStatus === 'completed')
                                                         <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">{{ __('Completed') }}</span>
@@ -211,7 +224,6 @@
                                                     </label>
                                                 </td>
                                             </tr>
-                                            <input type="hidden" name="required_forms_documents[]" value="{{ $form->id }}">
                                         @empty
                                             <tr>
                                                 <td colspan="5" class="px-4 py-2 text-sm text-gray-500 text-center">{{ __('No required forms selected.') }}</td>

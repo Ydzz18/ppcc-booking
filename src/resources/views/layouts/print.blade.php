@@ -3,7 +3,6 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
         <title>{{ $title }} - {{ config('app.name', 'PPCC Booking') }}</title>
         <style>
             :root { color-scheme: light; font-family: Arial, sans-serif; }
@@ -16,9 +15,7 @@
             .print-toolbar a, .print-toolbar button { border: 1px solid #d1d5db; border-radius: 6px; background: #fff; color: #1f2937; cursor: pointer; font-size: 14px; font-weight: 600; padding: 10px 16px; text-decoration: none; }
             .print-toolbar .print-button { border-color: #1d4ed8; background: #1d4ed8; color: #fff; }
             .print-toolbar .pdf-button { border-color: #047857; background: #047857; color: #fff; }
-            .paper { position: relative; background: #fff; border: 1px solid #e5e7eb; padding: 40px; }
-            .print-watermark { position: fixed; top: 50%; left: 50%; z-index: 0; width: 420px; height: 420px; margin: -210px 0 0 -210px; opacity: .08; pointer-events: none; }
-            .print-content { position: relative; z-index: 1; }
+            .paper { background: #fff; border: 1px solid #e5e7eb; padding: 40px; }
             .document-header { border-bottom: 2px solid #111827; margin-bottom: 28px; padding-bottom: 18px; }
             .document-header h1 { font-size: 26px; margin: 0 0 8px; }
             .document-header p { color: #6b7280; font-size: 13px; margin: 0; }
@@ -50,9 +47,7 @@
             .pdf-document .booking-info-heading { margin-bottom: 12px; padding-bottom: 6px; }
             .pdf-document .details td { padding-bottom: 12px; }
             .pdf-document .required-forms th,
-            .pdf-document .required-forms td,
-            .pdf-document .expenses th,
-            .pdf-document .expenses td { line-height: 1.2; padding: 7px 8px; }
+            .pdf-document .required-forms td { line-height: 1.2; padding: 7px 8px; }
             @media (max-width: 640px) {
                 .print-page { padding: 16px; }
                 .paper { padding: 24px 18px; }
@@ -65,6 +60,7 @@
                 .print-page { max-width: none; padding: 0; }
                 .print-toolbar, .print-edit-controls, .expense-edit-input, .expense-error { display: none !important; }
                 .expense-print-value { display: inline !important; }
+                .expense-edit-input[hidden] { display: none !important; }
                 .paper { border: 0; padding: 0; }
                 .section, tr { break-inside: avoid; }
             }
@@ -82,10 +78,7 @@
                 </div>
             @endunless
             <article class="paper">
-                <img class="print-watermark" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('watermark.png'))) }}" alt="" aria-hidden="true">
-                <div class="print-content">
-                    @yield('content')
-                </div>
+                @yield('content')
             </article>
         </main>
         <script>

@@ -60,8 +60,7 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Form or Requirement')
             ->assertSee('required_forms_documents[]')
             ->assertSee('selectedFormIds')
-            ->assertSee('task_expenses[')
-            ->assertSee('taskExpenses');
+            ->assertDontSee('task_expenses[');
 
         $this->actingAs($user)
             ->postJson(route('bookings.store'), [
@@ -69,7 +68,6 @@ class BookingExpensesTest extends TestCase
                 'client_name' => $client->id,
                 'type_of_task' => $task->id,
                 'required_forms_documents' => [$form->id],
-                'task_expenses' => [$form->id => '42.75'],
             ])
             ->assertCreated();
 
@@ -79,7 +77,7 @@ class BookingExpensesTest extends TestCase
             [
                 'form_id' => $form->id,
                 'form_name' => 'Permit Form',
-                'expense_amount' => 42.75,
+                'expense_amount' => 125.5,
             ],
         ], $monitoring->expenses_breakdown);
         $this->assertSame(125.5, (float) $form->fresh()->expense_amount);
@@ -87,29 +85,36 @@ class BookingExpensesTest extends TestCase
         $this->actingAs($user)
             ->get(route('bookings.index', ['tab' => 'monitoring']))
             ->assertOk()
-            ->assertSee('42.75')
+            ->assertSee('125.50')
+            ->assertSee('PHP 125.50')
             ->assertSee('Required Forms and Documents')
             ->assertSee('task-monitoring-form-status-row')
-            ->assertSee('task-monitoring-expense-row')
-            ->assertSee('task-monitoring-required-expense-row')
             ->assertSee('PHP')
+            ->assertDontSee('task-monitoring-expense-row')
+            ->assertDontSee('task-monitoring-required-expense-row')
             ->assertDontSee('Expenses Breakdown')
             ->assertDontSee('task-monitoring-label">Expenses');
 
-        $this->actingAs($user)
+        $printResponse = $this->actingAs($user)
             ->get(route('bookings.print', $monitoring))
             ->assertOk()
             ->assertSee('Permit Form')
             ->assertDontSee('Unselected Form')
-            ->assertSee('Required Forms and Documents')
-            ->assertSee('Expenses')
-            ->assertSee('class="required-forms"', false)
-            ->assertSee('class="expenses"', false)
+            ->assertDontSee('Amount (PHP)')
             ->assertSee(route('bookings.print.expenses.update', $monitoring), false)
             ->assertSee('Edit Expenses')
             ->assertSee('expenses['.$form->id.']', false)
-            ->assertSee('42.75')
-            ->assertSee('PHP 42.75');
+            ->assertSee('Expenses')
+            ->assertSee('class="section expenses-section"', false)
+            ->assertSee('class="expenses"', false)
+            ->assertSee('Amount')
+            ->assertSee('PHP 125.50')
+            ->assertSee('Total Expenses');
+
+        preg_match('/<table class="required-forms">.*?<\/table>/s', $printResponse->getContent(), $requiredFormsTable);
+        $this->assertNotEmpty($requiredFormsTable);
+        $this->assertStringNotContainsString('Expenses', $requiredFormsTable[0]);
+        $this->assertStringNotContainsString('PHP', $requiredFormsTable[0]);
 
         $this->actingAs($user)
             ->get(route('bookings.pdf', $monitoring))
@@ -127,7 +132,7 @@ class BookingExpensesTest extends TestCase
             ])
             ->assertSessionHasNoErrors();
 
-        $this->assertSame(42.75, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
+        $this->assertSame(125.5, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
     }
 
     public function test_print_expenses_can_be_updated_without_changing_form_defaults(): void
@@ -167,6 +172,49 @@ class BookingExpensesTest extends TestCase
         $this->assertSame(87.65, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
     }
 
+    public function test_multiple_task_types_combine_shared_document_quantities(): void
+    {
+        [$user, $client, $task, $form] = $this->createBookingFixture();
+        $secondTask = Task::create([
+            'agency' => 'Another Agency',
+            'task_name' => 'Second Task',
+            'required_forms_documents' => [$form->id],
+        ]);
+        $task->update(['required_forms_documents' => [$form->id]]);
+
+        $this->actingAs($user)
+            ->postJson(route('bookings.store'), [
+                'date_task_received' => '2026-10-01',
+                'client_name' => $client->id,
+                'type_of_task' => [$task->id, $secondTask->id],
+                'required_forms_documents' => [$form->id],
+                'required_forms_quantities' => [$form->id => 2],
+                'task_expenses' => [$form->id => '42.75'],
+            ])
+            ->assertCreated();
+
+        $monitoring = TaskMonitoring::query()->firstOrFail();
+        $this->assertSame([$task->id, $secondTask->id], $monitoring->task_ids);
+        $this->assertSame([$form->id => 2], $monitoring->required_forms_quantities);
+
+        $this->actingAs($user)
+            ->get(route('bookings.index', ['tab' => 'monitoring']))
+            ->assertOk()
+            ->assertSee('Sample Task, Second Task')
+            ->assertSee('Permit Form x 2');
+
+        $this->actingAs($user)
+            ->get(route('bookings.print', $monitoring))
+            ->assertOk()
+            ->assertSee('Sample Task, Second Task')
+            ->assertSee('Permit Form')
+            ->assertSee('2')
+            ->assertDontSee('Amount (PHP)')
+            ->assertSee('Expenses')
+            ->assertSee('PHP 42.75')
+            ->assertSee('Total Expenses');
+    }
+
     public function test_client_contact_person_can_be_saved(): void
     {
         $user = User::factory()->create();
@@ -196,59 +244,6 @@ class BookingExpensesTest extends TestCase
             'client_name' => 'Contact Test Client',
             'contact_person' => 'Jordan Example',
         ]);
-    }
-
-    public function test_task_entry_can_save_multiple_task_types(): void
-    {
-        [$user, $client, $task, $form] = $this->createBookingFixture();
-        $task->update(['required_forms_documents' => [$form->id]]);
-        $secondForm = FormItem::create([
-            'form_name' => 'Clearance Form',
-            'expense_amount' => 60.00,
-        ]);
-        $secondTask = Task::create([
-            'agency' => 'Another Agency',
-            'task_name' => 'Second Task',
-            'required_forms_documents' => [$secondForm->id],
-        ]);
-
-        $this->actingAs($user)
-            ->get(route('bookings.index'))
-            ->assertOk()
-            ->assertSee('type_of_task[]')
-            ->assertSee('selectedTaskIds');
-
-        $this->actingAs($user)
-            ->postJson(route('bookings.store'), [
-                'date_task_received' => '2026-10-01',
-                'client_name' => $client->id,
-                'type_of_task' => [$task->id, $secondTask->id],
-                'required_forms_documents' => [$form->id, $secondForm->id],
-                'task_expenses' => [
-                    $form->id => '42.75',
-                    $secondForm->id => '60.00',
-                ],
-            ])
-            ->assertCreated();
-
-        $monitoring = TaskMonitoring::query()->firstOrFail();
-        $this->assertSame([$task->id, $secondTask->id], $monitoring->task_ids);
-        $this->assertSame([$form->id, $secondForm->id], $monitoring->required_forms_documents);
-
-        $this->actingAs($user)
-            ->get(route('bookings.index', ['tab' => 'monitoring']))
-            ->assertOk()
-            ->assertSee('Sample Task, Second Task');
-
-        $this->actingAs($user)
-            ->get(route('bookings.print', $monitoring))
-            ->assertOk()
-            ->assertSee('Sample Task, Second Task');
-
-        $this->actingAs($user)
-            ->get(route('bookings.edit', $monitoring))
-            ->assertOk()
-            ->assertSee('Sample Task, Second Task');
     }
 
     public function test_task_monitoring_edit_shows_expense_checkboxes_and_total(): void

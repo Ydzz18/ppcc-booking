@@ -67,9 +67,8 @@ class BookingController extends Controller
         }
 
         $taskNamesById = $tasks->pluck('task_name', 'id');
-        $formExpensesById = $forms->pluck('expense_amount', 'id');
 
-        return view('bookings', compact('clients', 'contactPersons', 'tasks', 'forms', 'monitorings', 'formNamesById', 'formExpensesById', 'formStatusesByMonitoringAndForm', 'taskNamesById'));
+        return view('bookings', compact('clients', 'contactPersons', 'tasks', 'forms', 'monitorings', 'formNamesById', 'formStatusesByMonitoringAndForm', 'taskNamesById'));
     }
 
     /**
@@ -87,11 +86,14 @@ class BookingController extends Controller
             'type_of_task.*' => ['integer', 'distinct', 'exists:tasks,id'],
             'required_forms_documents' => ['nullable', 'array'],
             'required_forms_documents.*' => ['integer', 'exists:forms,id'],
-            'task_expenses' => ['nullable', 'array'],
-            'task_expenses.*' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
+            'required_forms_quantities' => ['nullable', 'array'],
+            'required_forms_quantities.*' => ['required', 'integer', 'min:1'],
         ]);
 
         $requiredFormIds = collect($validated['required_forms_documents'] ?? [])->map(fn ($id) => (int) $id)->unique()->values()->all();
+        $requiredFormQuantities = collect($requiredFormIds)->mapWithKeys(fn (int $formId) => [
+            $formId => max(1, (int) ($validated['required_forms_quantities'][$formId] ?? 1)),
+        ])->all();
 
         TaskMonitoring::create([
             'date_task_received' => $validated['date_task_received'],
@@ -100,10 +102,10 @@ class BookingController extends Controller
             'task_ids' => $validated['type_of_task'],
             'assigned_responsible_person_id' => $validated['client_name'],
             'required_forms_documents' => $requiredFormIds,
+            'required_forms_quantities' => $requiredFormQuantities,
             'expenses_breakdown' => $this->expenseBreakdown(
                 $requiredFormIds,
                 [],
-                $validated['task_expenses'] ?? []
             ),
             'submission_status' => 'pending',
         ]);
@@ -159,9 +161,7 @@ class BookingController extends Controller
             || ! empty($monitoring->receiving_officer)
             || ! empty($monitoring->acknowledgement_receipt_reference_number);
 
-        $taskNames = $tasks->whereIn('id', $monitoring->task_ids ?: [$monitoring->task_id])->pluck('task_name')->implode(', ');
-
-        return view('task-monitorings.edit', compact('monitoring', 'clients', 'tasks', 'contactPersons', 'forms', 'notesByForm', 'showSubmissionForm', 'taskNames'));
+        return view('task-monitorings.edit', compact('monitoring', 'clients', 'tasks', 'contactPersons', 'forms', 'notesByForm', 'showSubmissionForm'));
     }
 
     /**
@@ -192,7 +192,6 @@ class BookingController extends Controller
             ->sort()
             ->values()
             ->all();
-
         if ($expectedIds !== $submittedIds) {
             throw ValidationException::withMessages([
                 'expenses' => __('Expense values must match the booking documents.'),
@@ -231,20 +230,6 @@ class BookingController extends Controller
             ->download('booking-'.$monitoring->id.'.pdf');
     }
 
-    private function taskNamesForMonitoring(TaskMonitoring $monitoring): string
-    {
-        $taskIds = collect($monitoring->task_ids ?: [$monitoring->task_id])
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values();
-
-        return Task::query()
-            ->whereIn('id', $taskIds)
-            ->orderBy('task_name')
-            ->pluck('task_name')
-            ->implode(', ') ?: '—';
-    }
-
     /**
      * Load the booking data shared by the preview and PDF responses.
      */
@@ -254,6 +239,7 @@ class BookingController extends Controller
 
         $requiredFormIds = collect($monitoring->required_forms_documents ?? [])
             ->map(fn ($id) => (int) $id)
+            ->unique()
             ->values();
         $formsById = FormItem::query()
             ->whereIn('id', $requiredFormIds)
@@ -263,7 +249,7 @@ class BookingController extends Controller
             ->where('task_monitoring_id', $monitoring->id)
             ->get()
             ->keyBy('form_id');
-        $expensesByFormId = collect($monitoring->expenses_breakdown ?? [])
+        $expensesByForm = collect($monitoring->expenses_breakdown ?? [])
             ->keyBy(fn (array $expense) => (int) ($expense['form_id'] ?? 0));
 
         return $requiredFormIds->map(fn (int $formId) => [
@@ -272,8 +258,21 @@ class BookingController extends Controller
             'status' => strtolower(trim((string) ($notesByForm->get($formId)?->note_status ?? 'pending'))),
             'note' => $notesByForm->get($formId)?->notes_remarks,
             'note_date' => $notesByForm->get($formId)?->note_date,
-            'expense_amount' => (float) ($expensesByFormId->get($formId)['expense_amount'] ?? $formsById->get($formId)?->expense_amount ?? 0),
+            'quantity' => max(1, (int) ($monitoring->required_forms_quantities[$formId] ?? 1)),
+            'expense_amount' => (float) ($expensesByForm->get($formId)['expense_amount'] ?? $formsById->get($formId)?->expense_amount ?? 0),
         ]);
+    }
+
+    private function taskNamesForMonitoring(TaskMonitoring $monitoring): string
+    {
+        $taskIds = collect($monitoring->task_ids ?: [$monitoring->task_id])
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $taskNames = Task::query()->whereIn('id', $taskIds)->orderBy('task_name')->pluck('task_name');
+
+        return $taskNames->isNotEmpty() ? $taskNames->implode(', ') : '—';
     }
 
     /**
@@ -292,6 +291,8 @@ class BookingController extends Controller
             'assigned_responsible_person' => ['required', 'integer', 'exists:clients,id'],
             'required_forms_documents' => ['nullable', 'array'],
             'required_forms_documents.*' => ['integer', 'exists:forms,id'],
+            'required_forms_quantities' => ['nullable', 'array'],
+            'required_forms_quantities.*' => ['required', 'integer', 'min:1'],
             'date_of_submission' => ['nullable', 'date'],
             'receiving_officer' => ['nullable', 'string', 'max:255'],
             'acknowledgement_receipt_reference_number' => ['nullable', 'string', 'max:255'],
@@ -312,7 +313,10 @@ class BookingController extends Controller
                 : $existingSubmissionNotes."\n".$newSubmissionNote;
         }
 
-        $requiredFormIds = $validated['required_forms_documents'] ?? [];
+        $requiredFormIds = collect($validated['required_forms_documents'] ?? [])->map(fn ($id) => (int) $id)->unique()->values()->all();
+        $requiredFormQuantities = collect($requiredFormIds)->mapWithKeys(fn (int $formId) => [
+            $formId => max(1, (int) ($validated['required_forms_quantities'][$formId] ?? $monitoring->required_forms_quantities[$formId] ?? 1)),
+        ])->all();
         $expensesBreakdown = $this->expenseBreakdown($requiredFormIds, $monitoring->expenses_breakdown ?? []);
 
         $monitoring->update([
@@ -322,6 +326,7 @@ class BookingController extends Controller
             'task_ids' => $validated['type_of_task'],
             'assigned_responsible_person_id' => $validated['assigned_responsible_person'],
             'required_forms_documents' => $requiredFormIds,
+            'required_forms_quantities' => $requiredFormQuantities,
             'expenses_breakdown' => $expensesBreakdown,
             'date_of_submission' => $validated['date_of_submission'] ?? null,
             'receiving_officer' => $validated['receiving_officer'] ?? null,
@@ -387,10 +392,9 @@ class BookingController extends Controller
     }
 
     /** @param array<int, int|string> $formIds
-     *  @param array<int, array<string, mixed>> $existingBreakdown
      *  @return array<int, array{form_id: int, form_name: string, expense_amount: float}>
      */
-    private function expenseBreakdown(array $formIds, array $existingBreakdown = [], array $expenseOverrides = []): array
+    private function expenseBreakdown(array $formIds, array $existingBreakdown = []): array
     {
         $existingByFormId = collect($existingBreakdown)
             ->filter(fn ($expense) => isset($expense['form_id']))
@@ -409,7 +413,7 @@ class BookingController extends Controller
             ->map(fn ($form) => is_array($form) ? $form : [
                 'form_id' => (int) $form->id,
                 'form_name' => $form->form_name,
-                'expense_amount' => (float) ($expenseOverrides[$form->id] ?? $form->expense_amount),
+                'expense_amount' => (float) $form->expense_amount,
             ])
             ->values()
             ->all();

@@ -5,9 +5,7 @@ import { applyTheme, syncBrandLogos } from './theme';
 
 window.Alpine = Alpine;
 
-Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, viewedEndpoint, userId) => ({
-	storageKey: `notifications-viewed-${userId}`,
-	viewedAt: Number(localStorage.getItem(`notifications-viewed-${userId}`)) || null,
+Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, viewedEndpoint) => ({
 	notificationsOpen: false,
 	notificationCount: initialCount,
 	headerNotifications: initialNotifications,
@@ -21,19 +19,11 @@ Alpine.data('liveNotifications', (initialCount, initialNotifications, endpoint, 
 		window.addEventListener('task-entry-created', () => this.refresh());
 	},
 
-	unreadNotifications(notifications) {
-		if (this.viewedAt === null) return notifications;
-		return notifications.filter((notification) => Date.parse(notification.created_at) > this.viewedAt);
-	},
-
 	async markNotificationsViewed() {
-		const latestNotificationTime = Math.max(...this.headerNotifications.map((notification) => Date.parse(notification.created_at) || 0), 0);
-		this.viewedAt = Math.max(Date.now(), latestNotificationTime);
 		this.notificationCount = 0;
 		this.headerNotifications.forEach((notification) => this.seenNotificationIds.add(notification.id));
 
 		try {
-			localStorage.setItem(this.storageKey, String(this.viewedAt));
 			const response = await fetch(viewedEndpoint, {
 				method: 'POST',
 				credentials: 'same-origin',

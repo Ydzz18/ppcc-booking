@@ -111,7 +111,7 @@
             @endif
         </section>
 
-        <section aria-labelledby="client-management-title" class="grid gap-6 md:grid-cols-2">
+        <section aria-labelledby="client-management-title" class="grid gap-6 lg:grid-cols-2">
             <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex flex-wrap items-end justify-between gap-4">
                     <div>
@@ -120,11 +120,11 @@
                     <a href="{{ route('settings.index', ['tab' => 'clients']) }}" class="text-sm font-medium text-indigo-700 hover:text-indigo-900">{{ __('Open directory') }} &rarr;</a>
                 </div>
 
-                <form method="GET" action="{{ route('dashboard') }}" class="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_160px_auto]">
+                <form method="GET" action="{{ route('dashboard') }}" class="mt-5 grid grid-cols-1 gap-3">
                     <label class="sr-only" for="client_search">{{ __('Search clients') }}</label>
-                    <input id="client_search" name="client_search" value="{{ $search }}" type="search" placeholder="{{ __('Search name, business, or address') }}" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
+                    <input id="client_search" name="client_search" value="{{ $search }}" type="search" placeholder="{{ __('Search name, business, or address') }}" class="min-w-0 w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
                     <label class="sr-only" for="client_filter">{{ __('Filter clients') }}</label>
-                    <select id="client_filter" name="client_filter" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
+                    <select id="client_filter" name="client_filter" class="min-w-0 w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
                         <option value="all" @selected($clientFilter === 'all')>{{ __('All clients') }}</option>
                         <option value="recent" @selected($clientFilter === 'recent')>{{ __('Added in 30 days') }}</option>
                         <option value="oldest" @selected($clientFilter === 'oldest')>{{ __('Oldest first') }}</option>
