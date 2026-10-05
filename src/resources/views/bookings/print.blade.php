@@ -9,26 +9,19 @@
         $requiredFormsCompleted = $requiredForms->isNotEmpty() && $requiredForms->every(fn ($form) => $form['status'] === 'completed');
         $bookingStatus = $requiredFormsCompleted || strtolower((string) ($monitoring->submission_status ?? 'pending')) === 'completed' ? __('Completed') : __('Pending');
         $taskAgeDays = $monitoring->taskAgeInDays();
-<<<<<<< HEAD
+        $totalExpenses = $requiredForms->sum('expense_amount');
         $bookingDetails = [
             [__('Booking ID'), $monitoring->id],
             [__('Status'), $bookingStatus],
             [__('Date Task Received'), $monitoring->date_task_received?->format('F d, Y') ?? '—'],
             [__('Task Age'), $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days'))],
             [__('Client Name'), $monitoring->client?->client_name ?? '—'],
-            [__('Type of Task'), $monitoring->task?->task_name ?? '—'],
-            [__('Client Name'), $monitoring->assignedResponsiblePerson?->contact_person ?? '—'],
+            [__('Type of Task'), $taskNames],
+            [__('Assigned Responsible Person'), $monitoring->assignedResponsiblePerson?->contact_person ?? '—'],
             [__('Submission Status'), ucfirst((string) ($monitoring->submission_status ?? 'pending'))],
             [__('Date of Submission'), $monitoring->date_of_submission?->format('F d, Y') ?? '—'],
             [__('Receiving Officer'), $monitoring->receiving_officer ?? '—'],
             [__('Acknowledgement Receipt / Reference'), $monitoring->acknowledgement_receipt_reference_number ?? '—'],
-=======
-        $totalExpenses = $requiredForms->sum('expense_amount');
-        $bookingDetails = [
-            [__('Status'), $bookingStatus],
-            [__('Task Age'), $taskAgeDays === null ? '—' : $taskAgeDays.' '.($taskAgeDays === 1 ? __('day') : __('days'))],
-            [__('Submission Status'), ucfirst((string) ($monitoring->submission_status ?? 'pending'))],
->>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
         ];
     @endphp
 
@@ -38,14 +31,7 @@
     </header>
 
     <section class="section">
-<<<<<<< HEAD
         <h2>{{ __('Booking Information') }}</h2>
-=======
-        <div class="booking-info-heading">
-            <h2>{{ $monitoring->client?->client_name ?? '—' }}</h2>
-            <h2>{{ __('Type of Task') }}: {{ $taskNames }}</h2>
-        </div>
->>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
         <table class="details">
             <tbody>
                 @foreach (array_chunk($bookingDetails, 2) as $detailsRow)
@@ -74,11 +60,7 @@
         @else
             <table class="required-forms">
                 <thead>
-<<<<<<< HEAD
-                    <tr><th>{{ __('Form / Document') }}</th><th>{{ __('Status') }}</th><th>{{ __('Notes / Remarks') }}</th><th>{{ __('Note Date') }}</th><th>{{ __('Amount (PHP)') }}</th></tr>
-=======
-                    <tr><th>{{ __('Form / Document') }}</th><th>{{ __('Quantity') }}</th><th>{{ __('Status') }}</th><th>{{ __('Notes / Remarks') }}</th><th>{{ __('Note Date') }}</th><th>{{ __('Expenses') }}</th></tr>
->>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
+                    <tr><th>{{ __('Form / Document') }}</th><th>{{ __('Quantity') }}</th><th>{{ __('Status') }}</th><th>{{ __('Notes / Remarks') }}</th><th>{{ __('Note Date') }}</th></tr>
                 </thead>
                 <tbody>
                     @foreach ($requiredForms as $form)
@@ -88,26 +70,83 @@
                             <td class="status">{{ $form['status'] === 'completed' ? __('Completed') : __('Pending') }}</td>
                             <td>{{ $form['note'] ?: '—' }}</td>
                             <td>{{ $form['note_date']?->format('F d, Y') ?? '—' }}</td>
-<<<<<<< HEAD
-                            <td>{{ number_format($form['expense_amount'], 2) }}</td>
-=======
-                            <td>PHP {{ number_format($form['expense_amount'], 2) }}</td>
->>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
                         </tr>
                     @endforeach
                 </tbody>
-                <tfoot>
-                    <tr>
-<<<<<<< HEAD
-                        <th colspan="4">{{ __('Total Expenses') }}</th>
-                        <th>PHP {{ number_format((float) $requiredForms->sum('expense_amount'), 2) }}</th>
-=======
-                        <th colspan="5">{{ __('Total Expenses') }}</th>
-                        <th>PHP {{ number_format($totalExpenses, 2) }}</th>
->>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
-                    </tr>
-                </tfoot>
             </table>
+        @endif
+    </section>
+
+    <section class="section">
+        <h2>{{ __('Expenses') }}</h2>
+        @if ($requiredForms->isEmpty())
+            <p class="empty">{{ __('No expenses recorded.') }}</p>
+        @else
+            @if ($isPdf ?? false)
+                <table class="expenses">
+                    <thead>
+                        <tr><th>{{ __('Form / Document') }}</th><th>{{ __('Expenses') }}</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($requiredForms as $form)
+                            <tr>
+                                <td>{{ $form['name'] }}</td>
+                                <td>PHP {{ number_format($form['expense_amount'], 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>{{ __('Total Expenses') }}</th>
+                            <th>PHP {{ number_format((float) $requiredForms->sum('expense_amount'), 2) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            @else
+                <form method="POST" action="{{ route('bookings.print.expenses.update', $monitoring) }}" data-expenses-form @if ($errors->has('expenses') || old('expenses')) data-start-editing @endif>
+                    @csrf
+                    @method('PATCH')
+                    <div class="print-edit-controls">
+                        @if (session('status') === 'expenses-updated')
+                            <p role="status">{{ __('Expenses updated successfully.') }}</p>
+                        @endif
+                        <button type="button" data-edit-expenses>{{ __('Edit Expenses') }}</button>
+                        <button type="submit" data-save-expenses hidden>{{ __('Save Expenses') }}</button>
+                        <button type="button" data-cancel-expenses hidden>{{ __('Cancel') }}</button>
+                    </div>
+                    @error('expenses')
+                        <p class="expense-error" role="alert">{{ $message }}</p>
+                    @enderror
+                    <table class="expenses">
+                        <thead>
+                            <tr><th>{{ __('Form / Document') }}</th><th>{{ __('Expenses') }}</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($requiredForms as $form)
+                                <tr>
+                                    <td>{{ $form['name'] }}</td>
+                                    <td>
+                                        <span class="expense-print-value">PHP {{ number_format($form['expense_amount'], 2) }}</span>
+                                        <label class="expense-edit-input" hidden>
+                                            <span class="sr-only">{{ __('Expense for') }} {{ $form['name'] }}</span>
+                                            <input data-expense-input data-original-value="{{ number_format($form['expense_amount'], 2, '.', '') }}" type="number" name="expenses[{{ $form['id'] }}]" min="0" step="0.01" required value="{{ old('expenses.'.$form['id'], number_format($form['expense_amount'], 2, '.', '')) }}">
+                                        </label>
+                                        @error('expenses.'.$form['id'])
+                                            <p class="expense-error" role="alert">{{ $message }}</p>
+                                        @enderror
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>{{ __('Total Expenses') }}</th>
+                                <th><span data-expense-total>PHP {{ number_format((float) $requiredForms->sum('expense_amount'), 2) }}</span></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </form>
+            @endif
         @endif
     </section>
 

@@ -9,7 +9,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('task_monitorings', function (Blueprint $table) {
-            $table->json('task_ids')->nullable()->after('task_id');
             $table->json('required_forms_quantities')->nullable()->after('required_forms_documents');
         });
     }
@@ -17,7 +16,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('task_monitorings', function (Blueprint $table) {
-            $table->dropColumn(['task_ids', 'required_forms_quantities']);
+            $table->dropColumn('required_forms_quantities');
         });
     }
 };

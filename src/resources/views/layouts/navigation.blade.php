@@ -41,9 +41,6 @@
                         <svg class="mobile-sidebar-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5A2.25 2.25 0 0 1 6.75 5.25h10.5A2.25 2.25 0 0 1 19.5 7.5v10.75a.5.5 0 0 1-.5.5H6.75A2.25 2.25 0 0 1 4.5 16.5v-9Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 8.25h15m-4 5.25h.01" /></svg>
                         <span class="mobile-sidebar-label">{{ __('Expenses') }}</span>
                     </x-nav-link>
-                    <x-nav-link :href="route('expenses.index')" :active="request()->routeIs('expenses.*')">
-                        {{ __('Expenses') }}
-                    </x-nav-link>
                     @can('manage-users')
                         <x-nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')" title="{{ __('Audit Logs') }}">
                             <svg class="mobile-sidebar-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5h-2A1.75 1.75 0 0 0 4.5 6.25v13A1.75 1.75 0 0 0 6.25 21h11.5a1.75 1.75 0 0 0 1.75-1.75v-13a1.75 1.75 0 0 0-1.75-1.75h-2M8.25 4.5A1.75 1.75 0 0 1 10 2.75h4a1.75 1.75 0 0 1 1.75 1.75m-7.5 7.25 2.25 2.25 4.75-4.75" /></svg>

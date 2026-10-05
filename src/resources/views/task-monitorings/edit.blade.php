@@ -25,11 +25,7 @@
                         <!-- Type of Task Column -->
                         <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
                             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Type of Task') }}</p>
-                            <p class="mt-2 text-sm font-medium text-gray-900">
-                                @foreach ($tasks->filter(fn ($task) => in_array((string) $task->id, $selectedTaskIds, true)) as $task)
-                                    {{ $task->task_name }}@unless ($loop->last), @endunless
-                                @endforeach
-                            </p>
+                            <p class="mt-2 text-sm font-medium text-gray-900">{{ $taskNames ?: '—' }}</p>
                         </div>
 
                         <!-- Client Name Column -->
@@ -141,23 +137,14 @@
 
                         <div>
                             <x-input-label for="type_of_task" :value="__('Type of Task')" />
-<<<<<<< HEAD
-                            <select id="type_of_task" name="type_of_task" disabled x-bind:disabled="!isBookingFieldsEditable" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">{{ __('Select Task') }}</option>
-=======
                             <fieldset id="type_of_task" disabled x-bind:disabled="!isBookingFieldsEditable" class="mt-1 max-h-40 space-y-2 overflow-y-auto rounded-md border border-gray-300 p-3">
->>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
                                 @foreach ($tasks as $task)
                                     <label class="flex items-start gap-2 text-sm text-gray-700">
                                         <input type="checkbox" name="type_of_task[]" value="{{ $task->id }}" @checked(in_array((string) $task->id, $selectedTaskIds, true)) class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                                         <span>{{ $task->task_name }}</span>
                                     </label>
                                 @endforeach
-<<<<<<< HEAD
-                            </select>
-=======
                             </fieldset>
->>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
                             <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
                         </div>
 

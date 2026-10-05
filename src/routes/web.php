@@ -132,6 +132,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{monitoring}/print', [BookingController::class, 'print'])->name('bookings.print');
+    Route::patch('/bookings/{monitoring}/print/expenses', [BookingController::class, 'updatePrintExpenses'])->name('bookings.print.expenses.update');
     Route::get('/bookings/{monitoring}/pdf', [BookingController::class, 'downloadPdf'])->name('bookings.pdf');
     Route::get('/bookings/{monitoring}/edit', [BookingController::class, 'edit'])->name('bookings.edit');
     Route::patch('/bookings/{monitoring}', [BookingController::class, 'update'])->name('bookings.update');

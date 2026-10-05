@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class TaskMonitoring extends Model
 {
@@ -39,10 +39,7 @@ class TaskMonitoring extends Model
         'task_ids',
         'assigned_responsible_person_id',
         'required_forms_documents',
-<<<<<<< HEAD
-=======
         'required_forms_quantities',
->>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
         'expenses_breakdown',
         'submission_status',
         'date_of_submission',
@@ -59,12 +56,9 @@ class TaskMonitoring extends Model
     {
         return [
             'date_task_received' => 'date',
-            'required_forms_documents' => 'array',
-<<<<<<< HEAD
-=======
             'task_ids' => 'array',
+            'required_forms_documents' => 'array',
             'required_forms_quantities' => 'array',
->>>>>>> 1a7868b8dbad2a38810a6b76f4e019c747f9568d
             'expenses_breakdown' => 'array',
             'date_of_submission' => 'date',
         ];
