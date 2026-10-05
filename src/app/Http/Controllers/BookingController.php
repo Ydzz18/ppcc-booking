@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class BookingController extends Controller
@@ -174,6 +175,49 @@ class BookingController extends Controller
         return view('bookings.print', compact('monitoring', 'requiredForms', 'taskNames'));
     }
 
+    public function updatePrintExpenses(Request $request, TaskMonitoring $monitoring): RedirectResponse
+    {
+        $validated = $request->validate([
+            'expenses' => ['required', 'array'],
+            'expenses.*' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
+        ]);
+
+        $requiredFormIds = collect($monitoring->required_forms_documents ?? [])
+            ->map(fn ($formId) => (int) $formId)
+            ->unique()
+            ->values();
+        $expectedIds = $requiredFormIds->map(fn (int $formId) => (string) $formId)->sort()->values()->all();
+        $submittedIds = collect(array_keys($validated['expenses']))
+            ->map(fn ($formId) => (string) $formId)
+            ->sort()
+            ->values()
+            ->all();
+        if ($expectedIds !== $submittedIds) {
+            throw ValidationException::withMessages([
+                'expenses' => __('Expense values must match the booking documents.'),
+            ]);
+        }
+
+        $existingExpenses = collect($monitoring->expenses_breakdown ?? [])
+            ->keyBy(fn (array $expense) => (int) ($expense['form_id'] ?? 0));
+        $formsById = FormItem::query()
+            ->whereIn('id', $requiredFormIds)
+            ->get(['id', 'form_name'])
+            ->keyBy('id');
+
+        $monitoring->update([
+            'expenses_breakdown' => $requiredFormIds->map(fn (int $formId) => [
+                'form_id' => $formId,
+                'form_name' => $existingExpenses->get($formId)['form_name']
+                    ?? $formsById->get($formId)?->form_name
+                    ?? __('Unknown form'),
+                'expense_amount' => (float) $validated['expenses'][(string) $formId],
+            ])->all(),
+        ]);
+
+        return Redirect::route('bookings.print', $monitoring)->with('status', 'expenses-updated');
+    }
+
     /**
      * Download a PDF of the specified booking.
      */
@@ -209,6 +253,7 @@ class BookingController extends Controller
             ->keyBy(fn (array $expense) => (int) ($expense['form_id'] ?? 0));
 
         return $requiredFormIds->map(fn (int $formId) => [
+            'id' => $formId,
             'name' => $formsById->get($formId)?->form_name ?? __('Unknown form'),
             'status' => strtolower(trim((string) ($notesByForm->get($formId)?->note_status ?? 'pending'))),
             'note' => $notesByForm->get($formId)?->notes_remarks,

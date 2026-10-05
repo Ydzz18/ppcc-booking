@@ -34,6 +34,11 @@
             th { background: #f9fafb; font-size: 11px; text-transform: uppercase; }
             .status { font-weight: 700; text-transform: capitalize; }
             .empty { color: #6b7280; font-size: 13px; }
+            .print-edit-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+            .print-edit-controls button { border: 1px solid #1d4ed8; border-radius: 6px; background: #1d4ed8; color: #fff; cursor: pointer; font-size: 13px; font-weight: 600; padding: 8px 12px; }
+            .expense-edit-input input { width: 130px; border: 1px solid #9ca3af; border-radius: 4px; padding: 6px 8px; text-align: right; }
+            .expense-error { color: #b91c1c; font-size: 12px; margin: 4px 0; }
+            .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
             .pdf-document .print-page { max-width: none; padding: 0; }
             .pdf-document .paper { border: 0; padding: 0; }
             .pdf-document { background: #fff; }
@@ -53,7 +58,9 @@
             @media print {
                 body { background: #fff; }
                 .print-page { max-width: none; padding: 0; }
-                .print-toolbar { display: none; }
+                .print-toolbar, .print-edit-controls, .expense-edit-input, .expense-error { display: none !important; }
+                .expense-print-value { display: inline !important; }
+                .expense-edit-input[hidden] { display: none !important; }
                 .paper { border: 0; padding: 0; }
                 .section, tr { break-inside: avoid; }
             }
@@ -74,5 +81,36 @@
                 @yield('content')
             </article>
         </main>
+        <script>
+            document.querySelectorAll('[data-expenses-form]').forEach((form) => {
+                const editButton = form.querySelector('[data-edit-expenses]');
+                const saveButton = form.querySelector('[data-save-expenses]');
+                const cancelButton = form.querySelector('[data-cancel-expenses]');
+                const inputs = [...form.querySelectorAll('[data-expense-input]')];
+                const total = form.querySelector('[data-expense-total]');
+
+                const updateTotal = () => {
+                    const sum = inputs.reduce((amount, input) => amount + Number(input.value || 0), 0);
+                    total.textContent = `PHP ${sum.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                };
+                const setEditing = (editing) => {
+                    editButton.hidden = editing;
+                    saveButton.hidden = !editing;
+                    cancelButton.hidden = !editing;
+                    form.querySelectorAll('.expense-print-value').forEach((value) => { value.hidden = editing; });
+                    form.querySelectorAll('.expense-edit-input').forEach((field) => { field.hidden = !editing; });
+                };
+
+                editButton.addEventListener('click', () => setEditing(true));
+                cancelButton.addEventListener('click', () => {
+                    inputs.forEach((input) => { input.value = input.dataset.originalValue; });
+                    updateTotal();
+                    setEditing(false);
+                });
+                inputs.forEach((input) => input.addEventListener('input', updateTotal));
+
+                if (form.hasAttribute('data-start-editing')) setEditing(true);
+            });
+        </script>
     </body>
 </html>

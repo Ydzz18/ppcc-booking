@@ -95,15 +95,26 @@ class BookingExpensesTest extends TestCase
             ->assertDontSee('Expenses Breakdown')
             ->assertDontSee('task-monitoring-label">Expenses');
 
-        $this->actingAs($user)
+        $printResponse = $this->actingAs($user)
             ->get(route('bookings.print', $monitoring))
             ->assertOk()
             ->assertSee('Permit Form')
             ->assertDontSee('Unselected Form')
             ->assertDontSee('Amount (PHP)')
+            ->assertSee(route('bookings.print.expenses.update', $monitoring), false)
+            ->assertSee('Edit Expenses')
+            ->assertSee('expenses['.$form->id.']', false)
             ->assertSee('Expenses')
+            ->assertSee('class="section expenses-section"', false)
+            ->assertSee('class="expenses"', false)
+            ->assertSee('Amount')
             ->assertSee('PHP 125.50')
             ->assertSee('Total Expenses');
+
+        preg_match('/<table class="required-forms">.*?<\/table>/s', $printResponse->getContent(), $requiredFormsTable);
+        $this->assertNotEmpty($requiredFormsTable);
+        $this->assertStringNotContainsString('Expenses', $requiredFormsTable[0]);
+        $this->assertStringNotContainsString('PHP', $requiredFormsTable[0]);
 
         $this->actingAs($user)
             ->get(route('bookings.pdf', $monitoring))
@@ -122,6 +133,43 @@ class BookingExpensesTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertSame(125.5, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
+    }
+
+    public function test_print_expenses_can_be_updated_without_changing_form_defaults(): void
+    {
+        [$user, $client, $task, $form] = $this->createBookingFixture();
+        $monitoring = TaskMonitoring::create([
+            'date_task_received' => '2026-09-30',
+            'client_id' => $client->id,
+            'task_id' => $task->id,
+            'task_ids' => [$task->id],
+            'assigned_responsible_person_id' => $client->id,
+            'required_forms_documents' => [$form->id],
+            'expenses_breakdown' => [[
+                'form_id' => $form->id,
+                'form_name' => $form->form_name,
+                'expense_amount' => 125.5,
+            ]],
+            'submission_status' => 'pending',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('bookings.print.expenses.update', $monitoring), [
+                'expenses' => [$form->id => '87.65'],
+            ])
+            ->assertRedirect(route('bookings.print', $monitoring))
+            ->assertSessionHas('status', 'expenses-updated');
+
+        $this->assertSame(87.65, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
+        $this->assertSame(125.5, (float) $form->fresh()->expense_amount);
+
+        $this->actingAs($user)
+            ->patch(route('bookings.print.expenses.update', $monitoring), [
+                'expenses' => [$form->id => '99.00', $form->id + 999 => '1.00'],
+            ])
+            ->assertSessionHasErrors('expenses');
+
+        $this->assertSame(87.65, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
     }
 
     public function test_multiple_task_types_combine_shared_document_quantities(): void
