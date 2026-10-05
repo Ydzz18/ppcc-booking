@@ -154,35 +154,14 @@ class BookingExpensesTest extends TestCase
 
         $monitoring = TaskMonitoring::query()->firstOrFail();
         $this->assertSame([$form->id], $monitoring->required_forms_documents);
-<<<<<<< HEAD
-        $this->assertSame([
-            [
-                'form_id' => $form->id,
-                'form_name' => 'Permit Form',
-                'expense_amount' => 125.5,
-            ],
-        ], $monitoring->expenses_breakdown);
-        $this->assertSame(125.5, (float) $form->fresh()->expense_amount);
-=======
         $this->assertSame([], $monitoring->expenses_breakdown);
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
 
         $this->actingAs($user)
             ->get(route('bookings.index', ['tab' => 'monitoring']))
             ->assertOk()
-<<<<<<< HEAD
-            ->assertSee('125.50')
-            ->assertSee('PHP 125.50')
-            ->assertSee('Required Forms and Documents')
-            ->assertSee('task-monitoring-form-status-row')
-            ->assertSee('PHP')
-            ->assertDontSee('task-monitoring-expense-row')
-            ->assertDontSee('task-monitoring-required-expense-row')
-=======
             ->assertSee('Required Forms and Documents')
             ->assertSee('task-monitoring-form-status-row')
             ->assertSee('No expenses recorded.')
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
             ->assertDontSee('Expenses Breakdown')
             ->assertDontSee('task-monitoring-label">Expenses');
 
@@ -191,23 +170,6 @@ class BookingExpensesTest extends TestCase
             ->assertOk()
             ->assertSee('Permit Form')
             ->assertDontSee('Unselected Form')
-<<<<<<< HEAD
-            ->assertDontSee('Amount (PHP)')
-            ->assertSee(route('bookings.print.expenses.update', $monitoring), false)
-            ->assertSee('Edit Expenses')
-            ->assertSee('expenses['.$form->id.']', false)
-            ->assertSee('Expenses')
-            ->assertSee('class="section expenses-section"', false)
-            ->assertSee('class="expenses"', false)
-            ->assertSee('Amount')
-            ->assertSee('PHP 125.50')
-            ->assertSee('Total Expenses');
-
-        preg_match('/<table class="required-forms">.*?<\/table>/s', $printResponse->getContent(), $requiredFormsTable);
-        $this->assertNotEmpty($requiredFormsTable);
-        $this->assertStringNotContainsString('Expenses', $requiredFormsTable[0]);
-        $this->assertStringNotContainsString('PHP', $requiredFormsTable[0]);
-=======
             ->assertSee('Required Forms and Documents')
             ->assertSee('Expenses')
             ->assertSee('class="required-forms"', false)
@@ -216,7 +178,6 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Edit Expenses')
             ->assertSee('Notarial Fee-SPA')
             ->assertSee('No expenses recorded.');
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
 
         $this->actingAs($user)
             ->patch(route('bookings.update', $monitoring), [
@@ -228,16 +189,14 @@ class BookingExpensesTest extends TestCase
             ])
             ->assertSessionHasNoErrors();
 
-<<<<<<< HEAD
-        $this->assertSame(125.5, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
-=======
         $this->assertSame([], $monitoring->fresh()->expenses_breakdown);
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
     }
 
-    public function test_print_expenses_can_be_updated_without_changing_form_defaults(): void
+    public function test_print_expenses_can_be_updated_without_changing_catalog_defaults(): void
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
+        $expense = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+        $expense->update(['default_amount' => 125.50]);
         $monitoring = TaskMonitoring::create([
             'date_task_received' => '2026-09-30',
             'client_id' => $client->id,
@@ -246,8 +205,8 @@ class BookingExpensesTest extends TestCase
             'assigned_responsible_person_id' => $client->id,
             'required_forms_documents' => [$form->id],
             'expenses_breakdown' => [[
-                'form_id' => $form->id,
-                'form_name' => $form->form_name,
+                'catalog_id' => $expense->id,
+                'catalog_name' => $expense->name,
                 'expense_amount' => 125.5,
             ]],
             'submission_status' => 'pending',
@@ -255,17 +214,17 @@ class BookingExpensesTest extends TestCase
 
         $this->actingAs($user)
             ->patch(route('bookings.print.expenses.update', $monitoring), [
-                'expenses' => [$form->id => '87.65'],
+                'expenses' => [$expense->id => '87.65'],
             ])
             ->assertRedirect(route('bookings.print', $monitoring))
             ->assertSessionHas('status', 'expenses-updated');
 
         $this->assertSame(87.65, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
-        $this->assertSame(125.5, (float) $form->fresh()->expense_amount);
+        $this->assertSame('125.50', $expense->fresh()->default_amount);
 
         $this->actingAs($user)
             ->patch(route('bookings.print.expenses.update', $monitoring), [
-                'expenses' => [$form->id => '99.00', $form->id + 999 => '1.00'],
+                'expenses' => [$expense->id => '99.00', $expense->id + 999 => '1.00'],
             ])
             ->assertSessionHasErrors('expenses');
 
@@ -310,10 +269,6 @@ class BookingExpensesTest extends TestCase
             ->assertSee('2')
             ->assertSee('Amount (PHP)')
             ->assertSee('Expenses')
-<<<<<<< HEAD
-            ->assertSee('PHP 42.75')
-            ->assertSee('Total Expenses');
-=======
             ->assertSee('No expenses recorded.')
             ->assertDontSee('Permit Form</td><td>PHP');
     }
@@ -407,7 +362,6 @@ class BookingExpensesTest extends TestCase
             ->assertRedirect(route('bookings.print', $monitoring));
 
         $this->assertSame([], $monitoring->fresh()->expenses_breakdown);
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
     }
 
     public function test_client_contact_person_can_be_saved(): void
@@ -441,9 +395,6 @@ class BookingExpensesTest extends TestCase
         ]);
     }
 
-<<<<<<< HEAD
-    public function test_task_monitoring_edit_shows_expense_checkboxes_and_total(): void
-=======
     public function test_task_entry_can_save_multiple_task_types(): void
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
@@ -491,7 +442,6 @@ class BookingExpensesTest extends TestCase
     }
 
     public function test_task_monitoring_edit_keeps_forms_as_checklist_requirements_only(): void
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
         $monitoring = TaskMonitoring::create([

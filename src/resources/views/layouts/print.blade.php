@@ -3,10 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-<<<<<<< HEAD
-=======
         <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
         <title>{{ $title }} - {{ config('app.name', 'PPCC Booking') }}</title>
         <style>
             :root { color-scheme: light; font-family: Arial, sans-serif; }
@@ -57,13 +54,9 @@
             .pdf-document .booking-info-heading { margin-bottom: 12px; padding-bottom: 6px; }
             .pdf-document .details td { padding-bottom: 12px; }
             .pdf-document .required-forms th,
-<<<<<<< HEAD
-            .pdf-document .required-forms td { line-height: 1.2; padding: 7px 8px; }
-=======
             .pdf-document .required-forms td,
             .pdf-document .expenses th,
             .pdf-document .expenses td { line-height: 1.2; padding: 7px 8px; }
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
             @media (max-width: 640px) {
                 .print-page { padding: 16px; }
                 .paper { padding: 24px 18px; }

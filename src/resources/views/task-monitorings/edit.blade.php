@@ -25,15 +25,11 @@
                         <!-- Type of Task Column -->
                         <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
                             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Type of Task') }}</p>
-<<<<<<< HEAD
                             <p class="mt-2 text-sm font-medium text-gray-900">
                                 @foreach ($tasks->filter(fn ($task) => in_array((string) $task->id, $selectedTaskIds, true)) as $task)
                                     {{ $task->task_name }}@unless ($loop->last), @endunless
                                 @endforeach
                             </p>
-=======
-                            <p class="mt-2 text-sm font-medium text-gray-900">{{ $taskNames ?: '—' }}</p>
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
                         </div>
 
                         <!-- Client Name Column -->
@@ -162,12 +158,6 @@
                             <x-input-label for="required_forms_documents" :value="__('List of Required Forms and Documents')" />
                             @php
                                 $selectedFormIds = array_values(array_unique(array_map('strval', old('required_forms_documents', $monitoring->required_forms_documents ?? []))));
-<<<<<<< HEAD
-                                $expenseBreakdownByFormId = collect($monitoring->expenses_breakdown ?? [])->keyBy(fn (array $expense) => (int) ($expense['form_id'] ?? 0));
-                                $expenseAmounts = $forms->mapWithKeys(fn ($form) => [(string) $form->id => (float) ($expenseBreakdownByFormId->get($form->id)['expense_amount'] ?? $form->expense_amount ?? 0)])->all();
-                                $selectedExpenseIds = $selectedFormIds;
-=======
->>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
                                 $allRequiredFormsCompleted = ! empty($selectedFormIds)
                                     && collect($selectedFormIds)->every(function (string $formId) use ($notesByForm): bool {
                                         return strtolower((string) ($notesByForm[(int) $formId]['note_status'] ?? 'pending')) === 'completed';
