@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FormItem;
 use App\Models\TaskMonitoring;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -62,9 +61,6 @@ class ExpenseController extends Controller
         $to = $filters['to'] ?? null;
         $search = trim((string) ($filters['search'] ?? ''));
 
-        $formsById = FormItem::query()
-            ->get(['id', 'form_name', 'expense_amount'])
-            ->keyBy('id');
         $monitorings = TaskMonitoring::query()
             ->with(['client:id,client_name', 'task:id,task_name'])
             ->when($from, fn ($query) => $query->whereDate('date_task_received', '>=', $from))
@@ -73,31 +69,19 @@ class ExpenseController extends Controller
             ->latest('id')
             ->get();
 
-        $entries = $monitorings->flatMap(function (TaskMonitoring $monitoring) use ($formsById): array {
-            $breakdown = collect($monitoring->expenses_breakdown ?? []);
-
-            if ($breakdown->isEmpty()) {
-                $breakdown = collect($monitoring->required_forms_documents ?? [])
-                    ->map(function ($formId) use ($formsById): ?array {
-                        $form = $formsById->get((int) $formId);
-
-                        return $form ? [
-                            'form_id' => (int) $form->id,
-                            'form_name' => $form->form_name,
-                            'expense_amount' => (float) $form->expense_amount,
-                        ] : null;
-                    })
-                    ->filter();
-            }
-
-            return $breakdown->map(fn (array $expense): array => [
-                'task_id' => $monitoring->id,
-                'date' => $monitoring->date_task_received?->format('Y-m-d'),
-                'client' => $monitoring->client?->client_name ?? '—',
-                'task' => $monitoring->task?->task_name ?? '—',
-                'form' => $expense['form_name'] ?? __('Unknown form'),
-                'amount' => (float) ($expense['expense_amount'] ?? 0),
-            ])->all();
+        $entries = $monitorings->flatMap(function (TaskMonitoring $monitoring): array {
+            return collect($monitoring->expenses_breakdown ?? [])
+                ->filter(fn ($expense): bool => is_array($expense)
+                    && isset($expense['catalog_id'], $expense['catalog_name'], $expense['expense_amount']))
+                ->map(fn (array $expense): array => [
+                    'task_id' => $monitoring->id,
+                    'date' => $monitoring->date_task_received?->format('Y-m-d'),
+                    'client' => $monitoring->client?->client_name ?? '—',
+                    'task' => $monitoring->task?->task_name ?? '—',
+                    'item' => $expense['catalog_name'],
+                    'amount' => (float) $expense['expense_amount'],
+                ])
+                ->all();
         })->values();
 
         if ($search !== '') {
@@ -107,7 +91,7 @@ class ExpenseController extends Controller
                     $entry['task_id'],
                     $entry['client'],
                     $entry['task'],
-                    $entry['form'],
+                    $entry['item'],
                 ]));
 
                 return str_contains($haystack, $needle);

@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\Client;
+use App\Models\ExpenseCatalogItem;
 use App\Models\FormItem;
 use App\Models\Task;
 use App\Models\TaskMonitoring;
 use App\Models\TaskMonitoringFormNote;
 use App\Models\User;
+use Database\Seeders\ExpenseCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,43 +17,122 @@ class BookingExpensesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_forms_can_be_created_with_expenses(): void
+    public function test_forms_remain_document_requirements_separate_from_expense_catalog(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user)
             ->post(route('forms.store'), [
                 'form_names' => ['Permit Form'],
-                'form_expenses' => ['125.50'],
             ])
             ->assertRedirect(route('settings.index', ['tab' => 'forms', 'forms_page' => 1]));
 
         $this->assertDatabaseHas('forms', [
             'form_name' => 'Permit Form',
-            'expense_amount' => '125.50',
         ]);
 
         $form = FormItem::query()->firstOrFail();
         $this->actingAs($user)
             ->patch(route('forms.update', $form), [
-                'form_name' => 'Permit Form',
-                'expense_amount' => '150.00',
+                'form_name' => 'Permit Document',
             ])
             ->assertRedirect(route('settings.index'));
 
         $this->assertDatabaseHas('forms', [
-            'form_name' => 'Permit Form',
-            'expense_amount' => '150.00',
+            'form_name' => 'Permit Document',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('expense-catalog.index'))
+            ->assertOk()
+            ->assertSee('Expenses List')
+            ->assertSee('Notarial Fee-SPA')
+            ->assertSee('Others:3___________');
+
+        $this->actingAs($user)
+            ->get(route('bookings.index'))
+            ->assertOk()
+            ->assertSee(route('expense-catalog.index'), false);
+    }
+
+    public function test_expense_catalog_seed_is_ordered_idempotent_and_preserves_defaults(): void
+    {
+        $item = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+        $item->update(['default_amount' => 75.25]);
+
+        $this->seed(ExpenseCatalogSeeder::class);
+        $this->seed(ExpenseCatalogSeeder::class);
+
+        $this->assertSame([
+            'Notarial Fee-SPA',
+            'Notarial Fee-Sworn',
+            'Loose DST',
+            'Doc Stamp Tax',
+            'SI Printing',
+            'DR Printing',
+            'Permits',
+            'Cedula',
+            'Certification Fee',
+            'Penalties',
+            'Registration Fee',
+            'Processing Fee',
+            'Others:1___________',
+            'Others:2___________',
+            'Others:3___________',
+        ], ExpenseCatalogItem::query()->orderBy('sort_order')->pluck('name')->all());
+        $this->assertSame(15, ExpenseCatalogItem::query()->count());
+        $this->assertSame('75.25', $item->fresh()->default_amount);
+    }
+
+    public function test_expense_catalog_items_can_be_created_and_updated(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('expense-catalog.store'), [
+                'name' => 'Courier',
+                'default_amount' => '12.50',
+            ])
+            ->assertRedirect(route('expense-catalog.index'));
+
+        $catalogItem = ExpenseCatalogItem::query()->where('name', 'Courier')->firstOrFail();
+        $this->assertSame('12.50', $catalogItem->default_amount);
+
+        $this->actingAs($user)
+            ->patch(route('expense-catalog.update', $catalogItem), [
+                'name' => 'Courier Fee',
+                'default_amount' => '15.75',
+            ])
+            ->assertRedirect(route('expense-catalog.index'));
+
+        $this->assertDatabaseHas('expense_catalog', [
+            'id' => $catalogItem->id,
+            'name' => 'Courier Fee',
+            'default_amount' => '15.75',
         ]);
     }
 
-    public function test_task_entry_snapshots_and_displays_selected_form_expenses(): void
+    public function test_catalog_seeding_does_not_recreate_renamed_default_items(): void
+    {
+        $item = ExpenseCatalogItem::query()->where('name', 'Cedula')->firstOrFail();
+        $item->update(['name' => 'Municipal Certification', 'default_amount' => 4.50]);
+
+        $this->seed(ExpenseCatalogSeeder::class);
+        $this->seed(ExpenseCatalogSeeder::class);
+
+        $this->assertSame(15, ExpenseCatalogItem::query()->count());
+        $this->assertDatabaseHas('expense_catalog', [
+            'id' => $item->id,
+            'name' => 'Municipal Certification',
+            'default_amount' => '4.50',
+        ]);
+        $this->assertDatabaseMissing('expense_catalog', ['name' => 'Cedula']);
+    }
+
+    public function test_task_entry_keeps_required_documents_separate_from_catalog_expenses(): void
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
-        $uncheckedForm = FormItem::create([
-            'form_name' => 'Unselected Form',
-            'expense_amount' => 60.00,
-        ]);
+        $uncheckedForm = FormItem::create(['form_name' => 'Unselected Form']);
         $task->update(['required_forms_documents' => [$form->id, $uncheckedForm->id]]);
 
         $this->actingAs($user)
@@ -60,8 +141,7 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Form or Requirement')
             ->assertSee('required_forms_documents[]')
             ->assertSee('selectedFormIds')
-            ->assertSee('task_expenses[')
-            ->assertSee('taskExpenses');
+            ->assertDontSee('task_expenses[');
 
         $this->actingAs($user)
             ->postJson(route('bookings.store'), [
@@ -69,30 +149,19 @@ class BookingExpensesTest extends TestCase
                 'client_name' => $client->id,
                 'type_of_task' => $task->id,
                 'required_forms_documents' => [$form->id],
-                'task_expenses' => [$form->id => '42.75'],
             ])
             ->assertCreated();
 
         $monitoring = TaskMonitoring::query()->firstOrFail();
         $this->assertSame([$form->id], $monitoring->required_forms_documents);
-        $this->assertSame([
-            [
-                'form_id' => $form->id,
-                'form_name' => 'Permit Form',
-                'expense_amount' => 42.75,
-            ],
-        ], $monitoring->expenses_breakdown);
-        $this->assertSame(125.5, (float) $form->fresh()->expense_amount);
+        $this->assertSame([], $monitoring->expenses_breakdown);
 
         $this->actingAs($user)
             ->get(route('bookings.index', ['tab' => 'monitoring']))
             ->assertOk()
-            ->assertSee('42.75')
             ->assertSee('Required Forms and Documents')
             ->assertSee('task-monitoring-form-status-row')
-            ->assertSee('task-monitoring-expense-row')
-            ->assertSee('task-monitoring-required-expense-row')
-            ->assertSee('PHP')
+            ->assertSee('No expenses recorded.')
             ->assertDontSee('Expenses Breakdown')
             ->assertDontSee('task-monitoring-label">Expenses');
 
@@ -107,16 +176,9 @@ class BookingExpensesTest extends TestCase
             ->assertSee('class="expenses"', false)
             ->assertSee(route('bookings.print.expenses.update', $monitoring), false)
             ->assertSee('Edit Expenses')
-            ->assertSee('expenses['.$form->id.']', false)
-            ->assertSee('42.75')
-            ->assertSee('PHP 42.75');
+            ->assertSee('Notarial Fee-SPA')
+            ->assertSee('No expenses recorded.');
 
-        $this->actingAs($user)
-            ->get(route('bookings.pdf', $monitoring))
-            ->assertOk()
-            ->assertHeader('content-type', 'application/pdf');
-
-        $form->update(['expense_amount' => 999]);
         $this->actingAs($user)
             ->patch(route('bookings.update', $monitoring), [
                 'date_task_received' => '2026-09-30',
@@ -127,7 +189,7 @@ class BookingExpensesTest extends TestCase
             ])
             ->assertSessionHasNoErrors();
 
-        $this->assertSame(42.75, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
+        $this->assertSame([], $monitoring->fresh()->expenses_breakdown);
     }
 
     public function test_multiple_task_types_combine_shared_document_quantities(): void
@@ -147,7 +209,6 @@ class BookingExpensesTest extends TestCase
                 'type_of_task' => [$task->id, $secondTask->id],
                 'required_forms_documents' => [$form->id],
                 'required_forms_quantities' => [$form->id => 2],
-                'task_expenses' => [$form->id => '42.75'],
             ])
             ->assertCreated();
 
@@ -167,15 +228,19 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Sample Task, Second Task')
             ->assertSee('Permit Form')
             ->assertSee('2')
-            ->assertDontSee('Amount (PHP)')
+            ->assertSee('Amount (PHP)')
             ->assertSee('Expenses')
-            ->assertSee('PHP 42.75')
-            ->assertSee('Total Expenses');
+            ->assertSee('No expenses recorded.')
+            ->assertDontSee('Permit Form</td><td>PHP');
     }
 
-    public function test_print_expenses_can_be_updated_without_changing_form_defaults(): void
+    public function test_print_expenses_can_be_added_removed_and_edited_as_catalog_snapshots(): void
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
+        $expense = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+        $expense->update(['default_amount' => 125.50]);
+        $newExpense = ExpenseCatalogItem::query()->where('name', 'Cedula')->firstOrFail();
+        $newExpense->update(['default_amount' => 33.25]);
         $monitoring = TaskMonitoring::create([
             'date_task_received' => '2026-09-30',
             'client_id' => $client->id,
@@ -184,30 +249,80 @@ class BookingExpensesTest extends TestCase
             'assigned_responsible_person_id' => $client->id,
             'required_forms_documents' => [$form->id],
             'expenses_breakdown' => [[
-                'form_id' => $form->id,
-                'form_name' => $form->form_name,
+                'catalog_id' => $expense->id,
+                'catalog_name' => 'Permits',
                 'expense_amount' => 125.5,
             ]],
             'submission_status' => 'pending',
         ]);
 
         $this->actingAs($user)
-            ->patch(route('bookings.print.expenses.update', $monitoring), [
-                'expenses' => [$form->id => '87.65'],
-            ])
-            ->assertRedirect(route('bookings.print', $monitoring))
-            ->assertSessionHas('status', 'expenses-updated');
-
-        $this->assertSame(87.65, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
-        $this->assertSame(125.5, (float) $form->fresh()->expense_amount);
+            ->get(route('bookings.print', $monitoring))
+            ->assertOk()
+            ->assertSee('data-default-amount="33.25"', false)
+            ->assertSee('data-save-expenses-pdf', false)
+            ->assertSee('Cancel');
 
         $this->actingAs($user)
             ->patch(route('bookings.print.expenses.update', $monitoring), [
-                'expenses' => [$form->id => '99.00', $form->id + 999 => '1.00'],
+                'expenses' => [$expense->id => '87.65', $newExpense->id => '33.25'],
+                'download_pdf' => '1',
+            ])
+            ->assertRedirect(route('bookings.pdf', $monitoring));
+
+        $this->assertSame([
+            ['catalog_id' => $expense->id, 'catalog_name' => 'Permits', 'expense_amount' => 87.65],
+            ['catalog_id' => $newExpense->id, 'catalog_name' => 'Cedula', 'expense_amount' => 33.25],
+        ], $monitoring->fresh()->expenses_breakdown);
+
+        $expense->update(['name' => 'Permit Charges', 'default_amount' => 999]);
+        $this->actingAs($user)
+            ->get(route('bookings.print', $monitoring))
+            ->assertOk()
+            ->assertSee('Permits')
+            ->assertSee('PHP 87.65')
+            ->assertDontSee('Permit Charges');
+
+        $this->actingAs($user)
+            ->patch(route('bookings.update', $monitoring), [
+                'date_task_received' => '2026-09-30',
+                'client_name' => $client->id,
+                'type_of_task' => $task->id,
+                'assigned_responsible_person' => $client->id,
+                'required_forms_documents' => [$form->id],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(87.65, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
+        $this->assertSame('Permits', $monitoring->fresh()->expenses_breakdown[0]['catalog_name']);
+
+        $this->actingAs($user)
+            ->patch(route('bookings.print.expenses.update', $monitoring), [
+                'expenses' => [$expense->id => '87.65'],
+            ])
+            ->assertRedirect(route('bookings.print', $monitoring));
+        $this->assertCount(1, $monitoring->fresh()->expenses_breakdown);
+        $this->assertSame($expense->id, $monitoring->fresh()->expenses_breakdown[0]['catalog_id']);
+
+        $this->actingAs($user)
+            ->patch(route('bookings.print.expenses.update', $monitoring), [
+                'expenses' => [$expense->id => '99.00', $expense->id + 999 => '1.00'],
             ])
             ->assertSessionHasErrors('expenses');
 
         $this->assertSame(87.65, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
+
+        $this->actingAs($user)
+            ->patch(route('bookings.print.expenses.update', $monitoring), [
+                'expenses' => [$expense->id => 'not-an-amount'],
+            ])
+            ->assertSessionHasErrors('expenses.'.$expense->id);
+
+        $this->actingAs($user)
+            ->patch(route('bookings.print.expenses.update', $monitoring), [])
+            ->assertRedirect(route('bookings.print', $monitoring));
+
+        $this->assertSame([], $monitoring->fresh()->expenses_breakdown);
     }
 
     public function test_client_contact_person_can_be_saved(): void
@@ -245,10 +360,7 @@ class BookingExpensesTest extends TestCase
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
         $task->update(['required_forms_documents' => [$form->id]]);
-        $secondForm = FormItem::create([
-            'form_name' => 'Clearance Form',
-            'expense_amount' => 60.00,
-        ]);
+        $secondForm = FormItem::create(['form_name' => 'Clearance Form']);
         $secondTask = Task::create([
             'agency' => 'Another Agency',
             'task_name' => 'Second Task',
@@ -267,10 +379,6 @@ class BookingExpensesTest extends TestCase
                 'client_name' => $client->id,
                 'type_of_task' => [$task->id, $secondTask->id],
                 'required_forms_documents' => [$form->id, $secondForm->id],
-                'task_expenses' => [
-                    $form->id => '42.75',
-                    $secondForm->id => '60.00',
-                ],
             ])
             ->assertCreated();
 
@@ -294,7 +402,7 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Sample Task, Second Task');
     }
 
-    public function test_task_monitoring_edit_shows_expense_checkboxes_and_total(): void
+    public function test_task_monitoring_edit_keeps_forms_as_checklist_requirements_only(): void
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
         $monitoring = TaskMonitoring::create([
@@ -304,24 +412,18 @@ class BookingExpensesTest extends TestCase
             'task_ids' => [$task->id],
             'assigned_responsible_person_id' => $client->id,
             'required_forms_documents' => [$form->id],
-            'expenses_breakdown' => [[
-                'form_id' => $form->id,
-                'form_name' => $form->form_name,
-                'expense_amount' => 125.5,
-            ]],
             'submission_status' => 'pending',
         ]);
 
         $this->actingAs($user)
             ->get(route('bookings.edit', $monitoring))
             ->assertOk()
-            ->assertSee('Expenses')
-            ->assertSee('Total Expenses')
-            ->assertSee('selectedExpenseIds')
-            ->assertSee('PHP 125.50');
+            ->assertSee('Required Forms and Documents')
+            ->assertDontSee('selectedExpenseIds')
+            ->assertDontSee('expense_amount');
     }
 
-    public function test_settings_render_contact_person_and_form_expense_controls(): void
+    public function test_settings_render_contact_person_and_keep_form_management_separate(): void
     {
         $user = User::factory()->create();
 
@@ -334,14 +436,15 @@ class BookingExpensesTest extends TestCase
         $this->actingAs($user)
             ->get(route('settings.index', ['tab' => 'forms']))
             ->assertOk()
-            ->assertSee('Forms and Expenses')
-            ->assertSee('form_expenses[]')
-            ->assertSee('Expense');
+            ->assertSee('Form names')
+            ->assertDontSee('form_expenses[]')
+            ->assertDontSee('name="expense_amount"');
     }
 
     public function test_expense_tracker_generates_a_filtered_printable_report(): void
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
+        $expense = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
         TaskMonitoring::create([
             'date_task_received' => '2026-09-29',
             'client_id' => $client->id,
@@ -349,8 +452,8 @@ class BookingExpensesTest extends TestCase
             'assigned_responsible_person_id' => $client->id,
             'required_forms_documents' => [$form->id],
             'expenses_breakdown' => [[
-                'form_id' => $form->id,
-                'form_name' => $form->form_name,
+                'catalog_id' => $expense->id,
+                'catalog_name' => $expense->name,
                 'expense_amount' => 42.75,
             ]],
             'submission_status' => 'pending',
@@ -362,9 +465,22 @@ class BookingExpensesTest extends TestCase
             'assigned_responsible_person_id' => $client->id,
             'required_forms_documents' => [$form->id],
             'expenses_breakdown' => [[
-                'form_id' => $form->id,
-                'form_name' => $form->form_name,
+                'catalog_id' => $expense->id,
+                'catalog_name' => $expense->name,
                 'expense_amount' => 60.00,
+            ]],
+            'submission_status' => 'pending',
+        ]);
+        TaskMonitoring::create([
+            'date_task_received' => '2026-09-29',
+            'client_id' => $client->id,
+            'task_id' => $task->id,
+            'assigned_responsible_person_id' => $client->id,
+            'required_forms_documents' => [$form->id],
+            'expenses_breakdown' => [[
+                'form_id' => $form->id,
+                'form_name' => 'Permit Form',
+                'expense_amount' => 88.88,
             ]],
             'submission_status' => 'pending',
         ]);
@@ -381,6 +497,7 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Expense Tracker')
             ->assertSee('42.75')
             ->assertSee('PHP 42.75')
+            ->assertDontSee('88.88')
             ->assertDontSee('60.00');
 
         $this->actingAs($user)
@@ -390,8 +507,36 @@ class BookingExpensesTest extends TestCase
             ->assertSee('42.75')
             ->assertDontSee('60.00');
 
+    }
+
+    public function test_booking_and_expense_pdfs_render_catalog_expense_snapshots(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('The GD extension is required to render DomPDF output.');
+        }
+
+        [$user, $client, $task] = $this->createBookingFixture();
+        $expense = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+        $monitoring = TaskMonitoring::create([
+            'date_task_received' => '2026-09-30',
+            'client_id' => $client->id,
+            'task_id' => $task->id,
+            'assigned_responsible_person_id' => $client->id,
+            'expenses_breakdown' => [[
+                'catalog_id' => $expense->id,
+                'catalog_name' => $expense->name,
+                'expense_amount' => 42.75,
+            ]],
+            'submission_status' => 'pending',
+        ]);
+
         $this->actingAs($user)
-            ->get(route('expenses.pdf', $filters))
+            ->get(route('bookings.pdf', $monitoring))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $this->actingAs($user)
+            ->get(route('expenses.pdf', ['search' => 'Permits']))
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
     }
@@ -476,7 +621,6 @@ class BookingExpensesTest extends TestCase
         ]);
         $form = FormItem::create([
             'form_name' => 'Permit Form',
-            'expense_amount' => 125.50,
         ]);
 
         return [$user, $client, $task, $form];

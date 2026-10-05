@@ -4,6 +4,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ExpenseCatalogController;
 use App\Http\Controllers\FormItemController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -118,6 +119,9 @@ Route::get('/dashboard', function (Request $request) {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/settings/expenses', [ExpenseCatalogController::class, 'index'])->name('expense-catalog.index');
+    Route::post('/settings/expenses', [ExpenseCatalogController::class, 'store'])->name('expense-catalog.store');
+    Route::patch('/settings/expenses/{expenseCatalogItem}', [ExpenseCatalogController::class, 'update'])->name('expense-catalog.update');
     Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
     Route::get('/expenses/print', [ExpenseController::class, 'print'])->name('expenses.print');
     Route::get('/expenses/pdf', [ExpenseController::class, 'downloadPdf'])->name('expenses.pdf');
@@ -166,7 +170,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $formSearch = trim((string) $request->query('form_search', ''));
         $formOrder = $request->query('form_order') === 'desc' ? 'desc' : 'asc';
         $forms = FormItem::query()
-            ->select(['id', 'form_name', 'expense_amount', 'created_at'])
+            ->select(['id', 'form_name', 'created_at'])
             ->when($formSearch !== '', function ($query) use ($formSearch): void {
                 $query->where('form_name', 'like', "%{$formSearch}%");
             })

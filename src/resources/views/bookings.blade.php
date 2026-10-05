@@ -38,8 +38,6 @@
                     <div id="job-task-entry-section" class="max-w-7xl mx-auto" x-show="activeMenu === 'entry'">
                         <div class="border border-gray-200 rounded-lg p-6" x-data="{
                             taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()),
-                            formExpenseOptions: @js($forms->map(fn ($form) => ['id' => (string) $form->id, 'name' => $form->form_name, 'expense' => (float) $form->expense_amount])->values()),
-                            taskExpenses: @js($forms->mapWithKeys(fn ($form) => [(string) $form->id => (float) old('task_expenses.'.$form->id, $form->expense_amount)])->all()),
                             selectedAgency: '',
                             selectedTaskIds: @js(array_map('strval', (array) old('type_of_task', []))),
                             selectedTaskRequiredForms: [],
@@ -47,9 +45,6 @@
                             preserveInitialFormSelection: @js(old('type_of_task') !== null),
                             formSelectionInitialized: false,
                             selectedTaskRequiredQuantities: @js(old('required_forms_quantities', [])),
-                            totalSelectedExpenses() {
-                                return this.formExpenseOptions.filter(form => this.selectedFormIds.includes(form.id)).reduce((total, form) => total + Number(this.taskExpenses[form.id] ?? form.expense ?? 0), 0);
-                            },
                             selectAgency() {
                                 this.selectedTaskIds = this.selectedTaskIds.filter(id => this.taskOptions.some(task => String(task.id) === id && task.agency === this.selectedAgency));
                                 this.updateSelectedTasks();
@@ -134,7 +129,6 @@
                                         <div class="flex items-center justify-between gap-4 px-3 text-xs font-semibold uppercase text-gray-500">
                                             <span>{{ __('Form or Requirement') }}</span>
                                             <span>{{ __('Quantity') }}</span>
-                                            <span>{{ __('Expense') }}</span>
                                         </div>
                                         @foreach ($forms as $form)
                                             <div x-show="selectedTaskRequiredForms.includes('{{ $form->id }}')" x-cloak class="flex items-center justify-between gap-4 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
@@ -145,21 +139,12 @@
                                                     <input type="checkbox" name="required_forms_documents[]" x-model="selectedFormIds" value="{{ $form->id }}" aria-label="{{ __('Include') }} {{ $form->form_name }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                                                     <span>{{ __('Include') }}</span>
                                                 </label>
-                                                <label class="flex shrink-0 items-center gap-2 font-medium">
-                                                    <span class="text-xs text-gray-500">PHP</span>
-                                                    <input type="number" name="task_expenses[{{ $form->id }}]" min="0" step="0.01" x-model.number="taskExpenses['{{ $form->id }}']" x-bind:disabled="!selectedFormIds.includes('{{ $form->id }}')" class="w-28 rounded-md border-gray-300 py-1 text-right text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500" aria-label="{{ __('Expense for') }} {{ $form->form_name }}">
-                                                </label>
                                             </div>
                                         @endforeach
                                         <p x-show="selectedTaskRequiredForms.length === 0" x-cloak class="text-sm text-gray-500">{{ __('Select a task to view its required forms and documents.') }}</p>
                                     </div>
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
-
-                                <div class="mt-3 flex items-center justify-between gap-4 rounded-md border border-gray-200 px-4 py-3 text-sm font-semibold">
-                                    <span>{{ __('Total Expenses') }}</span>
-                                    <span x-text="'PHP ' + totalSelectedExpenses().toFixed(2)"></span>
-                                </div>
 
                             </div>
 
@@ -184,15 +169,8 @@
                                         $submissionStatus = strtolower((string) ($monitoring->submission_status ?? 'pending'));
                                         $bookingStatus = $allRequiredFormsCompleted || $submissionStatus === 'completed' ? 'completed' : 'pending';
                                         $taskAgeDays = $monitoring->taskAgeInDays();
-                                        $monitoringExpenses = collect($monitoring->expenses_breakdown ?? []);
-                                        if ($monitoringExpenses->isEmpty()) {
-                                            $monitoringExpenses = $requiredFormIds->map(fn ($formId) => [
-                                                'form_id' => (int) $formId,
-                                                'form_name' => $formNamesById[$formId] ?? __('Unknown form'),
-                                                'expense_amount' => (float) ($formExpensesById[$formId] ?? 0),
-                                            ]);
-                                        }
-                                        $monitoringExpensesByFormId = $monitoringExpenses->keyBy('form_id');
+                                        $monitoringExpenses = collect($monitoring->expenses_breakdown ?? [])
+                                            ->filter(fn ($expense) => is_array($expense) && isset($expense['catalog_id'], $expense['catalog_name'], $expense['expense_amount']));
                                         $totalExpenses = (float) $monitoringExpenses->sum('expense_amount');
                                     @endphp
                                     <div x-data="{ expanded: false }" class="bg-white">
@@ -275,40 +253,43 @@
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Submission Status') }}</p><p class="mt-1 text-gray-900">{{ ucfirst($submissionStatus) }}</p></div>
                                                 <div><p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Release of Cert/Clearance') }}</p><p class="mt-1 text-gray-900">{{ '—' }}</p></div>
                                                 <div class="sm:col-span-2 lg:col-span-3">
-                                                    <div class="task-monitoring-required-expense-header text-xs font-medium uppercase tracking-wide text-gray-500">
-                                                        <p>{{ __('Required Forms and Documents') }}</p>
-                                                        <p title="{{ __('Expense amount in Philippine pesos') }}">{{ __('PHP') }}</p>
-                                                    </div>
+                                                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Required Forms and Documents') }}</p>
                                                     @if ($requiredFormIds->isEmpty())
-                                                        <div class="task-monitoring-required-expense-row mt-2">
-                                                            <p class="rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ '—' }}</p>
-                                                            <p class="task-monitoring-expense-row rounded-md border border-gray-200 text-gray-500">{{ '—' }}</p>
-                                                        </div>
+                                                        <p class="mt-2 rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ '—' }}</p>
                                                     @else
-                                                        <div class="task-monitoring-required-expense-list mt-2">
+                                                        <div class="mt-2 space-y-2">
                                                             @foreach ($requiredFormIds as $formId)
                                                                 @php
                                                                     $formName = $formNamesById[$formId] ?? null;
                                                                     $formStatus = strtolower(trim((string) ($formStatusesByMonitoringAndForm[$monitoring->id.'-'.$formId] ?? 'pending')));
                                                                     $formCompleted = $formStatus === 'completed';
-                                                                    $formExpense = (float) ($monitoringExpensesByFormId->get($formId)['expense_amount'] ?? 0);
                                                                 @endphp
 
                                                                 @if ($formName)
-                                                                    <div class="task-monitoring-required-expense-row">
-                                                                        <div class="task-monitoring-form-status-row rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
-                                                                            <span class="task-monitoring-form-expense-name required-form-name">{{ $formName }}@if (($requiredFormQuantities[$formId] ?? 1) > 1) x {{ $requiredFormQuantities[$formId] }}@endif</span>
-                                                                            <span class="task-monitoring-form-expense-status text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
-                                                                        </div>
-                                                                        <div class="task-monitoring-expense-row rounded-md border border-gray-200 text-gray-800">
-                                                                            <span class="task-monitoring-form-expense-amount font-medium" title="PHP {{ number_format($formExpense, 2) }}">{{ number_format($formExpense, 2) }}</span>
-                                                                        </div>
+                                                                    <div class="task-monitoring-form-status-row flex items-center justify-between gap-3 rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
+                                                                        <span class="required-form-name">{{ $formName }}@if (($requiredFormQuantities[$formId] ?? 1) > 1) x {{ $requiredFormQuantities[$formId] }}@endif</span>
+                                                                        <span class="text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
                                                                     </div>
                                                                 @endif
                                                             @endforeach
-                                                            <div class="task-monitoring-form-expense-total border-t border-gray-200 pt-2 font-semibold text-gray-900">
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div class="sm:col-span-2 lg:col-span-3">
+                                                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Expenses') }}</p>
+                                                    @if ($monitoringExpenses->isEmpty())
+                                                        <p class="mt-2 rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ __('No expenses recorded.') }}</p>
+                                                    @else
+                                                        <div class="mt-2 divide-y divide-gray-200 rounded-md border border-gray-200">
+                                                            @foreach ($monitoringExpenses as $expense)
+                                                                <div class="flex items-center justify-between gap-4 px-3 py-2 text-sm">
+                                                                    <span class="text-gray-800">{{ $expense['catalog_name'] }}</span>
+                                                                    <span class="shrink-0 font-medium tabular-nums text-gray-900">PHP {{ number_format((float) $expense['expense_amount'], 2) }}</span>
+                                                                </div>
+                                                            @endforeach
+                                                            <div class="flex items-center justify-between gap-4 border-t border-gray-200 px-3 py-2 text-sm font-semibold">
                                                                 <span>{{ __('Total Expenses') }}</span>
-                                                                <span class="task-monitoring-form-expense-amount" title="PHP {{ number_format($totalExpenses, 2) }}">{{ number_format($totalExpenses, 2) }}</span>
+                                                                <span class="shrink-0 tabular-nums">PHP {{ number_format($totalExpenses, 2) }}</span>
                                                             </div>
                                                         </div>
                                                     @endif
