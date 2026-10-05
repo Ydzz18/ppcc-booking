@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+        <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
         <title>{{ $title }} - {{ config('app.name', 'PPCC Booking') }}</title>
         <style>
             :root { color-scheme: light; font-family: Arial, sans-serif; }
