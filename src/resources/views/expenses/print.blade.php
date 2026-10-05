@@ -31,7 +31,7 @@
                         <th>{{ __('Task ID') }}</th>
                         <th>{{ __('Client') }}</th>
                         <th>{{ __('Task') }}</th>
-                        <th>{{ __('Form or Document') }}</th>
+                        <th>{{ __('Expense item') }}</th>
                         <th>{{ __('Amount (PHP)') }}</th>
                     </tr>
                 </thead>
@@ -42,7 +42,7 @@
                             <td>{{ $entry['task_id'] }}</td>
                             <td>{{ $entry['client'] }}</td>
                             <td>{{ $entry['task'] }}</td>
-                            <td>{{ $entry['form'] }}</td>
+                            <td>{{ $entry['item'] }}</td>
                             <td>{{ number_format($entry['amount'], 2) }}</td>
                         </tr>
                     @endforeach

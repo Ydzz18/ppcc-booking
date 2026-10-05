@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class TaskMonitoring extends Model
 {
@@ -56,8 +56,8 @@ class TaskMonitoring extends Model
     {
         return [
             'date_task_received' => 'date',
-            'required_forms_documents' => 'array',
             'task_ids' => 'array',
+            'required_forms_documents' => 'array',
             'required_forms_quantities' => 'array',
             'expenses_breakdown' => 'array',
             'date_of_submission' => 'date',

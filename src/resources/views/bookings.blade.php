@@ -36,7 +36,37 @@
                     @endif
 
                     <div id="job-task-entry-section" class="max-w-7xl mx-auto" x-show="activeMenu === 'entry'">
-                        <div class="border border-gray-200 rounded-lg p-6" x-data="{ taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()), formExpenseOptions: @js($forms->map(fn ($form) => ['id' => (string) $form->id, 'expense' => (float) $form->expense_amount])->values()), selectedAgency: '', selectedTaskIds: @js(array_map('strval', (array) old('type_of_task', []))), selectedTaskRequiredForms: @js(array_map('strval', (array) old('required_forms_documents', []))), selectedFormIds: @js(array_map('strval', (array) old('required_forms_documents', []))), preserveInitialFormSelection: @js(old('type_of_task') !== null), formSelectionInitialized: false, selectedTaskRequiredQuantities: @js(old('required_forms_quantities', [])), totalSelectedExpenses() { return this.formExpenseOptions.filter(form => this.selectedFormIds.includes(form.id)).reduce((total, form) => total + Number(form.expense || 0), 0); }, updateSelectedTasks() { const hasPreviousSelection = this.formSelectionInitialized; const previousRequiredFormIds = new Set(this.selectedTaskRequiredForms); const previouslyIncludedFormIds = new Set(this.selectedFormIds); const requiredFormIds = new Set(); const quantities = {}; this.taskOptions.filter(task => this.selectedTaskIds.includes(String(task.id))).forEach(task => (task.required_forms_documents || []).forEach(formId => { const id = String(formId); requiredFormIds.add(id); quantities[id] = (quantities[id] || 0) + 1; })); const availableFormIds = Array.from(requiredFormIds); this.selectedFormIds = availableFormIds.filter(id => hasPreviousSelection ? (!previousRequiredFormIds.has(id) || previouslyIncludedFormIds.has(id)) : (this.preserveInitialFormSelection ? previouslyIncludedFormIds.has(id) : true)); this.selectedTaskRequiredForms = availableFormIds; this.selectedTaskRequiredQuantities = quantities; this.formSelectionInitialized = true; } }" x-init="selectedTaskIds = selectedTaskIds.map(String); updateSelectedTasks()">
+                        <div class="border border-gray-200 rounded-lg p-6" x-data="{
+                            taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()),
+                            selectedAgency: '',
+                            selectedTaskIds: @js(array_map('strval', (array) old('type_of_task', []))),
+                            selectedTaskRequiredForms: [],
+                            selectedFormIds: @js(array_map('strval', (array) old('required_forms_documents', []))),
+                            preserveInitialFormSelection: @js(old('type_of_task') !== null),
+                            formSelectionInitialized: false,
+                            selectedTaskRequiredQuantities: @js(old('required_forms_quantities', [])),
+                            selectAgency() {
+                                this.selectedTaskIds = this.selectedTaskIds.filter(id => this.taskOptions.some(task => String(task.id) === id && task.agency === this.selectedAgency));
+                                this.updateSelectedTasks();
+                            },
+                            updateSelectedTasks() {
+                                const hasPreviousSelection = this.formSelectionInitialized;
+                                const previousRequiredFormIds = new Set(this.selectedTaskRequiredForms);
+                                const previouslyIncludedFormIds = new Set(this.selectedFormIds);
+                                const requiredFormIds = new Set();
+                                const quantities = {};
+                                this.taskOptions.filter(task => this.selectedTaskIds.includes(String(task.id))).forEach(task => (task.required_forms_documents || []).forEach(formId => {
+                                    const id = String(formId);
+                                    requiredFormIds.add(id);
+                                    quantities[id] = (quantities[id] || 0) + 1;
+                                }));
+                                const availableFormIds = Array.from(requiredFormIds);
+                                this.selectedFormIds = availableFormIds.filter(id => hasPreviousSelection ? (!previousRequiredFormIds.has(id) || previouslyIncludedFormIds.has(id)) : (this.preserveInitialFormSelection ? previouslyIncludedFormIds.has(id) : true));
+                                this.selectedTaskRequiredForms = availableFormIds;
+                                this.selectedTaskRequiredQuantities = quantities;
+                                this.formSelectionInitialized = true;
+                            }
+                        }" x-init="selectedTaskIds = selectedTaskIds.map(String); selectedFormIds = selectedFormIds.map(String); updateSelectedTasks()">
                             <div class="flex items-center justify-between gap-4">
                                 <h3 class="text-lg font-medium text-gray-900">{{ __('Task Entry') }}</h3>
                                 <x-primary-button form="task-entry-form">{{ __('Create Task') }}</x-primary-button>
@@ -99,7 +129,6 @@
                                         <div class="flex items-center justify-between gap-4 px-3 text-xs font-semibold uppercase text-gray-500">
                                             <span>{{ __('Form or Requirement') }}</span>
                                             <span>{{ __('Quantity') }}</span>
-                                            <span>{{ __('Expense') }}</span>
                                         </div>
                                         @foreach ($forms as $form)
                                             <div x-show="selectedTaskRequiredForms.includes('{{ $form->id }}')" x-cloak class="flex items-center justify-between gap-4 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
@@ -108,7 +137,7 @@
                                                 <span class="shrink-0 text-xs text-gray-500" x-show="selectedFormIds.includes('{{ $form->id }}') && Number(selectedTaskRequiredQuantities['{{ $form->id }}'] || 1) > 1" x-text="'x ' + (selectedTaskRequiredQuantities['{{ $form->id }}'] || 1)"></span>
                                                 <label class="flex shrink-0 items-center gap-2 text-xs text-gray-500">
                                                     <input type="checkbox" name="required_forms_documents[]" x-model="selectedFormIds" value="{{ $form->id }}" aria-label="{{ __('Include') }} {{ $form->form_name }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                                    <span>PHP {{ number_format((float) $form->expense_amount, 2) }}</span>
+                                                    <span>{{ __('Include') }}</span>
                                                 </label>
                                             </div>
                                         @endforeach
@@ -116,11 +145,6 @@
                                     </div>
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
-
-                                <div class="mt-3 flex items-center justify-between gap-4 rounded-md border border-gray-200 px-4 py-3 text-sm font-semibold">
-                                    <span>{{ __('Total Expenses') }}</span>
-                                    <span x-text="'PHP ' + totalSelectedExpenses().toFixed(2)"></span>
-                                </div>
 
                             </div>
 
@@ -145,6 +169,9 @@
                                         $submissionStatus = strtolower((string) ($monitoring->submission_status ?? 'pending'));
                                         $bookingStatus = $allRequiredFormsCompleted || $submissionStatus === 'completed' ? 'completed' : 'pending';
                                         $taskAgeDays = $monitoring->taskAgeInDays();
+                                        $monitoringExpenses = collect($monitoring->expenses_breakdown ?? [])
+                                            ->filter(fn ($expense) => is_array($expense) && isset($expense['catalog_id'], $expense['catalog_name'], $expense['expense_amount']));
+                                        $totalExpenses = (float) $monitoringExpenses->sum('expense_amount');
                                     @endphp
                                     <div x-data="{ expanded: false }" class="bg-white">
                                         <div class="task-monitoring-summary-grid px-4 py-4">
@@ -230,7 +257,7 @@
                                                     @if ($requiredFormIds->isEmpty())
                                                         <p class="mt-2 rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ '—' }}</p>
                                                     @else
-                                                        <div class="task-monitoring-required-expense-list mt-2">
+                                                        <div class="mt-2 space-y-2">
                                                             @foreach ($requiredFormIds as $formId)
                                                                 @php
                                                                     $formName = $formNamesById[$formId] ?? null;
@@ -239,12 +266,31 @@
                                                                 @endphp
 
                                                                 @if ($formName)
-                                                                    <div class="task-monitoring-form-status-row rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
-                                                                        <span class="task-monitoring-form-expense-name required-form-name">{{ $formName }}@if (($requiredFormQuantities[$formId] ?? 1) > 1) x {{ $requiredFormQuantities[$formId] }}@endif</span>
-                                                                        <span class="task-monitoring-form-expense-status text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
+                                                                    <div class="task-monitoring-form-status-row flex items-center justify-between gap-3 rounded-md border px-3 py-2 {{ $formCompleted ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30' : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' }}">
+                                                                        <span class="required-form-name">{{ $formName }}@if (($requiredFormQuantities[$formId] ?? 1) > 1) x {{ $requiredFormQuantities[$formId] }}@endif</span>
+                                                                        <span class="text-xs font-semibold {{ $formCompleted ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">{{ $formCompleted ? __('Completed') : __('Not Completed') }}</span>
                                                                     </div>
                                                                 @endif
                                                             @endforeach
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div class="sm:col-span-2 lg:col-span-3">
+                                                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Expenses') }}</p>
+                                                    @if ($monitoringExpenses->isEmpty())
+                                                        <p class="mt-2 rounded-md border border-gray-200 px-3 py-2 text-gray-500">{{ __('No expenses recorded.') }}</p>
+                                                    @else
+                                                        <div class="mt-2 divide-y divide-gray-200 rounded-md border border-gray-200">
+                                                            @foreach ($monitoringExpenses as $expense)
+                                                                <div class="flex items-center justify-between gap-4 px-3 py-2 text-sm">
+                                                                    <span class="text-gray-800">{{ $expense['catalog_name'] }}</span>
+                                                                    <span class="shrink-0 font-medium tabular-nums text-gray-900">PHP {{ number_format((float) $expense['expense_amount'], 2) }}</span>
+                                                                </div>
+                                                            @endforeach
+                                                            <div class="flex items-center justify-between gap-4 border-t border-gray-200 px-3 py-2 text-sm font-semibold">
+                                                                <span>{{ __('Total Expenses') }}</span>
+                                                                <span class="shrink-0 tabular-nums">PHP {{ number_format($totalExpenses, 2) }}</span>
+                                                            </div>
                                                         </div>
                                                     @endif
                                                 </div>
