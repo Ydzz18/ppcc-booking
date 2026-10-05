@@ -8,7 +8,11 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
         @include('layouts.theme-init')
 
+<<<<<<< HEAD
         <link rel="icon" href="{{ asset('logo-booking.png') }}" type="image/png">
+=======
+        <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+>>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

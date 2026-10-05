@@ -28,7 +28,7 @@
                         </div>
                         <div>
                             <x-input-label for="expense_search" :value="__('Search')" />
-                            <x-text-input id="expense_search" name="search" type="search" class="mt-1 block w-full" :value="$search" placeholder="{{ __('Client, task, or form') }}" />
+                            <x-text-input id="expense_search" name="search" type="search" class="mt-1 block w-full" :value="$search" placeholder="{{ __('Client, task, or expense item') }}" />
                         </div>
                         <button type="submit" class="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2">
                             {{ __('Generate Report') }}
@@ -58,7 +58,7 @@
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">{{ __('Task ID') }}</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">{{ __('Client') }}</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">{{ __('Task') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">{{ __('Form or Document') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">{{ __('Expense item') }}</th>
                                     <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-500">{{ __('Amount (PHP)') }}</th>
                                 </tr>
                             </thead>
@@ -69,7 +69,7 @@
                                         <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">{{ $entry['task_id'] }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-700">{{ $entry['client'] }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-700">{{ $entry['task'] }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-700">{{ $entry['form'] }}</td>
+                                        <td class="px-4 py-3 text-sm text-gray-700">{{ $entry['item'] }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium tabular-nums text-gray-900">{{ number_format($entry['amount'], 2) }}</td>
                                     </tr>
                                 @empty

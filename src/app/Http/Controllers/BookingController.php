@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\ExpenseCatalogItem;
 use App\Models\FormItem;
 use App\Models\Task;
 use App\Models\TaskMonitoring;
@@ -41,7 +42,7 @@ class BookingController extends Controller
             ->get();
 
         $forms = FormItem::query()
-            ->select(['id', 'form_name', 'expense_amount'])
+            ->select(['id', 'form_name'])
             ->orderBy('form_name')
             ->get();
 
@@ -101,12 +102,18 @@ class BookingController extends Controller
             'task_id' => $validated['type_of_task'][0],
             'task_ids' => $validated['type_of_task'],
             'assigned_responsible_person_id' => $validated['client_name'],
+<<<<<<< HEAD
             'required_forms_documents' => $requiredFormIds,
             'required_forms_quantities' => $requiredFormQuantities,
             'expenses_breakdown' => $this->expenseBreakdown(
                 $requiredFormIds,
                 [],
             ),
+=======
+            'required_forms_quantities' => $requiredFormQuantities,
+            'required_forms_documents' => $requiredFormIds,
+            'expenses_breakdown' => [],
+>>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
             'submission_status' => 'pending',
         ]);
 
@@ -142,7 +149,7 @@ class BookingController extends Controller
             ->get();
 
         $forms = FormItem::query()
-            ->select(['id', 'form_name', 'expense_amount'])
+            ->select(['id', 'form_name'])
             ->orderBy('form_name')
             ->get();
 
@@ -170,18 +177,29 @@ class BookingController extends Controller
     public function print(TaskMonitoring $monitoring): View
     {
         $requiredForms = $this->requiredFormsForPrint($monitoring);
+        $expenses = $this->expenseSnapshotsForPrint($monitoring);
+        $expenseCatalog = ExpenseCatalogItem::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'name', 'default_amount']);
         $taskNames = $this->taskNamesForMonitoring($monitoring);
 
+<<<<<<< HEAD
         return view('bookings.print', compact('monitoring', 'requiredForms', 'taskNames'));
+=======
+        return view('bookings.print', compact('monitoring', 'requiredForms', 'expenses', 'expenseCatalog', 'taskNames'));
+>>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
     }
 
     public function updatePrintExpenses(Request $request, TaskMonitoring $monitoring): RedirectResponse
     {
         $validated = $request->validate([
-            'expenses' => ['required', 'array'],
-            'expenses.*' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
+            'expenses' => ['sometimes', 'array'],
+            'expenses.*' => ['required', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
+            'download_pdf' => ['sometimes', 'boolean'],
         ]);
 
+<<<<<<< HEAD
         $requiredFormIds = collect($monitoring->required_forms_documents ?? [])
             ->map(fn ($formId) => (int) $formId)
             ->unique()
@@ -193,27 +211,45 @@ class BookingController extends Controller
             ->values()
             ->all();
         if ($expectedIds !== $submittedIds) {
+=======
+        $submitted = $validated['expenses'] ?? [];
+        $submittedIds = array_keys($submitted);
+        $invalidKeys = array_filter($submittedIds, fn ($id): bool => ! ctype_digit((string) $id) || (int) $id < 1);
+        $catalogById = ExpenseCatalogItem::query()
+            ->whereIn('id', array_map('intval', $submittedIds))
+            ->get(['id', 'name', 'default_amount'])
+            ->keyBy('id');
+
+        if ($invalidKeys !== [] || $catalogById->count() !== count($submittedIds)) {
+>>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
             throw ValidationException::withMessages([
-                'expenses' => __('Expense values must match the booking documents.'),
+                'expenses' => __('Select only expense items from the current catalog.'),
             ]);
         }
 
         $existingExpenses = collect($monitoring->expenses_breakdown ?? [])
-            ->keyBy(fn (array $expense) => (int) ($expense['form_id'] ?? 0));
-        $formsById = FormItem::query()
-            ->whereIn('id', $requiredFormIds)
-            ->get(['id', 'form_name'])
-            ->keyBy('id');
+            ->filter(fn ($expense): bool => is_array($expense) && isset($expense['catalog_id']))
+            ->keyBy(fn (array $expense) => (int) $expense['catalog_id']);
 
         $monitoring->update([
-            'expenses_breakdown' => $requiredFormIds->map(fn (int $formId) => [
-                'form_id' => $formId,
-                'form_name' => $existingExpenses->get($formId)['form_name']
-                    ?? $formsById->get($formId)?->form_name
-                    ?? __('Unknown form'),
-                'expense_amount' => (float) $validated['expenses'][(string) $formId],
-            ])->all(),
+            'expenses_breakdown' => collect($submitted)
+                ->map(function ($amount, $catalogId) use ($catalogById, $existingExpenses): array {
+                    $item = $catalogById->get((int) $catalogId);
+                    $existing = $existingExpenses->get((int) $catalogId);
+
+                    return [
+                        'catalog_id' => (int) $catalogId,
+                        'catalog_name' => $existing['catalog_name'] ?? $item->name,
+                        'expense_amount' => (float) $amount,
+                    ];
+                })
+                ->values()
+                ->all(),
         ]);
+
+        if ($request->boolean('download_pdf')) {
+            return Redirect::route('bookings.pdf', $monitoring);
+        }
 
         return Redirect::route('bookings.print', $monitoring)->with('status', 'expenses-updated');
     }
@@ -224,9 +260,10 @@ class BookingController extends Controller
     public function downloadPdf(TaskMonitoring $monitoring)
     {
         $requiredForms = $this->requiredFormsForPrint($monitoring);
+        $expenses = $this->expenseSnapshotsForPrint($monitoring);
         $taskNames = $this->taskNamesForMonitoring($monitoring);
 
-        return Pdf::loadView('bookings.print', compact('monitoring', 'requiredForms', 'taskNames') + ['isPdf' => true])
+        return Pdf::loadView('bookings.print', compact('monitoring', 'requiredForms', 'expenses', 'taskNames') + ['isPdf' => true])
             ->download('booking-'.$monitoring->id.'.pdf');
     }
 
@@ -249,9 +286,12 @@ class BookingController extends Controller
             ->where('task_monitoring_id', $monitoring->id)
             ->get()
             ->keyBy('form_id');
+<<<<<<< HEAD
         $expensesByForm = collect($monitoring->expenses_breakdown ?? [])
             ->keyBy(fn (array $expense) => (int) ($expense['form_id'] ?? 0));
 
+=======
+>>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
         return $requiredFormIds->map(fn (int $formId) => [
             'id' => $formId,
             'name' => $formsById->get($formId)?->form_name ?? __('Unknown form'),
@@ -259,20 +299,24 @@ class BookingController extends Controller
             'note' => $notesByForm->get($formId)?->notes_remarks,
             'note_date' => $notesByForm->get($formId)?->note_date,
             'quantity' => max(1, (int) ($monitoring->required_forms_quantities[$formId] ?? 1)),
+<<<<<<< HEAD
             'expense_amount' => (float) ($expensesByForm->get($formId)['expense_amount'] ?? $formsById->get($formId)?->expense_amount ?? 0),
+=======
+>>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
         ]);
     }
 
-    private function taskNamesForMonitoring(TaskMonitoring $monitoring): string
+    private function expenseSnapshotsForPrint(TaskMonitoring $monitoring)
     {
-        $taskIds = collect($monitoring->task_ids ?: [$monitoring->task_id])
-            ->map(fn ($id) => (int) $id)
-            ->unique()
+        return collect($monitoring->expenses_breakdown ?? [])
+            ->filter(fn ($expense): bool => is_array($expense)
+                && isset($expense['catalog_id'], $expense['catalog_name'], $expense['expense_amount']))
+            ->map(fn (array $expense): array => [
+                'id' => (int) $expense['catalog_id'],
+                'name' => (string) $expense['catalog_name'],
+                'expense_amount' => (float) $expense['expense_amount'],
+            ])
             ->values();
-
-        $taskNames = Task::query()->whereIn('id', $taskIds)->orderBy('task_name')->pluck('task_name');
-
-        return $taskNames->isNotEmpty() ? $taskNames->implode(', ') : '—';
     }
 
     /**
@@ -317,8 +361,11 @@ class BookingController extends Controller
         $requiredFormQuantities = collect($requiredFormIds)->mapWithKeys(fn (int $formId) => [
             $formId => max(1, (int) ($validated['required_forms_quantities'][$formId] ?? $monitoring->required_forms_quantities[$formId] ?? 1)),
         ])->all();
+<<<<<<< HEAD
         $expensesBreakdown = $this->expenseBreakdown($requiredFormIds, $monitoring->expenses_breakdown ?? []);
 
+=======
+>>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
         $monitoring->update([
             'date_task_received' => $validated['date_task_received'],
             'client_id' => $validated['client_name'],
@@ -327,7 +374,10 @@ class BookingController extends Controller
             'assigned_responsible_person_id' => $validated['assigned_responsible_person'],
             'required_forms_documents' => $requiredFormIds,
             'required_forms_quantities' => $requiredFormQuantities,
+<<<<<<< HEAD
             'expenses_breakdown' => $expensesBreakdown,
+=======
+>>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
             'date_of_submission' => $validated['date_of_submission'] ?? null,
             'receiving_officer' => $validated['receiving_officer'] ?? null,
             'acknowledgement_receipt_reference_number' => $validated['acknowledgement_receipt_reference_number'] ?? null,
@@ -391,6 +441,7 @@ class BookingController extends Controller
         return Redirect::route('bookings.edit', $monitoring)->with('status', 'form-note-saved');
     }
 
+<<<<<<< HEAD
     /** @param array<int, int|string> $formIds
      *  @return array<int, array{form_id: int, form_name: string, expense_amount: float}>
      */
@@ -418,4 +469,6 @@ class BookingController extends Controller
             ->values()
             ->all();
     }
+=======
+>>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
 }

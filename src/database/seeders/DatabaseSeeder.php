@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
             'role' => User::ROLE_ADMIN,
             'status' => User::STATUS_ACTIVE,
         ]);
+        $this->call(ExpenseCatalogSeeder::class);
     }
 }

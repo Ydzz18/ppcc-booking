@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('task_monitorings', function (Blueprint $table) {
-            $table->json('task_ids')->nullable();
-        });
+        if (! Schema::hasColumn('task_monitorings', 'task_ids')) {
+            Schema::table('task_monitorings', function (Blueprint $table) {
+                $table->json('task_ids')->nullable();
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('task_monitorings', function (Blueprint $table) {
-            $table->dropColumn('task_ids');
-        });
+        if (Schema::hasColumn('task_monitorings', 'task_ids')) {
+            Schema::table('task_monitorings', function (Blueprint $table) {
+                $table->dropColumn('task_ids');
+            });
+        }
     }
 };

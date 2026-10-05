@@ -23,12 +23,6 @@
                             <x-input-error class="mt-2" :messages="$errors->get('form_name')" />
                         </div>
 
-                        <div>
-                            <x-input-label for="expense_amount" :value="__('Expense')" />
-                            <x-text-input id="expense_amount" name="expense_amount" type="number" min="0" step="0.01" class="mt-1 block w-full" :value="old('expense_amount', $formItem->expense_amount)" required />
-                            <x-input-error class="mt-2" :messages="$errors->get('expense_amount')" />
-                        </div>
-
                         <div class="flex items-center gap-4">
                             <x-primary-button>{{ __('Save') }}</x-primary-button>
                             <a href="{{ route('settings.index', ['tab' => 'forms']) }}" class="text-sm text-gray-600 hover:text-gray-900">{{ __('Back to Settings') }}</a>

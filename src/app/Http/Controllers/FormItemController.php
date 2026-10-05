@@ -18,7 +18,6 @@ class FormItemController extends Controller
     {
         $request->merge([
             'form_names' => array_map('trim', (array) $request->input('form_names', [])),
-            'form_expenses' => array_map('trim', (array) $request->input('form_expenses', [])),
         ]);
 
         $validated = $request->validate([
@@ -30,14 +29,11 @@ class FormItemController extends Controller
                 'distinct:ignore_case',
                 Rule::unique('forms', 'form_name'),
             ],
-            'form_expenses' => ['required', 'array', 'size:'.count($request->input('form_names', []))],
-            'form_expenses.*' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
         ]);
 
-        foreach ($validated['form_names'] as $index => $formName) {
+        foreach ($validated['form_names'] as $formName) {
             FormItem::create([
                 'form_name' => trim($formName),
-                'expense_amount' => $validated['form_expenses'][$index],
             ]);
         }
 
@@ -66,12 +62,10 @@ class FormItemController extends Controller
                 'max:255',
                 Rule::unique('forms', 'form_name')->ignore($formItem->id),
             ],
-            'expense_amount' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
         ]);
 
         $formItem->update([
             'form_name' => trim($validated['form_name']),
-            'expense_amount' => $validated['expense_amount'],
         ]);
 
         return Redirect::route('settings.index')->with('status', 'form-updated');

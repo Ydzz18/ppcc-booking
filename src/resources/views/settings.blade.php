@@ -814,32 +814,29 @@
                             <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">{{ __('Search') }}</button>
                         </form>
 
-                        <x-modal name="add-form" :show="$errors->hasAny(['form_name', 'form_names', 'form_names.*', 'form_expenses', 'form_expenses.*'])" maxWidth="md" focusable>
-                            <form method="POST" action="{{ route('forms.store') }}" class="space-y-6 p-6" x-data="{ formNames: @js(old('form_names', [''])), formExpenses: @js(old('form_expenses', ['0'])) }" data-confirm="{{ __('Are you sure you want to save these forms?') }}">
+                        <x-modal name="add-form" :show="$errors->hasAny(['form_name', 'form_names', 'form_names.*'])" maxWidth="md" focusable>
+                            <form method="POST" action="{{ route('forms.store') }}" class="space-y-6 p-6" x-data="{ formNames: @js(old('form_names', [''])) }" data-confirm="{{ __('Are you sure you want to save these forms?') }}">
                                 @csrf
                                 <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
                                     <div>
                                         <h2 class="text-lg font-semibold text-gray-900">{{ __('Add Form') }}</h2>
-                                        <p class="mt-1 text-sm text-gray-500">{{ __('Add a required form or document and its expense.') }}</p>
+                                        <p class="mt-1 text-sm text-gray-500">{{ __('Add a required form or document used by task checklists.') }}</p>
                                     </div>
                                     <button type="button" x-on:click="$dispatch('close-modal', 'add-form')" aria-label="{{ __('Close') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600">&times;</button>
                                 </div>
                                 <div>
-                                    <x-input-label :value="__('Forms and Expenses')" />
+                                    <x-input-label :value="__('Form names')" />
                                     <div class="mt-2 space-y-3">
                                         <template x-for="(formName, index) in formNames" :key="index">
-                                            <div class="grid grid-cols-[minmax(0,1fr)_8rem_auto] items-start gap-2">
+                                            <div class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
                                                 <x-text-input x-model="formNames[index]" name="form_names[]" type="text" class="block w-full" placeholder="{{ __('Form name') }}" required autofocus />
-                                                <x-text-input x-model="formExpenses[index]" name="form_expenses[]" type="number" min="0" step="0.01" class="block w-full" placeholder="{{ __('Expense') }}" required />
-                                                <button type="button" x-show="formNames.length > 1" x-on:click="formNames.splice(index, 1); formExpenses.splice(index, 1)" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="{{ __('Remove form') }}">&times;</button>
+                                                <button type="button" x-show="formNames.length > 1" x-on:click="formNames.splice(index, 1)" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="{{ __('Remove form') }}">&times;</button>
                                             </div>
                                         </template>
                                     </div>
-                                    <button type="button" x-on:click="formNames.push(''); formExpenses.push('0')" class="mt-3 text-sm font-semibold text-indigo-700 hover:text-indigo-900">+ {{ __('Add another form') }}</button>
+                                    <button type="button" x-on:click="formNames.push('')" class="mt-3 text-sm font-semibold text-indigo-700 hover:text-indigo-900">+ {{ __('Add another form') }}</button>
                                     <x-input-error class="mt-2" :messages="$errors->get('form_names')" />
                                     <x-input-error class="mt-2" :messages="$errors->get('form_names.*')" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('form_expenses')" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('form_expenses.*')" />
                                 </div>
                                 <div class="flex items-center justify-end gap-3">
                                     <button type="button" x-on:click="$dispatch('close-modal', 'add-form')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">{{ __('Cancel') }}</button>
@@ -854,7 +851,6 @@
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Form Name') }}</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Expense') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Action') }}</th>
                                     </tr>
                                 </thead>
@@ -863,7 +859,6 @@
                                         <tr x-show="formSearchText === '' || $el.dataset.formName.toLowerCase().includes(formSearchText.toLowerCase())" data-form-name="{{ $form->form_name }}">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $form->id }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $form->form_name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">PHP {{ number_format((float) $form->expense_amount, 2) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 <button type="button" x-on:click="$dispatch('open-modal', 'edit-form-{{ $form->id }}')" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                                     {{ __('Edit') }}
@@ -872,7 +867,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('No forms found.') }}</td>
+                                            <td colspan="3" class="px-6 py-4 text-sm text-gray-500 text-center">{{ __('No forms found.') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -880,7 +875,7 @@
                         </div>
 
                         @foreach ($forms as $form)
-                            <x-modal name="edit-form-{{ $form->id }}" :show="$errors->hasAny(['form_name', 'expense_amount']) && (string) old('editing_form_id') === (string) $form->id" maxWidth="md" focusable>
+                            <x-modal name="edit-form-{{ $form->id }}" :show="$errors->has('form_name') && (string) old('editing_form_id') === (string) $form->id" maxWidth="md" focusable>
                                 <form method="POST" action="{{ route('forms.update', $form) }}" class="space-y-6 p-6" data-confirm="{{ __('Are you sure you want to update this form?') }}">
                                     @csrf
                                     @method('patch')
@@ -888,7 +883,7 @@
                                     <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
                                         <div>
                                             <h2 class="text-lg font-semibold text-gray-900">{{ __('Edit Form') }}</h2>
-                                            <p class="mt-1 text-sm text-gray-500">{{ __('Update the form or document name.') }}</p>
+                                            <p class="mt-1 text-sm text-gray-500">{{ __('Update the form or document name used by task checklists.') }}</p>
                                         </div>
                                         <button type="button" x-on:click="$dispatch('close-modal', 'edit-form-{{ $form->id }}')" aria-label="{{ __('Close') }}" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-600">&times;</button>
                                     </div>
@@ -896,11 +891,6 @@
                                         <x-input-label for="edit_form_name_{{ $form->id }}" :value="__('Form Name')" />
                                         <x-text-input id="edit_form_name_{{ $form->id }}" name="form_name" type="text" class="mt-2 block w-full" :value="old('editing_form_id') == $form->id ? old('form_name') : $form->form_name" required />
                                         <x-input-error class="mt-2" :messages="$errors->get('form_name')" />
-                                    </div>
-                                    <div>
-                                        <x-input-label for="edit_form_expense_{{ $form->id }}" :value="__('Expense')" />
-                                        <x-text-input id="edit_form_expense_{{ $form->id }}" name="expense_amount" type="number" min="0" step="0.01" class="mt-2 block w-full" :value="old('editing_form_id') == $form->id ? old('expense_amount') : $form->expense_amount" required />
-                                        <x-input-error class="mt-2" :messages="$errors->get('expense_amount')" />
                                     </div>
                                     <div class="flex items-center justify-end gap-3">
                                         <button type="button" x-on:click="$dispatch('close-modal', 'edit-form-{{ $form->id }}')" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">{{ __('Cancel') }}</button>
@@ -916,7 +906,6 @@
                                     <div class="min-w-0">
                                         <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Form') }} #{{ $form->id }}</p>
                                         <h3 class="mt-1 break-words text-sm font-semibold text-gray-900">{{ $form->form_name }}</h3>
-                                        <p class="mt-1 text-sm text-gray-600">PHP {{ number_format((float) $form->expense_amount, 2) }}</p>
                                     </div>
                                     <a href="{{ route('forms.edit', $form) }}" class="inline-flex shrink-0 items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                         {{ __('Edit') }}
