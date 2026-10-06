@@ -282,6 +282,23 @@ class BookingController extends Controller
             ->values();
     }
 
+    private function taskNamesForMonitoring(TaskMonitoring $monitoring): string
+    {
+        $taskIds = collect($monitoring->task_ids ?: [$monitoring->task_id])
+            ->map(fn ($taskId) => (int) $taskId)
+            ->filter(fn (int $taskId) => $taskId > 0)
+            ->unique()
+            ->values();
+        $taskNamesById = Task::query()
+            ->whereIn('id', $taskIds)
+            ->pluck('task_name', 'id');
+
+        return $taskIds
+            ->map(fn (int $taskId) => $taskNamesById->get($taskId))
+            ->filter()
+            ->implode(', ') ?: '—';
+    }
+
     /**
      * Update the specified monitoring entry.
      */

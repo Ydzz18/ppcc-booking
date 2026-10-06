@@ -319,6 +319,23 @@ class BookingExpensesTest extends TestCase
             ->assertDontSee('Permit Form</td><td>PHP');
     }
 
+    public function test_print_uses_legacy_single_task_id_when_task_ids_are_missing(): void
+    {
+        [$user, $client, $task] = $this->createBookingFixture();
+        $monitoring = TaskMonitoring::create([
+            'date_task_received' => '2026-09-30',
+            'client_id' => $client->id,
+            'task_id' => $task->id,
+            'assigned_responsible_person_id' => $client->id,
+            'submission_status' => 'pending',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('bookings.print', $monitoring))
+            ->assertOk()
+            ->assertSee('Sample Task');
+    }
+
     public function test_print_expenses_can_be_added_removed_and_edited_as_catalog_snapshots(): void
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
