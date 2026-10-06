@@ -58,10 +58,6 @@ class TaskMonitoring extends Model
             'date_task_received' => 'date',
             'task_ids' => 'array',
             'required_forms_documents' => 'array',
-<<<<<<< HEAD
-=======
-            'task_ids' => 'array',
->>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
             'required_forms_quantities' => 'array',
             'expenses_breakdown' => 'array',
             'date_of_submission' => 'date',
