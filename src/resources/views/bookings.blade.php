@@ -35,7 +35,7 @@
                         <p class="text-sm text-green-600">{{ __('Task entry deleted successfully.') }}</p>
                     @endif
 
-                    <div id="job-task-entry-section" class="mx-auto w-full max-w-6xl" x-show="activeMenu === 'entry'">
+                    <div id="job-task-entry-section" class="mx-auto w-full max-w-none" x-show="activeMenu === 'entry'">
                         <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm" x-data="{
                             taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()),
                             selectedAgency: '',
@@ -85,8 +85,8 @@
                                     <h4 id="task-selection-heading" class="text-sm font-semibold text-gray-900">{{ __('Task Selection') }}</h4>
                                     <p class="mt-1 text-xs text-gray-500">{{ __('Choose an agency, then select one or more task types.') }}</p>
                                 </div>
-                                <div class="grid gap-4 md:grid-cols-[minmax(12rem,0.8fr)_minmax(0,1.2fr)]">
-                                    <div>
+                                <div class="space-y-4">
+                                    <div class="md:max-w-md">
                                         <x-input-label for="task_agency" :value="__('Agency')" />
                                         <select id="task_agency" x-model="selectedAgency" x-on:change="selectAgency()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                             <option value="">{{ __('Select Agency') }}</option>
@@ -97,7 +97,7 @@
                                     </div>
                                     <div>
                                         <x-input-label for="type_of_task" :value="__('Type of Task')" />
-                                        <div id="type_of_task" class="mt-1 grid max-h-48 min-h-32 grid-cols-1 gap-1 overflow-y-auto rounded-md border border-gray-200 bg-white p-3 sm:max-h-56 md:max-h-none md:grid-cols-3 md:gap-2 md:overflow-visible">
+                                        <div id="type_of_task" class="mt-1 grid grid-cols-1 gap-1 rounded-md border border-gray-200 bg-white p-3 md:grid-cols-3 md:gap-2">
                                             <template x-for="task in taskOptions.filter(task => selectedAgency === '' || task.agency === selectedAgency)" :key="task.id">
                                                 <label class="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 text-sm text-gray-700 transition hover:bg-indigo-50">
                                                     <input type="checkbox" name="type_of_task[]" x-model="selectedTaskIds" x-on:change="updateSelectedTasks()" x-bind:value="String(task.id)" class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
