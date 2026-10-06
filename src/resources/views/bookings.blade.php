@@ -97,7 +97,7 @@
                                     </div>
                                     <div>
                                         <x-input-label for="type_of_task" :value="__('Type of Task')" />
-                                        <div id="type_of_task" class="mt-1 max-h-48 min-h-32 space-y-2 overflow-y-auto rounded-md border border-gray-200 bg-white p-3 sm:max-h-56">
+                                        <div id="type_of_task" class="mt-1 grid max-h-48 min-h-32 grid-cols-1 gap-1 overflow-y-auto rounded-md border border-gray-200 bg-white p-3 sm:max-h-56 md:max-h-none md:grid-cols-3 md:gap-2 md:overflow-visible">
                                             <template x-for="task in taskOptions.filter(task => selectedAgency === '' || task.agency === selectedAgency)" :key="task.id">
                                                 <label class="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 text-sm text-gray-700 transition hover:bg-indigo-50">
                                                     <input type="checkbox" name="type_of_task[]" x-model="selectedTaskIds" x-on:change="updateSelectedTasks()" x-bind:value="String(task.id)" class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
