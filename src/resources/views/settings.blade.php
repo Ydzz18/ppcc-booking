@@ -584,6 +584,12 @@
                                                 </button>
                                             </form>
                                         @endif
+                                        <button type="button" x-on:click="$dispatch('open-modal', 'client-details-{{ $client->id }}')" aria-label="{{ __('View client details') }}" title="{{ __('View client details') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.5-6 9.75-6 9.75 6 9.75 6-3.5 6-9.75 6-9.75-6-9.75-6Z" />
+                                                <circle cx="12" cy="12" r="2.75" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </article>
                             @empty

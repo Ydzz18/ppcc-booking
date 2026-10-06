@@ -509,12 +509,14 @@ class BookingExpensesTest extends TestCase
 
     public function test_settings_render_contact_person_and_keep_form_management_separate(): void
     {
-        $user = User::factory()->create();
+        [$user] = $this->createBookingFixture();
 
         $this->actingAs($user)
             ->get(route('settings.index', ['tab' => 'clients']))
             ->assertOk()
             ->assertSee('Contact Person')
+            ->assertSee('aria-label="View client details"', false)
+            ->assertSee('client-details-', false)
             ->assertDontSee('Business Registration');
 
         $this->actingAs($user)
