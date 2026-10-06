@@ -47,7 +47,11 @@ class BookingExpensesTest extends TestCase
             ->assertOk()
             ->assertSee('Expenses List')
             ->assertSee('Notarial Fee-SPA')
-            ->assertSee('Others:3___________');
+            ->assertSee('Others:3___________')
+            ->assertSee('aria-label="Add Expense"', false)
+            ->assertSee('aria-label="Edit"', false)
+            ->assertSee('aria-label="Delete"', false)
+            ->assertSee(route('expense-catalog.destroy', ExpenseCatalogItem::query()->firstOrFail()), false);
 
         $this->actingAs($user)
             ->get(route('bookings.index'))
@@ -110,6 +114,42 @@ class BookingExpensesTest extends TestCase
             'name' => 'Courier Fee',
             'default_amount' => '15.75',
         ]);
+    }
+
+    public function test_expense_catalog_items_can_be_deleted_without_changing_saved_booking_snapshots(): void
+    {
+        [$user, $client, $task] = $this->createBookingFixture();
+        $catalogItem = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+        $monitoring = TaskMonitoring::create([
+            'date_task_received' => '2026-09-30',
+            'client_id' => $client->id,
+            'task_id' => $task->id,
+            'assigned_responsible_person_id' => $client->id,
+            'expenses_breakdown' => [[
+                'catalog_id' => $catalogItem->id,
+                'catalog_name' => $catalogItem->name,
+                'expense_amount' => 125.50,
+            ]],
+            'submission_status' => 'pending',
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('expense-catalog.destroy', $catalogItem))
+            ->assertRedirect(route('expense-catalog.index'))
+            ->assertSessionHas('status', 'expense-catalog-deleted');
+
+        $this->assertDatabaseMissing('expense_catalog', ['id' => $catalogItem->id]);
+        $this->assertSame([[
+            'catalog_id' => $catalogItem->id,
+            'catalog_name' => 'Permits',
+            'expense_amount' => 125.5,
+        ]], $monitoring->fresh()->expenses_breakdown);
+
+        $this->actingAs($user)
+            ->get(route('expense-catalog.index'))
+            ->assertOk()
+            ->assertSee('Expense catalog item deleted.')
+            ->assertDontSee('Permits');
     }
 
     public function test_catalog_seeding_does_not_recreate_renamed_default_items(): void

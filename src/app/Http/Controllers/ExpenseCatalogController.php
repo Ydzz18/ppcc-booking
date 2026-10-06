@@ -60,4 +60,11 @@ class ExpenseCatalogController extends Controller
 
         return to_route('expense-catalog.index')->with('status', 'expense-catalog-updated');
     }
+
+    public function destroy(ExpenseCatalogItem $expenseCatalogItem): RedirectResponse
+    {
+        $expenseCatalogItem->delete();
+
+        return to_route('expense-catalog.index')->with('status', 'expense-catalog-deleted');
+    }
 }
