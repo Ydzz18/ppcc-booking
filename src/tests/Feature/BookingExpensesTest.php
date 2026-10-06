@@ -48,6 +48,8 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Expenses List')
             ->assertSee('Notarial Fee-SPA')
             ->assertSee('Others:3___________')
+            ->assertSee('Add Other')
+            ->assertSee('placeholder="Others:"', false)
             ->assertSee('aria-label="Add Expense"', false)
             ->assertSee('aria-label="Edit"', false)
             ->assertSee('aria-label="Delete"', false)
@@ -274,6 +276,55 @@ class BookingExpensesTest extends TestCase
             ->assertSessionHasErrors('expenses');
 
         $this->assertSame(87.65, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
+    }
+
+    public function test_print_expenses_can_include_custom_other_items(): void
+    {
+        [$user, $client, $task] = $this->createBookingFixture();
+        $catalogItem = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+        $monitoring = TaskMonitoring::create([
+            'date_task_received' => '2026-09-30',
+            'client_id' => $client->id,
+            'task_id' => $task->id,
+            'assigned_responsible_person_id' => $client->id,
+            'submission_status' => 'pending',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('bookings.print.expenses.update', $monitoring), [
+                'expenses' => [$catalogItem->id => '10.00'],
+                'other_expenses' => [
+                    ['name' => 'Courier fee', 'amount' => '25.50'],
+                ],
+            ])
+            ->assertRedirect(route('bookings.print', $monitoring));
+
+        $this->assertSame([
+            [
+                'catalog_id' => $catalogItem->id,
+                'catalog_name' => 'Permits',
+                'expense_amount' => 10.0,
+            ],
+            [
+                'catalog_id' => null,
+                'catalog_name' => 'Courier fee',
+                'expense_amount' => 25.5,
+            ],
+        ], $monitoring->fresh()->expenses_breakdown);
+
+        $this->actingAs($user)
+            ->get(route('bookings.print', $monitoring))
+            ->assertOk()
+            ->assertSee('Permits')
+            ->assertSee('Courier fee')
+            ->assertSee('PHP 10.00')
+            ->assertSee('PHP 25.50');
+
+        $this->actingAs($user)
+            ->get(route('expenses.index'))
+            ->assertOk()
+            ->assertSee('Courier fee')
+            ->assertSee('25.50');
     }
 
     public function test_multiple_task_types_combine_shared_document_quantities(): void

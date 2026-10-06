@@ -170,7 +170,9 @@
                                         $bookingStatus = $allRequiredFormsCompleted || $submissionStatus === 'completed' ? 'completed' : 'pending';
                                         $taskAgeDays = $monitoring->taskAgeInDays();
                                         $monitoringExpenses = collect($monitoring->expenses_breakdown ?? [])
-                                            ->filter(fn ($expense) => is_array($expense) && isset($expense['catalog_id'], $expense['catalog_name'], $expense['expense_amount']));
+                                            ->filter(fn ($expense) => is_array($expense)
+                                                && array_key_exists('catalog_id', $expense)
+                                                && isset($expense['catalog_name'], $expense['expense_amount']));
                                         $totalExpenses = (float) $monitoringExpenses->sum('expense_amount');
                                     @endphp
                                     <div x-data="{ expanded: false }" class="bg-white">

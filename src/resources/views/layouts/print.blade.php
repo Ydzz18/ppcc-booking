@@ -45,6 +45,8 @@
             .expense-options { border: 1px solid #d1d5db; border-radius: 6px; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 4px 0 0; max-height: 220px; min-width: 0; overflow-y: auto; padding: 12px; }
             .expense-options label { align-items: flex-start; display: flex; gap: 8px; font-size: 13px; }
             .expense-options input { flex: 0 0 auto; margin-top: 2px; }
+            [data-add-other-expense], [data-remove-other-expense] { border: 1px solid #d1d5db; border-radius: 4px; background: #fff; color: #1f2937; cursor: pointer; font-size: 12px; padding: 5px 8px; }
+            [data-other-expense-name] { border: 1px solid #9ca3af; border-radius: 4px; padding: 6px 8px; }
             .expense-edit-input input { width: 130px; border: 1px solid #9ca3af; border-radius: 4px; padding: 6px 8px; text-align: right; }
             .expense-error { color: #b91c1c; font-size: 12px; margin: 4px 0; }
             .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
@@ -102,22 +104,35 @@
                 const editButton = form.querySelector('[data-edit-expenses]');
                 const saveButton = form.querySelector('[data-save-expenses]');
                 const cancelButton = form.querySelector('[data-cancel-expenses]');
-                const inputs = [...form.querySelectorAll('[data-expense-input]')];
-                const rows = [...form.querySelectorAll('[data-expense-row]')];
+                const expenseInputs = () => [...form.querySelectorAll('[data-expense-input]')];
+                const expenseRows = () => [...form.querySelectorAll('[data-expense-row]')];
                 const toggles = [...form.querySelectorAll('[data-expense-toggle]')];
                 const picker = form.querySelector('[data-expense-picker]');
                 const emptyRow = form.querySelector('[data-expense-empty]');
                 const total = form.querySelector('[data-expense-total]');
+                const addOtherButton = form.querySelector('[data-add-other-expense]');
+                const otherTemplate = form.querySelector('[data-other-expense-template]');
+                const initialOtherRows = [...form.querySelectorAll('[data-other-expense-row]')].map((row) => row.cloneNode(true));
+                const usedOtherIndexes = new Set([...form.querySelectorAll('[data-other-expense-name]')]
+                    .map((input) => Number(input.name.match(/\[(\d+)\]/)?.[1]))
+                    .filter(Number.isInteger));
+                let nextOtherExpenseIndex = 0;
                 const pdfButton = document.querySelector('[data-save-expenses-pdf]');
 
                 const updateTotal = () => {
-                    const sum = inputs.reduce((amount, input) => amount + (input.disabled ? 0 : Number(input.value || 0)), 0);
+                    const sum = expenseInputs().reduce((amount, input) => amount + (input.disabled ? 0 : Number(input.value || 0)), 0);
                     total.textContent = `PHP ${sum.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    rows.forEach((row) => {
+                    expenseRows().forEach((row) => {
                         const input = row.querySelector('[data-expense-input]');
                         const value = row.querySelector('[data-expense-print-amount]');
-                        value.textContent = `PHP ${Number(input.value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                        if (value && input) value.textContent = `PHP ${Number(input.value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                        const name = row.querySelector('[data-other-expense-name]');
+                        const printName = row.querySelector('[data-expense-print-name]');
+                        if (name && printName) printName.textContent = name.value;
                     });
+                };
+                const updateEmptyRow = () => {
+                    if (emptyRow) emptyRow.hidden = expenseRows().some((row) => !row.hidden);
                 };
                 const updateSelection = (toggle) => {
                     const row = form.querySelector(`#expense-row-${toggle.value}`);
@@ -126,7 +141,7 @@
                     row.hidden = !selected;
                     input.disabled = !selected;
                     if (selected && input.value === '') input.value = toggle.dataset.defaultAmount;
-                    if (emptyRow) emptyRow.hidden = rows.some((candidate) => !candidate.hidden);
+                    updateEmptyRow();
                     updateTotal();
                 };
                 const setEditing = (editing) => {
@@ -141,6 +156,24 @@
                 };
 
                 editButton.addEventListener('click', () => setEditing(true));
+                addOtherButton.addEventListener('click', () => {
+                    const row = otherTemplate.content.firstElementChild.cloneNode(true);
+                    while (usedOtherIndexes.has(nextOtherExpenseIndex)) nextOtherExpenseIndex++;
+                    const index = nextOtherExpenseIndex++;
+                    usedOtherIndexes.add(index);
+                    row.querySelector('[data-other-expense-name]').name = `other_expenses[${index}][name]`;
+                    row.querySelector('[data-expense-input]').name = `other_expenses[${index}][amount]`;
+                    emptyRow.before(row);
+                    row.querySelector('[data-other-expense-name]').focus();
+                    updateEmptyRow();
+                });
+                form.addEventListener('click', (event) => {
+                    if (event.target.matches('[data-remove-other-expense]')) {
+                        event.target.closest('[data-other-expense-row]').remove();
+                        updateEmptyRow();
+                        updateTotal();
+                    }
+                });
                 pdfButton?.addEventListener('click', (event) => {
                     event.preventDefault();
 
@@ -155,7 +188,16 @@
                     form.requestSubmit(saveButton);
                 });
                 cancelButton.addEventListener('click', () => {
-                    inputs.forEach((input) => { input.value = input.dataset.originalValue; });
+                    expenseInputs().forEach((input) => { input.value = input.dataset.originalValue ?? ''; });
+                    form.querySelectorAll('[data-other-expense-row]').forEach((row) => row.remove());
+                    initialOtherRows.forEach((row) => {
+                        const restoredRow = row.cloneNode(true);
+                        const name = restoredRow.querySelector('[data-other-expense-name]');
+                        const amount = restoredRow.querySelector('[data-expense-input]');
+                        if (name) name.value = name.dataset.originalName ?? '';
+                        if (amount) amount.value = amount.dataset.originalValue ?? '';
+                        emptyRow.before(restoredRow);
+                    });
                     toggles.forEach((toggle) => {
                         toggle.checked = toggle.dataset.originalChecked === 'true';
                         updateSelection(toggle);
@@ -163,7 +205,9 @@
                     updateTotal();
                     setEditing(false);
                 });
-                inputs.forEach((input) => input.addEventListener('input', updateTotal));
+                form.addEventListener('input', (event) => {
+                    if (event.target.matches('[data-expense-input], [data-other-expense-name]')) updateTotal();
+                });
                 toggles.forEach((toggle) => toggle.addEventListener('change', () => updateSelection(toggle)));
                 toggles.forEach(updateSelection);
 
