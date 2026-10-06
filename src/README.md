@@ -10,3 +10,7 @@
 
 The MySQL container imports the root `booking.sql` dump automatically when its
 volume is created for the first time. Existing database volumes are preserved.
+The app and phpMyAdmin wait for MySQL's health check before starting. If the
+database connection is refused later, check `docker compose ps` and start the
+stack with `docker compose up -d`; the MySQL service must be running and
+healthy. Inside Docker, keep `DB_HOST=mysql` (not `localhost`).

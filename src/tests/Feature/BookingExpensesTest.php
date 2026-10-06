@@ -47,7 +47,11 @@ class BookingExpensesTest extends TestCase
             ->assertOk()
             ->assertSee('Expenses List')
             ->assertSee('Notarial Fee-SPA')
-            ->assertSee('Others:3___________');
+            ->assertSee('Others:3___________')
+            ->assertSee('aria-label="Add Expense"', false)
+            ->assertSee('aria-label="Edit"', false)
+            ->assertSee('aria-label="Delete"', false)
+            ->assertSee(route('expense-catalog.destroy', ExpenseCatalogItem::query()->firstOrFail()), false);
 
         $this->actingAs($user)
             ->get(route('bookings.index'))
@@ -112,6 +116,42 @@ class BookingExpensesTest extends TestCase
         ]);
     }
 
+    public function test_expense_catalog_items_can_be_deleted_without_changing_saved_booking_snapshots(): void
+    {
+        [$user, $client, $task] = $this->createBookingFixture();
+        $catalogItem = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+        $monitoring = TaskMonitoring::create([
+            'date_task_received' => '2026-09-30',
+            'client_id' => $client->id,
+            'task_id' => $task->id,
+            'assigned_responsible_person_id' => $client->id,
+            'expenses_breakdown' => [[
+                'catalog_id' => $catalogItem->id,
+                'catalog_name' => $catalogItem->name,
+                'expense_amount' => 125.50,
+            ]],
+            'submission_status' => 'pending',
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('expense-catalog.destroy', $catalogItem))
+            ->assertRedirect(route('expense-catalog.index'))
+            ->assertSessionHas('status', 'expense-catalog-deleted');
+
+        $this->assertDatabaseMissing('expense_catalog', ['id' => $catalogItem->id]);
+        $this->assertSame([[
+            'catalog_id' => $catalogItem->id,
+            'catalog_name' => 'Permits',
+            'expense_amount' => 125.5,
+        ]], $monitoring->fresh()->expenses_breakdown);
+
+        $this->actingAs($user)
+            ->get(route('expense-catalog.index'))
+            ->assertOk()
+            ->assertSee('Expense catalog item deleted.')
+            ->assertDontSee('Permits');
+    }
+
     public function test_catalog_seeding_does_not_recreate_renamed_default_items(): void
     {
         $item = ExpenseCatalogItem::query()->where('name', 'Cedula')->firstOrFail();
@@ -171,13 +211,19 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Permit Form')
             ->assertDontSee('Unselected Form')
             ->assertSee('Required Forms and Documents')
-            ->assertSee('Expenses')
-            ->assertSee('class="required-forms"', false)
-            ->assertSee('class="expenses"', false)
             ->assertSee(route('bookings.print.expenses.update', $monitoring), false)
             ->assertSee('Edit Expenses')
+            ->assertSee('Amount (PHP)')
+            ->assertSee('Expenses')
             ->assertSee('Notarial Fee-SPA')
+            ->assertSee('class="expenses"', false)
+            ->assertSee('class="required-forms"', false)
             ->assertSee('No expenses recorded.');
+
+        preg_match('/<table class="required-forms">.*?<\/table>/s', $printResponse->getContent(), $requiredFormsTable);
+        $this->assertNotEmpty($requiredFormsTable);
+        $this->assertStringNotContainsString('Expenses', $requiredFormsTable[0]);
+        $this->assertStringNotContainsString('PHP', $requiredFormsTable[0]);
 
         $this->actingAs($user)
             ->patch(route('bookings.update', $monitoring), [
@@ -464,18 +510,27 @@ class BookingExpensesTest extends TestCase
 
     public function test_settings_render_contact_person_and_keep_form_management_separate(): void
     {
-        $user = User::factory()->create();
+        $fixture = $this->createBookingFixture();
+        $user = $fixture[0];
+        $form = $fixture[3];
 
         $this->actingAs($user)
             ->get(route('settings.index', ['tab' => 'clients']))
             ->assertOk()
             ->assertSee('Contact Person')
+            ->assertSee('aria-label="View client details"', false)
+            ->assertSee('client-details-', false)
+            ->assertSee('data-mobile-id-column="0"', false)
             ->assertDontSee('Business Registration');
 
         $this->actingAs($user)
             ->get(route('settings.index', ['tab' => 'forms']))
             ->assertOk()
             ->assertSee('Form names')
+            ->assertSee('edit-form-'.$form->id, false)
+            ->assertSee(route('forms.update', $form), false)
+            ->assertSee('Update the form or document name used by task checklists.')
+            ->assertDontSee(route('forms.edit', $form), false)
             ->assertDontSee('form_expenses[]')
             ->assertDontSee('name="expense_amount"');
     }

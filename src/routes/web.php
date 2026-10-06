@@ -122,6 +122,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/settings/expenses', [ExpenseCatalogController::class, 'index'])->name('expense-catalog.index');
     Route::post('/settings/expenses', [ExpenseCatalogController::class, 'store'])->name('expense-catalog.store');
     Route::patch('/settings/expenses/{expenseCatalogItem}', [ExpenseCatalogController::class, 'update'])->name('expense-catalog.update');
+    Route::delete('/settings/expenses/{expenseCatalogItem}', [ExpenseCatalogController::class, 'destroy'])->name('expense-catalog.destroy');
     Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
     Route::get('/expenses/print', [ExpenseController::class, 'print'])->name('expenses.print');
     Route::get('/expenses/pdf', [ExpenseController::class, 'downloadPdf'])->name('expenses.pdf');

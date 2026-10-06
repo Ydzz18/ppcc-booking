@@ -70,8 +70,8 @@
                 body { background: #fff; }
                 .print-page { max-width: none; padding: 0; }
                 .print-toolbar, .print-edit-controls, .expense-picker, .expense-edit-input, .expense-error, .expense-edit-name { display: none !important; }
-                .expense-print-value { display: inline !important; }
-                .expense-edit-input[hidden] { display: none !important; }
+                .expense-print-value:not([hidden]) { display: inline !important; }
+                .expense-print-value[hidden], .expense-edit-input[hidden] { display: none !important; }
                 .paper { border: 0; padding: 0; }
                 .section, tr { break-inside: avoid; }
             }

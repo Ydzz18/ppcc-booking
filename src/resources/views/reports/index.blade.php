@@ -17,7 +17,7 @@
                 <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">{{ count($rows) }} {{ __('records') }}</span>
             </div>
 
-            <form method="GET" action="{{ route('reports.index') }}" class="mt-6 grid gap-4 md:grid-cols-[minmax(0,1fr)_180px_180px_auto] md:items-end">
+            <form method="GET" action="{{ route('reports.index') }}" class="mobile-filter-toolbar mt-6 grid gap-4 md:grid-cols-[minmax(0,1fr)_180px_180px_auto] md:items-end">
                 <div>
                     <label for="type" class="block text-sm font-medium text-gray-700">{{ __('Report type') }}</label>
                     <select id="type" name="type" class="mt-2 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
@@ -69,7 +69,7 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="mobile-record-table min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             @foreach ($headers as $header)

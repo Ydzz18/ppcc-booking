@@ -17,7 +17,7 @@
                         </a>
                     </div>
 
-                    <form method="GET" action="{{ route('expenses.index') }}" class="grid gap-4 rounded-md border border-gray-200 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto] lg:items-end">
+                    <form method="GET" action="{{ route('expenses.index') }}" class="mobile-filter-toolbar grid gap-4 rounded-md border border-gray-200 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto] lg:items-end">
                         <div>
                             <x-input-label for="expense_from" :value="__('From')" />
                             <x-text-input id="expense_from" name="from" type="date" class="mt-1 block w-full" :value="$from" />
@@ -51,7 +51,7 @@
                     </div>
 
                     <div class="overflow-x-auto rounded-md border border-gray-200">
-                        <table class="min-w-[760px] w-full divide-y divide-gray-200">
+                        <table class="mobile-record-table min-w-[760px] w-full divide-y divide-gray-200" data-mobile-title-column="1" data-mobile-summary-columns="2,5">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">{{ __('Date Booked') }}</th>
