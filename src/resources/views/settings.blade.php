@@ -425,9 +425,9 @@
                                     <col class="w-[15%]">
                                     <col class="w-[19%]">
                                     <col class="w-[13%]">
-                                    <col class="w-[9%]">
-                                    <col class="w-[16%]">
-                                    <col class="w-[23%]">
+                                    <col class="w-[13%]">
+                                    <col class="w-[18%]">
+                                    <col class="w-[17%]">
                                 </colgroup>
                                 <thead class="bg-gray-50">
                                     <tr>
@@ -447,10 +447,10 @@
                                             <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->client_name }}</td>
                                             <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->address }}</td>
                                             <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->contact_person }}</td>
-                                            <td class="break-all px-2 py-3 text-xs text-gray-900">{{ $client->tin }}</td>
-                                            <td class="break-all px-2 py-3 text-xs text-gray-900">{{ $client->tel_phone_number }}</td>
+                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->tin }}</td>
+                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->tel_phone_number }}</td>
                                             <td class="px-2 py-3 text-xs text-gray-900">
-                                                <div class="flex flex-wrap items-center gap-2">
+                                                <div class="flex flex-nowrap items-center gap-2">
                                                     <a href="{{ route('clients.edit', $client) }}" aria-label="{{ __('Edit client') }}" title="{{ __('Edit client') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
