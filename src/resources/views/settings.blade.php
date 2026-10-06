@@ -419,37 +419,28 @@
                         </x-modal>
 
                         <div class="hidden overflow-hidden rounded-lg border border-gray-200 md:block">
-                            <table class="w-full table-fixed divide-y divide-gray-200">
-                                <colgroup>
-                                    <col class="w-[5%]">
-                                    <col class="w-[15%]">
-                                    <col class="w-[19%]">
-                                    <col class="w-[13%]">
-                                    <col class="w-[13%]">
-                                    <col class="w-[18%]">
-                                    <col class="w-[17%]">
-                                </colgroup>
+                            <table class="w-full table-auto divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('ID') }}</th>
-                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Client Name') }}</th>
-                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Address') }}</th>
-                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Contact Person') }}</th>
-                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('TIN') }}</th>
-                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Tel/Phone Number') }}</th>
-                                        <th scope="col" class="break-words px-2 py-3 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Action') }}</th>
+                                        <th scope="col" class="break-words px-4 py-4 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('ID') }}</th>
+                                        <th scope="col" class="break-words px-4 py-4 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Client Name') }}</th>
+                                        <th scope="col" class="break-words px-4 py-4 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Address') }}</th>
+                                        <th scope="col" class="break-words px-4 py-4 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Contact Person') }}</th>
+                                        <th scope="col" class="break-words px-4 py-4 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('TIN') }}</th>
+                                        <th scope="col" class="break-words px-4 py-4 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Tel/Phone Number') }}</th>
+                                        <th scope="col" class="break-words px-4 py-4 text-left text-[10px] font-medium leading-tight text-gray-500">{{ __('Action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse ($clients as $client)
                                         <tr>
-                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->id }}</td>
-                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->client_name }}</td>
-                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->address }}</td>
-                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->contact_person }}</td>
-                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->tin }}</td>
-                                            <td class="break-words px-2 py-3 text-xs text-gray-900">{{ $client->tel_phone_number }}</td>
-                                            <td class="px-2 py-3 text-xs text-gray-900">
+                                            <td class="break-words px-4 py-4 text-xs text-gray-900">{{ $client->id }}</td>
+                                            <td class="break-words px-4 py-4 text-xs text-gray-900">{{ $client->client_name }}</td>
+                                            <td class="break-words px-4 py-4 text-xs text-gray-900">{{ $client->address }}</td>
+                                            <td class="break-words px-4 py-4 text-xs text-gray-900">{{ $client->contact_person }}</td>
+                                            <td class="break-words px-4 py-4 text-xs text-gray-900">{{ $client->tin }}</td>
+                                            <td class="break-words px-4 py-4 text-xs text-gray-900">{{ $client->tel_phone_number }}</td>
+                                            <td class="px-4 py-4 text-xs text-gray-900">
                                                 <div class="flex flex-nowrap items-center gap-2">
                                                     <a href="{{ route('clients.edit', $client) }}" aria-label="{{ __('Edit client') }}" title="{{ __('Edit client') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
