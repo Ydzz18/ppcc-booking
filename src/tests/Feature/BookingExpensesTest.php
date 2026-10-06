@@ -171,6 +171,7 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Permit Form')
             ->assertDontSee('Unselected Form')
 <<<<<<< HEAD
+<<<<<<< HEAD
             ->assertDontSee('Amount (PHP)')
             ->assertSee(route('bookings.print.expenses.update', $monitoring), false)
             ->assertSee('Edit Expenses')
@@ -182,6 +183,8 @@ class BookingExpensesTest extends TestCase
             ->assertSee('PHP 125.50')
             ->assertSee('Total Expenses');
 =======
+=======
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
             ->assertSee('Required Forms and Documents')
             ->assertSee('Expenses')
             ->assertSee('class="required-forms"', false)
@@ -190,12 +193,15 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Edit Expenses')
             ->assertSee('Notarial Fee-SPA')
             ->assertSee('No expenses recorded.');
+<<<<<<< HEAD
 >>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
 
         preg_match('/<table class="required-forms">.*?<\/table>/s', $printResponse->getContent(), $requiredFormsTable);
         $this->assertNotEmpty($requiredFormsTable);
         $this->assertStringNotContainsString('Expenses', $requiredFormsTable[0]);
         $this->assertStringNotContainsString('PHP', $requiredFormsTable[0]);
+=======
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
 
         $this->actingAs($user)
             ->patch(route('bookings.update', $monitoring), [
@@ -210,9 +216,17 @@ class BookingExpensesTest extends TestCase
         $this->assertSame([], $monitoring->fresh()->expenses_breakdown);
     }
 
+<<<<<<< HEAD
     public function test_print_expenses_can_be_updated_without_changing_form_defaults(): void
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
+=======
+    public function test_print_expenses_can_be_updated_without_changing_catalog_defaults(): void
+    {
+        [$user, $client, $task, $form] = $this->createBookingFixture();
+        $expense = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+        $expense->update(['default_amount' => 125.50]);
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
         $monitoring = TaskMonitoring::create([
             'date_task_received' => '2026-09-30',
             'client_id' => $client->id,
@@ -221,8 +235,13 @@ class BookingExpensesTest extends TestCase
             'assigned_responsible_person_id' => $client->id,
             'required_forms_documents' => [$form->id],
             'expenses_breakdown' => [[
+<<<<<<< HEAD
                 'form_id' => $form->id,
                 'form_name' => $form->form_name,
+=======
+                'catalog_id' => $expense->id,
+                'catalog_name' => $expense->name,
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
                 'expense_amount' => 125.5,
             ]],
             'submission_status' => 'pending',
@@ -230,17 +249,29 @@ class BookingExpensesTest extends TestCase
 
         $this->actingAs($user)
             ->patch(route('bookings.print.expenses.update', $monitoring), [
+<<<<<<< HEAD
                 'expenses' => [$form->id => '87.65'],
+=======
+                'expenses' => [$expense->id => '87.65'],
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
             ])
             ->assertRedirect(route('bookings.print', $monitoring))
             ->assertSessionHas('status', 'expenses-updated');
 
         $this->assertSame(87.65, $monitoring->fresh()->expenses_breakdown[0]['expense_amount']);
+<<<<<<< HEAD
         $this->assertSame(125.5, (float) $form->fresh()->expense_amount);
 
         $this->actingAs($user)
             ->patch(route('bookings.print.expenses.update', $monitoring), [
                 'expenses' => [$form->id => '99.00', $form->id + 999 => '1.00'],
+=======
+        $this->assertSame('125.50', $expense->fresh()->default_amount);
+
+        $this->actingAs($user)
+            ->patch(route('bookings.print.expenses.update', $monitoring), [
+                'expenses' => [$expense->id => '99.00', $expense->id + 999 => '1.00'],
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
             ])
             ->assertSessionHasErrors('expenses');
 

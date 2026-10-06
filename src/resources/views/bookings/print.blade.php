@@ -64,6 +64,7 @@
             <p class="empty">{{ __('No forms or documents required.') }}</p>
         @else
 <<<<<<< HEAD
+<<<<<<< HEAD
             @if ($isPdf ?? false)
                 <table class="required-forms">
                     <thead>
@@ -116,6 +117,8 @@
                                 <td>{{ $form['name'] }}</td>
                                 <td>PHP {{ number_format($form['expense_amount'], 2) }}</td>
 =======
+=======
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
             <table class="required-forms">
                 <thead>
                     <tr><th>{{ __('Form / Document') }}</th><th>{{ __('Quantity') }}</th><th>{{ __('Status') }}</th><th>{{ __('Notes / Remarks') }}</th><th>{{ __('Note Date') }}</th></tr>
@@ -150,7 +153,10 @@
                             <tr>
                                 <td>{{ $expense['name'] }}</td>
                                 <td>PHP {{ number_format($expense['expense_amount'], 2) }}</td>
+<<<<<<< HEAD
 >>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
+=======
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
                             </tr>
                         @endforeach
                     </tbody>
@@ -161,6 +167,7 @@
                         </tr>
                     </tfoot>
                 </table>
+<<<<<<< HEAD
 <<<<<<< HEAD
             @else
                 <form method="POST" action="{{ route('bookings.print.expenses.update', $monitoring) }}" data-expenses-form @if ($errors->any()) data-start-editing @endif>
@@ -212,6 +219,8 @@
         </section>
     @endif
 =======
+=======
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
             @endif
         @else
             <form method="POST" action="{{ route('bookings.print.expenses.update', $monitoring) }}" data-expenses-form @if ($errors->has('expenses') || old('expenses') !== null) data-start-editing @endif>
@@ -305,7 +314,10 @@
             </form>
         @endif
     </section>
+<<<<<<< HEAD
 >>>>>>> 518d7ea95a1541f4f357009b0848c9673b28e59b
+=======
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
 
     @if ($monitoring->submission_notes)
         <section class="section">

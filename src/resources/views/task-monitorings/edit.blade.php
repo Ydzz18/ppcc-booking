@@ -25,7 +25,15 @@
                         <!-- Type of Task Column -->
                         <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
                             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('Type of Task') }}</p>
+<<<<<<< HEAD
                             <p class="mt-2 text-sm font-medium text-gray-900">{{ $taskNames ?: '—' }}</p>
+=======
+                            <p class="mt-2 text-sm font-medium text-gray-900">
+                                @foreach ($tasks->filter(fn ($task) => in_array((string) $task->id, $selectedTaskIds, true)) as $task)
+                                    {{ $task->task_name }}@unless ($loop->last), @endunless
+                                @endforeach
+                            </p>
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
                         </div>
 
                         <!-- Client Name Column -->

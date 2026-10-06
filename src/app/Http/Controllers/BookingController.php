@@ -342,6 +342,126 @@ class BookingController extends Controller
     }
 
     /**
+     * Show a print-ready preview of the specified booking.
+     */
+    public function print(TaskMonitoring $monitoring): View
+    {
+        $requiredForms = $this->requiredFormsForPrint($monitoring);
+        $expenses = $this->expenseSnapshotsForPrint($monitoring);
+        $expenseCatalog = ExpenseCatalogItem::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'name', 'default_amount']);
+        $taskNames = $this->taskNamesForMonitoring($monitoring);
+
+        return view('bookings.print', compact('monitoring', 'requiredForms', 'expenses', 'expenseCatalog', 'taskNames'));
+    }
+
+    public function updatePrintExpenses(Request $request, TaskMonitoring $monitoring): RedirectResponse
+    {
+        $validated = $request->validate([
+            'expenses' => ['sometimes', 'array'],
+            'expenses.*' => ['required', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
+            'download_pdf' => ['sometimes', 'boolean'],
+        ]);
+
+        $submitted = $validated['expenses'] ?? [];
+        $submittedIds = array_keys($submitted);
+        $invalidKeys = array_filter($submittedIds, fn ($id): bool => ! ctype_digit((string) $id) || (int) $id < 1);
+        $catalogById = ExpenseCatalogItem::query()
+            ->whereIn('id', array_map('intval', $submittedIds))
+            ->get(['id', 'name', 'default_amount'])
+            ->keyBy('id');
+        if ($invalidKeys !== [] || $catalogById->count() !== count($submittedIds)) {
+            throw ValidationException::withMessages([
+                'expenses' => __('Select only expense items from the current catalog.'),
+            ]);
+        }
+
+        $existingExpenses = collect($monitoring->expenses_breakdown ?? [])
+            ->filter(fn ($expense): bool => is_array($expense) && isset($expense['catalog_id']))
+            ->keyBy(fn (array $expense) => (int) $expense['catalog_id']);
+
+        $monitoring->update([
+            'expenses_breakdown' => collect($submitted)
+                ->map(function ($amount, $catalogId) use ($catalogById, $existingExpenses): array {
+                    $item = $catalogById->get((int) $catalogId);
+                    $existing = $existingExpenses->get((int) $catalogId);
+
+                    return [
+                        'catalog_id' => (int) $catalogId,
+                        'catalog_name' => $existing['catalog_name'] ?? $item->name,
+                        'expense_amount' => (float) $amount,
+                    ];
+                })
+                ->values()
+                ->all(),
+        ]);
+
+        if ($request->boolean('download_pdf')) {
+            return Redirect::route('bookings.pdf', $monitoring);
+        }
+
+        return Redirect::route('bookings.print', $monitoring)->with('status', 'expenses-updated');
+    }
+
+    /**
+     * Download a PDF of the specified booking.
+     */
+    public function downloadPdf(TaskMonitoring $monitoring)
+    {
+        $requiredForms = $this->requiredFormsForPrint($monitoring);
+        $expenses = $this->expenseSnapshotsForPrint($monitoring);
+        $taskNames = $this->taskNamesForMonitoring($monitoring);
+
+        return Pdf::loadView('bookings.print', compact('monitoring', 'requiredForms', 'expenses', 'taskNames') + ['isPdf' => true])
+            ->download('booking-'.$monitoring->id.'.pdf');
+    }
+
+    /**
+     * Load the booking data shared by the preview and PDF responses.
+     */
+    private function requiredFormsForPrint(TaskMonitoring $monitoring)
+    {
+        $monitoring->load(['client', 'task', 'assignedResponsiblePerson']);
+
+        $requiredFormIds = collect($monitoring->required_forms_documents ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+        $formsById = FormItem::query()
+            ->whereIn('id', $requiredFormIds)
+            ->get()
+            ->keyBy('id');
+        $notesByForm = TaskMonitoringFormNote::query()
+            ->where('task_monitoring_id', $monitoring->id)
+            ->get()
+            ->keyBy('form_id');
+
+        return $requiredFormIds->map(fn (int $formId) => [
+            'id' => $formId,
+            'name' => $formsById->get($formId)?->form_name ?? __('Unknown form'),
+            'status' => strtolower(trim((string) ($notesByForm->get($formId)?->note_status ?? 'pending'))),
+            'note' => $notesByForm->get($formId)?->notes_remarks,
+            'note_date' => $notesByForm->get($formId)?->note_date,
+            'quantity' => max(1, (int) ($monitoring->required_forms_quantities[$formId] ?? 1)),
+        ]);
+    }
+
+    private function expenseSnapshotsForPrint(TaskMonitoring $monitoring)
+    {
+        return collect($monitoring->expenses_breakdown ?? [])
+            ->filter(fn ($expense): bool => is_array($expense)
+                && isset($expense['catalog_id'], $expense['catalog_name'], $expense['expense_amount']))
+            ->map(fn (array $expense): array => [
+                'id' => (int) $expense['catalog_id'],
+                'name' => (string) $expense['catalog_name'],
+                'expense_amount' => (float) $expense['expense_amount'],
+            ])
+            ->values();
+    }
+
+    /**
      * Update the specified monitoring entry.
      */
     public function update(Request $request, TaskMonitoring $monitoring): RedirectResponse

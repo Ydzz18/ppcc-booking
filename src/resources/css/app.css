@@ -143,11 +143,16 @@
         height: auto !important;
         min-height: 100vh;
         min-height: 100dvh;
+<<<<<<< HEAD
         flex-direction: column !important;
+=======
+        flex-direction: row !important;
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
         overflow: visible !important;
     }
 
     .app-shell > nav {
+<<<<<<< HEAD
         position: relative !important;
         top: auto !important;
         z-index: 40;
@@ -184,10 +189,36 @@
 
     .landscape-mobile-menu:not(.hidden) {
         display: block !important;
+=======
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 40;
+        width: 4rem;
+        height: 100vh !important;
+        height: 100dvh !important;
+        overflow: hidden !important;
+    }
+
+    .landscape-desktop-sidebar {
+        display: flex !important;
+        width: 4rem;
+        height: 100vh !important;
+        height: 100dvh !important;
+        min-height: 0 !important;
+    }
+
+    .landscape-mobile-header {
+        display: none !important;
+    }
+
+    .landscape-mobile-menu {
+        display: none !important;
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
     }
 
     .app-shell > div.flex-1 {
         height: auto !important;
+<<<<<<< HEAD
         min-height: calc(100vh - 3.5rem);
         min-height: calc(100dvh - 3.5rem);
     }
@@ -201,6 +232,10 @@
     .app-shell > div.flex-1 > header > div {
         padding-top: 0 !important;
         padding-bottom: 0 !important;
+=======
+        min-height: 100vh;
+        min-height: 100dvh;
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
     }
 
     .app-main {
@@ -335,6 +370,7 @@ html[data-theme='dark'] .task-monitoring-value {
     color: var(--text-primary);
 }
 
+<<<<<<< HEAD
 .task-monitoring-required-expense-header,
 .task-monitoring-required-expense-row {
     display: grid;
@@ -344,6 +380,8 @@ html[data-theme='dark'] .task-monitoring-value {
     row-gap: 0.5rem;
 }
 
+=======
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
 .task-monitoring-form-status-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 7rem;
@@ -357,6 +395,7 @@ html[data-theme='dark'] .task-monitoring-value {
     row-gap: 0.5rem;
 }
 
+<<<<<<< HEAD
 .task-monitoring-expense-row {
     display: flex;
     min-height: 2.5rem;
@@ -373,18 +412,24 @@ html[data-theme='dark'] .task-monitoring-value {
     padding-top: 0.5rem;
 }
 
+=======
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
 .task-monitoring-form-expense-name {
     min-width: 0;
     overflow-wrap: anywhere;
 }
 
+<<<<<<< HEAD
 .task-monitoring-form-expense-amount,
+=======
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
 .task-monitoring-form-expense-status {
     text-align: right;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
 
+<<<<<<< HEAD
 .task-monitoring-form-expense-amount {
     font-size: 0.5625rem;
 }
@@ -392,6 +437,10 @@ html[data-theme='dark'] .task-monitoring-value {
 @media (max-width: 639px) {
     .task-monitoring-form-status-row,
     .task-monitoring-form-expense-total {
+=======
+@media (max-width: 639px) {
+    .task-monitoring-form-status-row {
+>>>>>>> cc7605a1efaea1247a2e66aae0df46dc30feaed1
         grid-template-columns: minmax(0, 1fr) 3.5rem;
         column-gap: 0.75rem;
     }
