@@ -88,7 +88,7 @@
                         @endif
 
                         <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                            <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="1" data-mobile-summary-columns="2,4">
+                            <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="1" data-mobile-id-column="0" data-mobile-summary-columns="2,4">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>
@@ -706,7 +706,7 @@
                         </x-modal>
 
                         <div id="task-table-container" class="overflow-x-auto border border-gray-200 rounded-lg">
-                            <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="2" data-mobile-summary-columns="1">
+                            <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="2" data-mobile-id-column="0" data-mobile-summary-columns="1">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>
@@ -889,7 +889,7 @@
                         </x-modal>
 
                         <div class="hidden overflow-x-auto border border-gray-200 rounded-lg md:block">
-                            <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="1" data-mobile-summary-columns="0">
+                            <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="1" data-mobile-id-column="0" data-mobile-summary-columns="0">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>
@@ -950,12 +950,12 @@
                                         <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Form') }} #{{ $form->id }}</p>
                                         <h3 class="mt-1 break-words text-sm font-semibold text-gray-900">{{ $form->form_name }}</h3>
                                     </div>
-                                    <a href="{{ route('forms.edit', $form) }}" aria-label="{{ __('Edit form') }}" title="{{ __('Edit form') }}" class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    <button type="button" x-on:click="$dispatch('open-modal', 'edit-form-{{ $form->id }}')" aria-label="{{ __('Edit form') }}" title="{{ __('Edit form') }}" class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5" />
                                         </svg>
-                                    </a>
+                                    </button>
                                 </article>
                             @empty
                                 <p class="rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-500">{{ __('No forms found.') }}</p>

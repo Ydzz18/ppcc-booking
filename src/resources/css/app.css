@@ -929,6 +929,20 @@ html.dark .rounded-xl {
         display: none;
     }
 
+    .mobile-record-id {
+        display: inline-flex;
+        margin-left: 0.5rem;
+        align-items: center;
+        border-radius: 9999px;
+        background: #f3f4f6;
+        padding: 0.125rem 0.45rem;
+        color: #6b7280;
+        font-size: 0.65rem;
+        font-weight: 600;
+        line-height: 1.25rem;
+        vertical-align: middle;
+    }
+
     table.mobile-record-table tbody td.mobile-record-summary {
         display: flex;
         align-items: flex-start;

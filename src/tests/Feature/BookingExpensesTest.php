@@ -509,7 +509,9 @@ class BookingExpensesTest extends TestCase
 
     public function test_settings_render_contact_person_and_keep_form_management_separate(): void
     {
-        [$user] = $this->createBookingFixture();
+        $fixture = $this->createBookingFixture();
+        $user = $fixture[0];
+        $form = $fixture[3];
 
         $this->actingAs($user)
             ->get(route('settings.index', ['tab' => 'clients']))
@@ -517,12 +519,17 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Contact Person')
             ->assertSee('aria-label="View client details"', false)
             ->assertSee('client-details-', false)
+            ->assertSee('data-mobile-id-column="0"', false)
             ->assertDontSee('Business Registration');
 
         $this->actingAs($user)
             ->get(route('settings.index', ['tab' => 'forms']))
             ->assertOk()
             ->assertSee('Form names')
+            ->assertSee('edit-form-'.$form->id, false)
+            ->assertSee(route('forms.update', $form), false)
+            ->assertSee('Update the form or document name used by task checklists.')
+            ->assertDontSee(route('forms.edit', $form), false)
             ->assertDontSee('form_expenses[]')
             ->assertDontSee('name="expense_amount"');
     }

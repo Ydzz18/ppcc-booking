@@ -93,6 +93,7 @@ const enhanceMobileRecordTables = (root = document) => {
 	[...new Set(tables)].forEach((table) => {
 		const headers = [...table.querySelectorAll('thead th')].map((header) => header.textContent.trim());
 		const titleColumn = Number(table.dataset.mobileTitleColumn ?? 0);
+		const idColumn = Number(table.dataset.mobileIdColumn ?? -1);
 		const summaryColumns = new Set(
 			(table.dataset.mobileSummaryColumns ?? '1')
 				.split(',')
@@ -111,9 +112,19 @@ const enhanceMobileRecordTables = (root = document) => {
 			});
 
 			const titleCell = cells[titleColumn];
-			if (!titleCell || titleCell.querySelector('[data-mobile-details-toggle]')) return;
+			if (!titleCell) return;
 
 			const title = titleCell.textContent.trim();
+			const idValue = cells[idColumn]?.textContent.trim();
+			if (idColumn >= 0 && idValue && !titleCell.querySelector('.mobile-record-id')) {
+				const idBadge = document.createElement('span');
+				idBadge.className = 'mobile-record-id';
+				idBadge.textContent = `#${idValue}`;
+				titleCell.append(idBadge);
+			}
+
+			if (titleCell.querySelector('[data-mobile-details-toggle]')) return;
+
 			const toggle = document.createElement('button');
 			toggle.type = 'button';
 			toggle.dataset.mobileDetailsToggle = '';
