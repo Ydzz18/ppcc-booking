@@ -14,8 +14,11 @@
                     <div x-show="activeMenu === 'users'" style="{{ $activeSettingsTab !== 'users' ? 'display: none;' : '' }}">
                         <div class="mb-5 flex items-center justify-between gap-4">
                             @can('manage-users')
-                                <button type="button" x-on:click="$dispatch('open-modal', 'register-user')" class="inline-flex items-center rounded-md bg-gray-800 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                    {{ __('Register New User') }}
+                                <button type="button" x-on:click="$dispatch('open-modal', 'register-user')" aria-label="{{ __('Register New User') }}" title="{{ __('Register New User') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
+                                        <circle cx="12" cy="12" r="9" />
+                                    </svg>
                                 </button>
                             @endcan
                         </div>
@@ -114,8 +117,11 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $user->created_at?->format('F d, Y') }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 @can('manage-users')
-                                                    <button type="button" x-on:click="$dispatch('open-modal', 'edit-user-{{ $user->id }}')" class="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                        {{ __('Edit') }}
+                                                    <button type="button" x-on:click="$dispatch('open-modal', 'edit-user-{{ $user->id }}')" aria-label="{{ __('Edit') }}" title="{{ __('Edit') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5" />
+                                                        </svg>
                                                     </button>
                                                 @else
                                                     <span class="text-gray-400">{{ __('—') }}</span>
@@ -206,8 +212,11 @@
                         @if (session('status') === 'client-deleted')
                             <p class="text-sm text-green-600">{{ __('Client deleted successfully.') }}</p>
                         @endif
-                        <button type="button" x-on:click="$dispatch('open-modal', 'add-client')" class="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                            {{ __('ADD CLIENT') }}
+                        <button type="button" x-on:click="$dispatch('open-modal', 'add-client')" aria-label="{{ __('Add client') }}" title="{{ __('Add client') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
+                                <circle cx="12" cy="12" r="9" />
+                            </svg>
                         </button>
 
                         <x-modal name="add-client" :show="$errors->hasAny(['client_name', 'business_name', 'contact_person', 'address', 'residential_address', 'tin', 'tel_phone_number', 'email_address', 'id_presented', 'fathers_name', 'mothers_maiden_name', 'date_of_birth', 'place_of_birth', 'civil_status', 'religion', 'capitalization', 'notes', 'additional_requirements', 'additional_requirements.*'])" maxWidth="2xl" focusable>
@@ -442,19 +451,24 @@
                                             <td class="break-all px-2 py-3 text-xs text-gray-900">{{ $client->tel_phone_number }}</td>
                                             <td class="px-2 py-3 text-xs text-gray-900">
                                                 <div class="flex flex-wrap items-center gap-2">
-                                                    <a href="{{ route('clients.edit', $client) }}" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                        {{ __('Edit') }}
+                                                    <a href="{{ route('clients.edit', $client) }}" aria-label="{{ __('Edit client') }}" title="{{ __('Edit client') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5" />
+                                                        </svg>
                                                     </a>
                                                     @if (Auth::user()->isAdmin())
                                                         <form method="POST" action="{{ route('clients.destroy', $client) }}" data-confirm="{{ __('Are you sure you want to delete this client?') }}">
                                                             @csrf
                                                             @method('delete')
-                                                            <button type="submit" class="inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                                                                {{ __('Delete') }}
+                                                            <button type="submit" aria-label="{{ __('Delete client') }}" title="{{ __('Delete client') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3" />
+                                                                </svg>
                                                             </button>
                                                         </form>
                                                     @endif
-                                                    <button type="button" x-on:click="$dispatch('open-modal', 'client-details-{{ $client->id }}')" aria-label="{{ __('View client details') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                    <button type="button" x-on:click="$dispatch('open-modal', 'client-details-{{ $client->id }}')" aria-label="{{ __('View client details') }}" title="{{ __('View client details') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25-4.5a.75.75 0 01-1.08 0l-4.25 4.5a.75.75 0 01.02 1.06z" clip-rule="evenodd" />
                                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -547,18 +561,25 @@
                                             <dd class="mt-1 break-words text-gray-900">{{ $client->tin ?: '—' }}</dd>
                                         </div>
                                     </dl>
-                                    <a href="{{ route('clients.edit', $client) }}" class="mt-4 inline-flex w-full items-center justify-center rounded-md bg-gray-800 px-3 py-2 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                        {{ __('Edit') }}
-                                    </a>
-                                    @if (Auth::user()->isAdmin())
-                                        <form method="POST" action="{{ route('clients.destroy', $client) }}" data-confirm="{{ __('Are you sure you want to delete this client?') }}" class="mt-2">
-                                            @csrf
-                                            @method('delete')
-                                            <button type="submit" class="inline-flex w-full items-center justify-center rounded-md bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                                                {{ __('Delete') }}
-                                            </button>
-                                        </form>
-                                    @endif
+                                    <div class="mt-4 flex gap-2">
+                                        <a href="{{ route('clients.edit', $client) }}" aria-label="{{ __('Edit client') }}" title="{{ __('Edit client') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5" />
+                                            </svg>
+                                        </a>
+                                        @if (Auth::user()->isAdmin())
+                                            <form method="POST" action="{{ route('clients.destroy', $client) }}" data-confirm="{{ __('Are you sure you want to delete this client?') }}">
+                                                @csrf
+                                                @method('delete')
+                                                <button type="submit" aria-label="{{ __('Delete client') }}" title="{{ __('Delete client') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </article>
                             @empty
                                 <p class="rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-500">{{ __('No clients found.') }}</p>
@@ -585,8 +606,11 @@
                             <p class="text-sm text-green-600">{{ __('Task updated successfully.') }}</p>
                         @endif
 
-                        <button type="button" x-on:click="$dispatch('open-modal', 'add-task')" class="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                            {{ __('ADD TASK') }}
+                        <button type="button" x-on:click="$dispatch('open-modal', 'add-task')" aria-label="{{ __('Add task') }}" title="{{ __('Add task') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
+                                <circle cx="12" cy="12" r="9" />
+                            </svg>
                         </button>
 
                         <form id="task-search-form" method="GET" action="{{ route('settings.index') }}" class="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_160px_auto]">
@@ -692,15 +716,20 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 <div class="flex items-center gap-2">
-                                                    <button type="button" x-on:click="$dispatch('open-modal', 'edit-task-{{ $task->id }}')" class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                        {{ __('Edit') }}
+                                                    <button type="button" x-on:click="$dispatch('open-modal', 'edit-task-{{ $task->id }}')" aria-label="{{ __('Edit task') }}" title="{{ __('Edit task') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5" />
+                                                        </svg>
                                                     </button>
                                                     @if (Auth::user()->isAdmin())
                                                         <form method="POST" action="{{ route('tasks.destroy', $task) }}" data-confirm="{{ __('Are you sure you want to delete this task?') }}">
                                                             @csrf
                                                             @method('delete')
-                                                            <button type="submit" class="inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                                                                {{ __('Delete') }}
+                                                            <button type="submit" aria-label="{{ __('Delete task') }}" title="{{ __('Delete task') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3" />
+                                                                </svg>
                                                             </button>
                                                         </form>
                                                     @endif
@@ -798,8 +827,11 @@
                             <p class="text-sm text-green-600">{{ __('Form updated successfully.') }}</p>
                         @endif
 
-                        <button type="button" x-on:click="$dispatch('open-modal', 'add-form')" class="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                            {{ __('ADD FORM') }}
+                        <button type="button" x-on:click="$dispatch('open-modal', 'add-form')" aria-label="{{ __('Add form') }}" title="{{ __('Add form') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 text-white transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
+                                <circle cx="12" cy="12" r="9" />
+                            </svg>
                         </button>
 
                         <form method="GET" action="{{ route('settings.index') }}" class="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_160px_auto]">
@@ -907,8 +939,11 @@
                                         <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Form') }} #{{ $form->id }}</p>
                                         <h3 class="mt-1 break-words text-sm font-semibold text-gray-900">{{ $form->form_name }}</h3>
                                     </div>
-                                    <a href="{{ route('forms.edit', $form) }}" class="inline-flex shrink-0 items-center rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                        {{ __('Edit') }}
+                                    <a href="{{ route('forms.edit', $form) }}" aria-label="{{ __('Edit form') }}" title="{{ __('Edit form') }}" class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5" />
+                                        </svg>
                                     </a>
                                 </article>
                             @empty

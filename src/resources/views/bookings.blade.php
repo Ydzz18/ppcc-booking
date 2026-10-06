@@ -401,27 +401,39 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ '—' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                <div class="relative z-10" x-on:click.outside="actionsOpen = false" :class="actionsOpen ? 'z-50' : 'z-10'">
-                                                    <button type="button" x-on:click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen.toString()" class="inline-flex min-h-9 w-32 items-center justify-between rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                                        {{ __('Actions') }}
-                                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
-                                                    </button>
-                                                    <div x-show="actionsOpen" x-cloak class="absolute right-0 z-50 mt-1 w-40 overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-lg">
-                                                        <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Print') }}</a>
-                                                        @if ($allRequiredFormsCompleted)
-                                                            <a href="{{ route('bookings.edit', ['monitoring' => $monitoring, 'show_submission_form' => 1]) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm {{ $submissionStatus === 'completed' ? 'text-green-700 hover:bg-green-50' : 'text-blue-700 hover:bg-blue-50' }}">{{ $submissionStatus === 'completed' ? __('View Details') : __('Submission Process') }}</a>
-                                                        @endif
-                                                        @unless ($allRequiredFormsCompleted)
-                                                            <a href="{{ route('bookings.edit', $monitoring) }}" x-on:click="actionsOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Update') }}</a>
-                                                        @endunless
-                                                        @if (Auth::user()->isAdmin())
-                                                            <form method="POST" action="{{ route('bookings.destroy', $monitoring) }}" data-confirm="{{ __('Are you sure you want to delete this task monitoring entry?') }}">
-                                                                @csrf
-                                                                @method('delete')
-                                                                <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">{{ __('Delete') }}</button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
+                                                <div class="flex items-center gap-2">
+                                                    <a href="{{ route('bookings.print', $monitoring) }}" target="_blank" rel="noopener" aria-label="{{ __('Print') }}" title="{{ __('Print') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 11h.01" />
+                                                        </svg>
+                                                    </a>
+                                                    @if ($allRequiredFormsCompleted)
+                                                        <a href="{{ route('bookings.edit', ['monitoring' => $monitoring, 'show_submission_form' => 1]) }}" aria-label="{{ $submissionStatus === 'completed' ? __('View Details') : __('Submission Process') }}" title="{{ $submissionStatus === 'completed' ? __('View Details') : __('Submission Process') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.5-6 9.75-6 9.75 6 9.75 6-3.5 6-9.75 6-9.75-6-9.75-6Z" />
+                                                                <circle cx="12" cy="12" r="2.75" />
+                                                            </svg>
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('bookings.edit', $monitoring) }}" aria-label="{{ __('Update') }}" title="{{ __('Update') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 2.651 2.651M8 16l3.8-.8L20 7a1.875 1.875 0 0 0-2.65-2.65l-8.2 8.2L8 16Z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5" />
+                                                            </svg>
+                                                        </a>
+                                                    @endif
+                                                    @if (Auth::user()->isAdmin())
+                                                        <form method="POST" action="{{ route('bookings.destroy', $monitoring) }}" data-confirm="{{ __('Are you sure you want to delete this task monitoring entry?') }}">
+                                                            @csrf
+                                                            @method('delete')
+                                                            <button type="submit" aria-label="{{ __('Delete') }}" title="{{ __('Delete') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3" />
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
