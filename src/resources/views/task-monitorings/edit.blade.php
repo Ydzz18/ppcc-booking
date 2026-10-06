@@ -170,7 +170,7 @@
                             @endphp
 
                             <div id="required_forms_documents" class="mt-1 overflow-x-auto rounded-md border border-gray-300">
-                                <table class="min-w-full divide-y divide-gray-200">
+                                <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="0" data-mobile-summary-columns="1">
                                     <thead class="bg-gray-50">
                                         <tr>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Form Name') }}</th>
@@ -226,7 +226,7 @@
                                 <div class="w-full">
                                     <x-input-label :value="__('Submission Details')" />
                                     <div class="mt-1 overflow-x-auto rounded-md border border-gray-300">
-                                        <table class="min-w-full divide-y divide-gray-200">
+                                        <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="0" data-mobile-summary-columns="1">
                                             <thead class="bg-gray-50">
                                                 <tr>
                                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Date of Submission') }}</th>
@@ -261,7 +261,7 @@
                                     <x-input-label :value="__('Submission Action')" />
 
                                     <div class="mt-1 overflow-x-auto rounded-md border border-gray-300">
-                                        <table class="min-w-full divide-y divide-gray-200">
+                                        <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="0" data-mobile-summary-columns="1">
                                             <thead class="bg-gray-50">
                                                 <tr>
                                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Submission Decision') }}</th>

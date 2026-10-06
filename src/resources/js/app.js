@@ -83,10 +83,75 @@ const initialTheme = savedTheme ?? (prefersDark ? 'dark' : 'light');
 
 Alpine.start();
 
+const enhanceMobileRecordTables = (root = document) => {
+	const enclosingTable = root.closest?.('table.mobile-record-table');
+	const tables = [
+		...(enclosingTable ? [enclosingTable] : []),
+		...(root.matches?.('table.mobile-record-table') ? [root] : []),
+		...root.querySelectorAll('table.mobile-record-table'),
+	];
+	[...new Set(tables)].forEach((table) => {
+		const headers = [...table.querySelectorAll('thead th')].map((header) => header.textContent.trim());
+		const titleColumn = Number(table.dataset.mobileTitleColumn ?? 0);
+		const summaryColumns = new Set(
+			(table.dataset.mobileSummaryColumns ?? '1')
+				.split(',')
+				.map((column) => Number(column.trim()))
+				.filter(Number.isInteger),
+		);
+
+		table.querySelectorAll('tbody tr').forEach((row) => {
+			const cells = [...row.children].filter((cell) => cell.tagName === 'TD');
+			if (cells.length === 0 || cells.some((cell) => cell.colSpan > 1)) return;
+
+			cells.forEach((cell, index) => {
+				cell.dataset.mobileLabel = headers[index] ?? '';
+				cell.classList.toggle('mobile-record-title', index === titleColumn);
+				cell.classList.toggle('mobile-record-summary', summaryColumns.has(index) || Boolean(cell.querySelector('a, button, form')));
+			});
+
+			const titleCell = cells[titleColumn];
+			if (!titleCell || titleCell.querySelector('[data-mobile-details-toggle]')) return;
+
+			const title = titleCell.textContent.trim();
+			const toggle = document.createElement('button');
+			toggle.type = 'button';
+			toggle.dataset.mobileDetailsToggle = '';
+			toggle.className = 'mobile-record-toggle';
+			toggle.setAttribute('aria-expanded', 'false');
+			toggle.setAttribute('aria-label', `Toggle details for ${title}`);
+			toggle.title = `Toggle details for ${title}`;
+			toggle.innerHTML = '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1-.02-1.06z" clip-rule="evenodd" /></svg>';
+			toggle.addEventListener('click', () => {
+				const expanded = toggle.getAttribute('aria-expanded') !== 'true';
+				row.classList.toggle('mobile-record-expanded', expanded);
+				toggle.setAttribute('aria-expanded', String(expanded));
+			});
+			titleCell.append(toggle);
+		});
+
+		table.closest('.overflow-x-auto')?.classList.add('mobile-record-table-wrap');
+	});
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const root = document.documentElement;
     applyTheme(initialTheme);
     syncBrandLogos();
+	enhanceMobileRecordTables();
+	new MutationObserver((mutations) => {
+		const tables = new Set();
+		mutations.forEach((mutation) => mutation.addedNodes.forEach((node) => {
+			if (!(node instanceof Element)) return;
+			if (node.matches('table.mobile-record-table')) tables.add(node);
+			node.querySelectorAll('table.mobile-record-table').forEach((table) => tables.add(table));
+			if (node.matches('tr, tbody')) {
+				const table = node.closest('table.mobile-record-table');
+				if (table) tables.add(table);
+			}
+		}));
+		tables.forEach((table) => enhanceMobileRecordTables(table));
+	}).observe(document.body, { childList: true, subtree: true });
 
 	const taskList = document.querySelector('#tasks-lists');
 	const taskSearchForm = document.querySelector('#task-search-form');

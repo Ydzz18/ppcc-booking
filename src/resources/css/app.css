@@ -818,3 +818,227 @@ html.dark .rounded-xl {
 .animate-shake {
 	animation: shake 0.3s ease-in-out;
 }
+
+.mobile-record-toggle {
+    display: none;
+}
+
+.mobile-filter-toolbar {
+    position: relative;
+    background: #fff;
+}
+
+@media (max-width: 767px) {
+    #job-task-monitoring > .mt-6 {
+        border: 0;
+    }
+
+    #job-task-monitoring > .mt-6 > .divide-y {
+        display: grid;
+        gap: 0.75rem;
+        border: 0;
+    }
+
+    #job-task-monitoring > .mt-6 > .divide-y > .bg-white {
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgb(15 23 42 / 7%);
+    }
+
+    #job-task-monitoring > .mt-6 > .divide-y > .bg-white + .bg-white {
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .mobile-filter-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        margin-inline: -1rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        box-shadow: 0 4px 10px rgb(15 23 42 / 8%);
+    }
+
+    .mobile-record-table-wrap {
+        overflow: visible !important;
+        border: 0 !important;
+    }
+
+    table.mobile-record-table,
+    table.mobile-record-table tbody {
+        display: block;
+        width: 100%;
+        min-width: 0 !important;
+    }
+
+    table.mobile-record-table thead {
+        display: none;
+    }
+
+    table.mobile-record-table tbody {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    table.mobile-record-table tbody tr {
+        position: relative;
+        display: grid;
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        background: #fff;
+        box-shadow: 0 1px 3px rgb(15 23 42 / 7%);
+    }
+
+    table.mobile-record-table tbody tr:has(td[colspan]) {
+        display: block;
+    }
+
+    table.mobile-record-table tbody td {
+        display: none;
+        min-width: 0;
+        padding: 0.65rem 0.9rem;
+        border: 0 !important;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        text-align: right;
+    }
+
+    table.mobile-record-table tbody td::before {
+        content: attr(data-mobile-label);
+        margin-right: 0.75rem;
+        color: #6b7280;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    table.mobile-record-table tbody td.mobile-record-title {
+        display: block;
+        padding: 0.9rem 3.25rem 0.85rem 0.9rem;
+        border-bottom: 1px solid #f3f4f6 !important;
+        color: #111827;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-align: left;
+    }
+
+    table.mobile-record-table tbody td.mobile-record-title::before {
+        display: none;
+    }
+
+    table.mobile-record-table tbody td.mobile-record-summary {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    table.mobile-record-table tbody tr.mobile-record-expanded td {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        border-bottom: 1px solid #f3f4f6 !important;
+    }
+
+    table.mobile-record-table tbody tr.mobile-record-expanded td.mobile-record-title {
+        display: block;
+    }
+
+    table.mobile-record-table tbody td:has(form, button, a) {
+        text-align: right;
+    }
+
+    table.mobile-record-table tbody td:has(form, button, a) > div {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    table.mobile-record-table tfoot {
+        display: block;
+        margin-top: 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        background: #f9fafb;
+    }
+
+    table.mobile-record-table tfoot tr,
+    table.mobile-record-table tfoot th {
+        display: block;
+        width: 100%;
+        text-align: right;
+    }
+
+    .mobile-record-toggle {
+        position: absolute;
+        top: 0.55rem;
+        right: 0.65rem;
+        display: inline-flex;
+        width: 2rem;
+        height: 2rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        background: #fff;
+        color: #4b5563;
+    }
+
+    .mobile-record-toggle svg {
+        width: 1rem;
+        height: 1rem;
+        transition: transform 150ms ease;
+    }
+
+    .mobile-record-toggle[aria-expanded="true"] svg {
+        transform: rotate(180deg);
+    }
+
+    .task-monitoring-summary-grid > .task-monitoring-metric:nth-child(2),
+    .task-monitoring-summary-grid > .task-monitoring-metric:nth-child(4),
+    .task-monitoring-summary-grid > .task-monitoring-metric:nth-child(5) {
+        display: none;
+    }
+
+    .task-monitoring-summary-grid > .task-monitoring-metric:first-child .task-monitoring-value {
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .task-monitoring-pair {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .task-monitoring-toggle {
+        margin-left: auto;
+    }
+
+    .task-monitoring-summary-grid:has(.task-monitoring-toggle[aria-expanded="true"]) > .task-monitoring-metric:nth-child(2),
+    .task-monitoring-summary-grid:has(.task-monitoring-toggle[aria-expanded="true"]) > .task-monitoring-metric:nth-child(4),
+    .task-monitoring-summary-grid:has(.task-monitoring-toggle[aria-expanded="true"]) > .task-monitoring-metric:nth-child(5) {
+        display: flex;
+    }
+
+    html.dark .mobile-filter-toolbar,
+    html[data-theme='dark'] .mobile-filter-toolbar,
+    html.dark table.mobile-record-table tbody tr,
+    html[data-theme='dark'] table.mobile-record-table tbody tr,
+    html.dark .mobile-record-toggle,
+    html[data-theme='dark'] .mobile-record-toggle {
+        background-color: var(--navy-card) !important;
+        border-color: var(--navy-border) !important;
+    }
+
+    html.dark table.mobile-record-table tbody td,
+    html[data-theme='dark'] table.mobile-record-table tbody td {
+        border-color: var(--navy-border) !important;
+    }
+}

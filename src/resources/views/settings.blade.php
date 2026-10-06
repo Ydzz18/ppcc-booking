@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
                                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white overflow-visible shadow-sm sm:rounded-lg">
                 @php($activeSettingsTab = in_array(request('tab'), ['users', 'clients', 'tasks', 'forms'], true) ? request('tab') : 'users')
                 <div class="p-6 text-gray-900 space-y-6" x-data="{ activeMenu: @js($activeSettingsTab), showTaskForm: @js($errors->has('task_name')), showFormEntry: @js($errors->has('form_name') || $errors->has('form_names') || $errors->has('form_names.*')) }" x-cloak>
                                                         </svg>
@@ -88,7 +88,7 @@
                         @endif
 
                         <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="1" data-mobile-summary-columns="2,4">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>
@@ -533,32 +533,37 @@
 
                         <div class="grid gap-3 md:hidden">
                             @forelse ($clients as $client)
-                                <article class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                                <article x-data="{ detailsOpen: false }" class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
                                             <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Client') }}</p>
                                             <h3 class="mt-1 break-words text-sm font-semibold text-gray-900">{{ $client->client_name }}</h3>
                                         </div>
-                                        <span class="shrink-0 text-xs text-gray-500">#{{ $client->id }}</span>
+                                        <div class="flex shrink-0 items-center gap-2">
+                                            <span class="text-xs text-gray-500">#{{ $client->id }}</span>
+                                            <button type="button" x-on:click="detailsOpen = !detailsOpen" :aria-expanded="detailsOpen.toString()" aria-label="{{ __('Toggle client details') }}" title="{{ __('Toggle client details') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                <svg class="h-4 w-4 transition-transform" :class="detailsOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1-.02-1.06z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                     <dl class="mt-4 grid gap-3 border-t border-gray-100 pt-3 text-sm">
-                                        <div>
-                                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Address') }}</dt>
-                                            <dd class="mt-1 break-words text-gray-900">{{ $client->address ?: '—' }}</dd>
+                                        <div class="flex items-start justify-between gap-3">
+                                            <dt class="shrink-0 text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Contact Person') }}</dt>
+                                            <dd class="break-words text-right text-gray-900">{{ $client->contact_person ?: '—' }}</dd>
                                         </div>
-                                        <div class="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Contact Person') }}</dt>
-                                                <dd class="mt-1 break-words text-gray-900">{{ $client->contact_person ?: '—' }}</dd>
-                                            </div>
-                                            <div>
-                                                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Tel/Phone Number') }}</dt>
-                                                <dd class="mt-1 break-words text-gray-900">{{ $client->tel_phone_number ?: '—' }}</dd>
-                                            </div>
+                                        <div x-show="detailsOpen" x-cloak class="flex items-start justify-between gap-3">
+                                            <dt class="shrink-0 text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Address') }}</dt>
+                                            <dd class="break-words text-right text-gray-900">{{ $client->address ?: '—' }}</dd>
                                         </div>
-                                        <div>
-                                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('TIN') }}</dt>
-                                            <dd class="mt-1 break-words text-gray-900">{{ $client->tin ?: '—' }}</dd>
+                                        <div x-show="detailsOpen" x-cloak class="flex items-start justify-between gap-3">
+                                            <dt class="shrink-0 text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Tel/Phone Number') }}</dt>
+                                            <dd class="break-words text-right text-gray-900">{{ $client->tel_phone_number ?: '—' }}</dd>
+                                        </div>
+                                        <div x-show="detailsOpen" x-cloak class="flex items-start justify-between gap-3">
+                                            <dt class="shrink-0 text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('TIN') }}</dt>
+                                            <dd class="break-words text-right text-gray-900">{{ $client->tin ?: '—' }}</dd>
                                         </div>
                                     </dl>
                                     <div class="mt-4 flex gap-2">
@@ -613,7 +618,7 @@
                             </svg>
                         </button>
 
-                        <form id="task-search-form" method="GET" action="{{ route('settings.index') }}" class="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_160px_auto]">
+                        <form id="task-search-form" method="GET" action="{{ route('settings.index') }}" class="mobile-filter-toolbar mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_160px_auto]">
                             <input type="hidden" name="tab" value="tasks">
                             <label class="sr-only" for="task_search">{{ __('Search tasks') }}</label>
                             <input id="task_search" name="task_search" x-on:input.debounce.400ms="$el.form.requestSubmit()" value="{{ $taskSearch }}" type="search" placeholder="{{ __('Search agency or task name') }}" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
@@ -695,7 +700,7 @@
                         </x-modal>
 
                         <div id="task-table-container" class="overflow-x-auto border border-gray-200 rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="2" data-mobile-summary-columns="1">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>
@@ -834,7 +839,7 @@
                             </svg>
                         </button>
 
-                        <form method="GET" action="{{ route('settings.index') }}" class="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_160px_auto]">
+                        <form method="GET" action="{{ route('settings.index') }}" class="mobile-filter-toolbar mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_160px_auto]">
                             <input type="hidden" name="tab" value="forms">
                             <label class="sr-only" for="form_search">{{ __('Search forms') }}</label>
                             <input id="form_search" name="form_search" x-model="formSearchText" value="{{ $formSearch }}" type="search" placeholder="{{ __('Search form name') }}" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900">
@@ -878,7 +883,7 @@
                         </x-modal>
 
                         <div class="hidden overflow-x-auto border border-gray-200 rounded-lg md:block">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="1" data-mobile-summary-columns="0">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('ID') }}</th>

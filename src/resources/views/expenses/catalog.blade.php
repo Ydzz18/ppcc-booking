@@ -55,7 +55,7 @@
                     </ol>
 
                     <div class="overflow-x-auto rounded-md border border-gray-200">
-                        <table class="min-w-[600px] w-full divide-y divide-gray-200">
+                        <table class="mobile-record-table min-w-[600px] w-full divide-y divide-gray-200" data-mobile-title-column="0" data-mobile-summary-columns="1">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Expense item') }}</th>

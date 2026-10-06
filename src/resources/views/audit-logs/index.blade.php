@@ -7,7 +7,7 @@
     </x-slot>
 
     <div class="space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-        <section class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm" aria-labelledby="audit-filter-title">
+        <section class="mobile-filter-toolbar rounded-lg border border-gray-200 bg-white p-5 shadow-sm" aria-labelledby="audit-filter-title">
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <h1 id="audit-filter-title" class="text-lg font-semibold text-gray-900">{{ __('Activity history') }}</h1>
@@ -39,7 +39,7 @@
 
         <section class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm" aria-label="{{ __('Audit log entries') }}">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="mobile-record-table min-w-full divide-y divide-gray-200" data-mobile-title-column="2" data-mobile-summary-columns="0,1">
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col" class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ __('Date and time') }}</th>
