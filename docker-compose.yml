@@ -10,7 +10,8 @@ services:
       - vendor_data:/var/www/vendor
       - build_data:/var/www/public/build
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - booking_network
 
@@ -41,6 +42,12 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./booking.sql:/docker-entrypoint-initdb.d/booking.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     networks:
       - booking_network
 
@@ -54,7 +61,8 @@ services:
       PMA_USER: booking
       PMA_PASSWORD: booking
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - booking_network
 
@@ -66,4 +74,3 @@ volumes:
 networks:
   booking_network:
     driver: bridge
-
