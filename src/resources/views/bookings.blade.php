@@ -5,10 +5,10 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="py-5 sm:py-12">
+        <div class="w-full px-2 sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 space-y-6" x-data="{ activeMenu: '{{ request('tab') === 'monitoring' ? 'monitoring' : 'entry' }}', taskCreatedModalOpen: @js(session('status') === 'task-created') }">
+                <div class="space-y-6 p-3 text-gray-900 sm:p-6" x-data="{ activeMenu: '{{ request('tab') === 'monitoring' ? 'monitoring' : 'entry' }}', taskCreatedModalOpen: @js(session('status') === 'task-created') }">
                     @if (session('status') === 'task-created')
                         <div x-show="taskCreatedModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 px-4" role="dialog" aria-modal="true" aria-labelledby="task-created-title">
                             <div class="w-full max-w-sm rounded-lg bg-white p-6 text-center shadow-xl">
@@ -35,8 +35,8 @@
                         <p class="text-sm text-green-600">{{ __('Task entry deleted successfully.') }}</p>
                     @endif
 
-                    <div id="job-task-entry-section" class="max-w-7xl mx-auto" x-show="activeMenu === 'entry'">
-                        <div class="border border-gray-200 rounded-lg p-6" x-data="{
+                    <div id="job-task-entry-section" class="mx-auto w-full max-w-6xl" x-show="activeMenu === 'entry'">
+                        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm" x-data="{
                             taskOptions: @js($tasks->map(fn ($task) => ['id' => $task->id, 'agency' => $task->agency, 'task_name' => $task->task_name, 'required_forms_documents' => $task->required_forms_documents ?? []])->values()),
                             selectedAgency: '',
                             selectedTaskIds: @js(array_map('strval', (array) old('type_of_task', []))),
@@ -67,18 +67,25 @@
                                 this.formSelectionInitialized = true;
                             }
                         }" x-init="selectedTaskIds = selectedTaskIds.map(String); selectedFormIds = selectedFormIds.map(String); updateSelectedTasks()">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-lg font-medium text-gray-900">{{ __('Task Entry') }}</h3>
-                                <x-primary-button form="task-entry-form">{{ __('Create Task') }}</x-primary-button>
+                            <div class="flex flex-col gap-4 border-b border-gray-200 bg-gray-50/70 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-widest text-indigo-600">{{ __('New Booking') }}</p>
+                                    <h3 class="mt-1 text-xl font-semibold text-gray-900">{{ __('Task Entry') }}</h3>
+                                    <p class="mt-1 text-sm text-gray-500">{{ __('Select a task, client, and required documents.') }}</p>
+                                </div>
+                                <x-primary-button form="task-entry-form" class="w-full justify-center whitespace-nowrap sm:w-auto">{{ __('Create Task') }}</x-primary-button>
                             </div>
 
-                        <form id="task-entry-form" method="POST" action="{{ route('bookings.store') }}" data-monitoring-refresh-url="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4" data-confirm="Are you sure you want to create this task?" data-async-monitoring-entry>
+                        <form id="task-entry-form" method="POST" action="{{ route('bookings.store') }}" data-monitoring-refresh-url="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="grid grid-cols-1 gap-4 p-3 sm:gap-6 sm:p-6 md:grid-cols-4" data-confirm="Are you sure you want to create this task?" data-async-monitoring-entry>
                             @csrf
                             <div id="task-entry-feedback" class="hidden md:col-span-4 rounded-md px-4 py-3 text-sm" role="status" aria-live="polite"></div>
 
-                            <div class="md:col-span-2 rounded-md border border-gray-200 p-4">
-                                <x-input-label :value="__('Task Selection')" />
-                                <div class="mt-2 grid gap-4 sm:grid-cols-2">
+                            <section class="rounded-xl border border-indigo-100 bg-indigo-50/30 p-3 sm:p-5 md:col-span-4" aria-labelledby="task-selection-heading">
+                                <div class="mb-4">
+                                    <h4 id="task-selection-heading" class="text-sm font-semibold text-gray-900">{{ __('Task Selection') }}</h4>
+                                    <p class="mt-1 text-xs text-gray-500">{{ __('Choose an agency, then select one or more task types.') }}</p>
+                                </div>
+                                <div class="grid gap-4 md:grid-cols-[minmax(12rem,0.8fr)_minmax(0,1.2fr)]">
                                     <div>
                                         <x-input-label for="task_agency" :value="__('Agency')" />
                                         <select id="task_agency" x-model="selectedAgency" x-on:change="selectAgency()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -90,9 +97,9 @@
                                     </div>
                                     <div>
                                         <x-input-label for="type_of_task" :value="__('Type of Task')" />
-                                        <div id="type_of_task" class="mt-1 h-40 space-y-2 overflow-y-auto rounded-md border border-gray-300 p-3">
+                                        <div id="type_of_task" class="mt-1 max-h-48 min-h-32 space-y-2 overflow-y-auto rounded-md border border-gray-200 bg-white p-3 sm:max-h-56">
                                             <template x-for="task in taskOptions.filter(task => selectedAgency === '' || task.agency === selectedAgency)" :key="task.id">
-                                                <label class="flex items-start gap-2 text-sm text-gray-700">
+                                                <label class="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 text-sm text-gray-700 transition hover:bg-indigo-50">
                                                     <input type="checkbox" name="type_of_task[]" x-model="selectedTaskIds" x-on:change="updateSelectedTasks()" x-bind:value="String(task.id)" class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                                                     <span x-text="task.task_name"></span>
                                                 </label>
@@ -102,31 +109,36 @@
                                         <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
                                     </div>
                                 </div>
-                                <p class="mt-2 text-xs text-gray-500">{{ __('Choose one or more task types. Required forms and documents update to include each selection.') }}</p>
-                            </div>
+                                <p class="mt-3 text-xs text-gray-500">{{ __('Required forms and documents update to match your task selections.') }}</p>
+                            </section>
 
-                            <div>
-                                <x-input-label for="date_task_received" :value="__('Date Task Received')" />
-                                <x-text-input id="date_task_received" name="date_task_received" type="date" class="mt-1 block w-full" :value="old('date_task_received', now()->toDateString())" />
-                                <x-input-error class="mt-2" :messages="$errors->get('date_task_received')" />
-                            </div>
+                            <section class="grid gap-4 sm:grid-cols-2 md:col-span-4" aria-label="{{ __('Booking Details') }}">
+                                <div class="rounded-xl border border-gray-200 p-3 sm:p-4">
+                                    <x-input-label for="date_task_received" :value="__('Date Task Received')" />
+                                    <x-text-input id="date_task_received" name="date_task_received" type="date" class="mt-2 block w-full" :value="old('date_task_received', now()->toDateString())" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('date_task_received')" />
+                                </div>
 
-                            <div>
-                                <x-input-label for="client_name" :value="__('Client Name')" />
-                                <select id="client_name" name="client_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">{{ __('Select Client') }}</option>
-                                    @foreach ($clients as $client)
-                                        <option value="{{ $client->id }}" @selected((string) old('client_name') === (string) $client->id)>{{ $client->client_name }}</option>
-                                    @endforeach
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('client_name')" />
-                            </div>
+                                <div class="rounded-xl border border-gray-200 p-3 sm:p-4">
+                                    <x-input-label for="client_name" :value="__('Client Name')" />
+                                    <select id="client_name" name="client_name" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <option value="">{{ __('Select Client') }}</option>
+                                        @foreach ($clients as $client)
+                                            <option value="{{ $client->id }}" @selected((string) old('client_name') === (string) $client->id)>{{ $client->client_name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('client_name')" />
+                                </div>
+                            </section>
 
-                            <div class="md:col-span-4">
-                                <x-input-label for="required_forms_documents" :value="__('List of Required Forms and Documents')" />
-                                <div id="required_forms_documents" class="mt-1 max-h-48 overflow-y-auto rounded-md border border-gray-300 p-3">
+                            <section class="rounded-xl border border-gray-200 p-3 sm:p-5 md:col-span-4" aria-labelledby="required-forms-heading">
+                                <div class="mb-3">
+                                    <h4 id="required-forms-heading" class="text-sm font-semibold text-gray-900">{{ __('List of Required Forms and Documents') }}</h4>
+                                    <p class="mt-1 text-xs text-gray-500">{{ __('Review the documents required for the selected task types.') }}</p>
+                                </div>
+                                <div id="required_forms_documents" class="max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/70 p-2 sm:p-3">
                                     <div class="space-y-2">
-                                        <div class="flex items-center justify-between gap-4 px-3 text-xs font-semibold uppercase text-gray-500">
+                                        <div class="flex items-center justify-between gap-4 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
                                             <span>{{ __('Form or Requirement') }}</span>
                                             <span>{{ __('Quantity') }}</span>
                                         </div>
@@ -145,10 +157,8 @@
                                     </div>
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
-
-                            </div>
-
-                            </form>
+                            </section>
+                        </form>
                         </div>
                     </div>
 
