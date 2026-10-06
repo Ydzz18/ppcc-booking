@@ -11,10 +11,15 @@
         $bookingStatus = $requiredFormsCompleted || strtolower((string) ($monitoring->submission_status ?? 'pending')) === 'completed' ? __('Completed') : __('Pending');
         $taskAgeDays = $monitoring->taskAgeInDays();
         $totalExpenses = $expenses->sum('expense_amount');
-        $savedExpenseAmounts = $expenses->mapWithKeys(fn ($expense) => [(string) $expense['id'] => number_format($expense['expense_amount'], 2, '.', '')])->all();
+        $savedExpenseAmounts = $expenses->where('is_other', false)->mapWithKeys(fn ($expense) => [(string) $expense['id'] => number_format($expense['expense_amount'], 2, '.', '')])->all();
         $expenseAmounts = collect(old('expenses', $savedExpenseAmounts));
         $selectedExpenseIds = $expenseAmounts->keys()->map(fn ($id) => (string) $id)->all();
-        $savedExpensesById = $expenses->keyBy('id');
+        $savedExpensesById = $expenses->where('is_other', false)->keyBy('id');
+        $savedOtherExpenses = $expenses->where('is_other', true)->values();
+        $otherExpenseValues = collect(old('other_expenses', $savedOtherExpenses->map(fn ($expense) => [
+            'name' => $expense['name'],
+            'amount' => number_format($expense['expense_amount'], 2, '.', ''),
+        ])->all()));
         $bookingDetails = [
             [__('Booking ID'), $monitoring->id],
             [__('Status'), $bookingStatus],
@@ -109,7 +114,7 @@
                 </table>
             @endif
         @else
-            <form method="POST" action="{{ route('bookings.print.expenses.update', $monitoring) }}" data-expenses-form @if ($errors->has('expenses') || old('expenses') !== null) data-start-editing @endif>
+            <form method="POST" action="{{ route('bookings.print.expenses.update', $monitoring) }}" data-expenses-form @if ($errors->has('expenses') || $errors->has('other_expenses') || old('expenses') !== null || old('other_expenses') !== null) data-start-editing @endif>
                 @csrf
                 @method('PATCH')
                 <div class="print-edit-controls">
@@ -121,6 +126,9 @@
                     <button type="button" data-cancel-expenses hidden>{{ __('Cancel') }}</button>
                 </div>
                 @error('expenses')
+                    <p class="expense-error" role="alert">{{ $message }}</p>
+                @enderror
+                @error('other_expenses')
                     <p class="expense-error" role="alert">{{ $message }}</p>
                 @enderror
 
@@ -147,6 +155,7 @@
                             <p class="empty">{{ __('No catalog expenses are available. Add them from Settings → Expenses List.') }}</p>
                         @endforelse
                     </fieldset>
+                    <button type="button" data-add-other-expense>{{ __('Add Other') }}</button>
                 </details>
 
                 <table class="expenses">
@@ -186,9 +195,59 @@
                                 </td>
                             </tr>
                         @endforeach
-                        <tr data-expense-empty @if ($expenses->isNotEmpty() || old('expenses') !== null) hidden @endif>
+                        @foreach ($otherExpenseValues as $index => $otherExpense)
+                            <tr data-expense-row data-other-expense-row>
+                                <td>
+                                    <span class="expense-print-value" data-expense-print-name>{{ $otherExpense['name'] ?? '' }}</span>
+                                    <label class="expense-edit-name" hidden>{{ __('Other') }}:
+                                        <input data-other-expense-name type="text" name="other_expenses[{{ $index }}][name]" data-original-name="{{ $savedOtherExpenses->get($index)['name'] ?? '' }}" maxlength="255" required placeholder="{{ __('Others:') }}" value="{{ $otherExpense['name'] ?? '' }}">
+                                    </label>
+                                    @if ($errors->has('other_expenses.'.$index.'.name'))
+                                        <p class="expense-error" role="alert">{{ $errors->first('other_expenses.'.$index.'.name') }}</p>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="expense-print-value" data-expense-print-amount>PHP {{ number_format((float) ($otherExpense['amount'] ?? 0), 2) }}</span>
+                                    <label class="expense-edit-input" hidden>
+                                        <span class="sr-only">{{ __('Amount for') }} {{ $otherExpense['name'] ?? __('Other') }}</span>
+                                        <input data-expense-input
+                                            data-original-value="{{ $savedOtherExpenses->get($index)['expense_amount'] ?? '' }}"
+                                            type="number"
+                                            name="other_expenses[{{ $index }}][amount]"
+                                            min="0"
+                                            max="99999999.99"
+                                            step="0.01"
+                                            required
+                                            value="{{ $otherExpense['amount'] ?? '' }}">
+                                    </label>
+                                    @if ($errors->has('other_expenses.'.$index.'.amount'))
+                                        <p class="expense-error" role="alert">{{ $errors->first('other_expenses.'.$index.'.amount') }}</p>
+                                    @endif
+                                    <button type="button" data-remove-other-expense class="expense-edit-name" hidden>{{ __('Remove') }}</button>
+                                </td>
+                            </tr>
+                        @endforeach
+                        <tr data-expense-empty @if ($expenses->isNotEmpty() || old('expenses') !== null || old('other_expenses') !== null) hidden @endif>
                             <td colspan="2" class="empty">{{ __('No expenses recorded. Choose Edit Expenses to add catalog items.') }}</td>
                         </tr>
+                        <template data-other-expense-template>
+                            <tr data-expense-row data-other-expense-row data-new-other-expense>
+                                <td>
+                                    <span class="expense-print-value" data-expense-print-name hidden></span>
+                                    <label class="expense-edit-name">{{ __('Other') }}:
+                                        <input data-other-expense-name type="text" maxlength="255" required placeholder="{{ __('Others:') }}">
+                                    </label>
+                                </td>
+                                <td>
+                                    <span class="expense-print-value" data-expense-print-amount hidden></span>
+                                    <label class="expense-edit-input">
+                                        <span class="sr-only">{{ __('Amount for Other') }}</span>
+                                        <input data-expense-input type="number" min="0" max="99999999.99" step="0.01" required>
+                                    </label>
+                                    <button type="button" data-remove-other-expense class="expense-edit-name">{{ __('Remove') }}</button>
+                                </td>
+                            </tr>
+                        </template>
                     </tbody>
                     <tfoot>
                         <tr>

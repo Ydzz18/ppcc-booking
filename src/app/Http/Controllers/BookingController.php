@@ -183,10 +183,14 @@ class BookingController extends Controller
         $validated = $request->validate([
             'expenses' => ['sometimes', 'array'],
             'expenses.*' => ['required', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
+            'other_expenses' => ['sometimes', 'array', 'max:50'],
+            'other_expenses.*.name' => ['required', 'string', 'max:255'],
+            'other_expenses.*.amount' => ['required', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
             'download_pdf' => ['sometimes', 'boolean'],
         ]);
 
         $submitted = $validated['expenses'] ?? [];
+        $submittedOtherExpenses = $validated['other_expenses'] ?? [];
         $submittedIds = array_keys($submitted);
         $invalidKeys = array_filter($submittedIds, fn ($id): bool => ! ctype_digit((string) $id) || (int) $id < 1);
         $catalogById = ExpenseCatalogItem::query()
@@ -203,18 +207,28 @@ class BookingController extends Controller
             ->filter(fn ($expense): bool => is_array($expense) && isset($expense['catalog_id']))
             ->keyBy(fn (array $expense) => (int) $expense['catalog_id']);
 
-        $monitoring->update([
-            'expenses_breakdown' => collect($submitted)
-                ->map(function ($amount, $catalogId) use ($catalogById, $existingExpenses): array {
-                    $item = $catalogById->get((int) $catalogId);
-                    $existing = $existingExpenses->get((int) $catalogId);
+        $catalogExpenses = collect($submitted)
+            ->map(function ($amount, $catalogId) use ($catalogById, $existingExpenses): array {
+                $item = $catalogById->get((int) $catalogId);
+                $existing = $existingExpenses->get((int) $catalogId);
 
-                    return [
-                        'catalog_id' => (int) $catalogId,
-                        'catalog_name' => $existing['catalog_name'] ?? $item->name,
-                        'expense_amount' => (float) $amount,
-                    ];
-                })
+                return [
+                    'catalog_id' => (int) $catalogId,
+                    'catalog_name' => $existing['catalog_name'] ?? $item->name,
+                    'expense_amount' => (float) $amount,
+                ];
+            })
+            ->values();
+        $otherExpenses = collect($submittedOtherExpenses)
+            ->map(fn (array $expense): array => [
+                'catalog_id' => null,
+                'catalog_name' => trim($expense['name']),
+                'expense_amount' => (float) $expense['amount'],
+            ]);
+
+        $monitoring->update([
+            'expenses_breakdown' => $catalogExpenses
+                ->concat($otherExpenses)
                 ->values()
                 ->all(),
         ]);
@@ -273,9 +287,11 @@ class BookingController extends Controller
     {
         return collect($monitoring->expenses_breakdown ?? [])
             ->filter(fn ($expense): bool => is_array($expense)
-                && isset($expense['catalog_id'], $expense['catalog_name'], $expense['expense_amount']))
-            ->map(fn (array $expense): array => [
-                'id' => (int) $expense['catalog_id'],
+                && array_key_exists('catalog_id', $expense)
+                && isset($expense['catalog_name'], $expense['expense_amount']))
+            ->map(fn (array $expense, int $index): array => [
+                'id' => $expense['catalog_id'] === null ? 'other-'.$index : (int) $expense['catalog_id'],
+                'is_other' => $expense['catalog_id'] === null,
                 'name' => (string) $expense['catalog_name'],
                 'expense_amount' => (float) $expense['expense_amount'],
             ])

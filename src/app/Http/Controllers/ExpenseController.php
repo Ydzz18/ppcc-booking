@@ -72,7 +72,8 @@ class ExpenseController extends Controller
         $entries = $monitorings->flatMap(function (TaskMonitoring $monitoring): array {
             return collect($monitoring->expenses_breakdown ?? [])
                 ->filter(fn ($expense): bool => is_array($expense)
-                    && isset($expense['catalog_id'], $expense['catalog_name'], $expense['expense_amount']))
+                    && array_key_exists('catalog_id', $expense)
+                    && isset($expense['catalog_name'], $expense['expense_amount']))
                 ->map(fn (array $expense): array => [
                     'task_id' => $monitoring->id,
                     'date' => $monitoring->date_task_received?->format('Y-m-d'),
