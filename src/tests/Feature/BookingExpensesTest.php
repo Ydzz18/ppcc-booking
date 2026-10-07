@@ -537,6 +537,106 @@ class BookingExpensesTest extends TestCase
             ->assertSee('Sample Task, Second Task');
     }
 
+    public function test_task_entry_can_save_catalog_and_custom_expenses(): void
+    {
+        [$user, $client, $task] = $this->createBookingFixture();
+        $catalogItem = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+
+        $this->actingAs($user)
+            ->get(route('bookings.index'))
+            ->assertOk()
+            ->assertSee('data-booking-expense-editor', false)
+            ->assertSee('Add Other')
+            ->assertSee('expenses['.$catalogItem->id.']', false);
+
+        $this->actingAs($user)
+            ->postJson(route('bookings.store'), [
+                'date_task_received' => '2026-10-01',
+                'client_name' => $client->id,
+                'type_of_task' => [$task->id],
+                'expenses' => [$catalogItem->id => '45.25'],
+                'other_expenses' => [
+                    ['name' => 'Courier fee', 'amount' => '12.50'],
+                ],
+                'expense_editor_submitted' => '1',
+            ])
+            ->assertCreated();
+
+        $monitoring = TaskMonitoring::query()->firstOrFail();
+        $this->assertSame([
+            [
+                'catalog_id' => $catalogItem->id,
+                'catalog_name' => 'Permits',
+                'expense_amount' => 45.25,
+            ],
+            [
+                'catalog_id' => null,
+                'catalog_name' => 'Courier fee',
+                'expense_amount' => 12.5,
+            ],
+        ], $monitoring->expenses_breakdown);
+    }
+
+    public function test_monitoring_edit_can_update_catalog_and_custom_expenses(): void
+    {
+        [$user, $client, $task] = $this->createBookingFixture();
+        $catalogItem = ExpenseCatalogItem::query()->where('name', 'Permits')->firstOrFail();
+        $monitoring = TaskMonitoring::create([
+            'date_task_received' => '2026-10-01',
+            'client_id' => $client->id,
+            'task_id' => $task->id,
+            'task_ids' => [$task->id],
+            'assigned_responsible_person_id' => $client->id,
+            'expenses_breakdown' => [
+                [
+                    'catalog_id' => $catalogItem->id,
+                    'catalog_name' => $catalogItem->name,
+                    'expense_amount' => 45.25,
+                ],
+                [
+                    'catalog_id' => null,
+                    'catalog_name' => 'Courier fee',
+                    'expense_amount' => 12.5,
+                ],
+            ],
+            'submission_status' => 'pending',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('bookings.edit', $monitoring))
+            ->assertOk()
+            ->assertSee('data-booking-expense-editor', false)
+            ->assertSee('Courier fee')
+            ->assertSee('name="expenses['.$catalogItem->id.']"', false);
+
+        $this->actingAs($user)
+            ->patch(route('bookings.update', $monitoring), [
+                'date_task_received' => '2026-10-01',
+                'client_name' => $client->id,
+                'type_of_task' => [$task->id],
+                'assigned_responsible_person' => $client->id,
+                'expenses' => [$catalogItem->id => '50.00'],
+                'other_expenses' => [
+                    ['name' => 'Delivery', 'amount' => '20.75'],
+                ],
+                'expense_editor_submitted' => '1',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame([
+            [
+                'catalog_id' => $catalogItem->id,
+                'catalog_name' => 'Permits',
+                'expense_amount' => 50.0,
+            ],
+            [
+                'catalog_id' => null,
+                'catalog_name' => 'Delivery',
+                'expense_amount' => 20.75,
+            ],
+        ], $monitoring->fresh()->expenses_breakdown);
+    }
+
     public function test_task_monitoring_edit_keeps_forms_as_checklist_requirements_only(): void
     {
         [$user, $client, $task, $form] = $this->createBookingFixture();
@@ -554,8 +654,10 @@ class BookingExpensesTest extends TestCase
             ->get(route('bookings.edit', $monitoring))
             ->assertOk()
             ->assertSee('Required Forms and Documents')
-            ->assertDontSee('selectedExpenseIds')
-            ->assertDontSee('expense_amount');
+            ->assertSee('data-booking-expense-editor', false)
+            ->assertSee('Expenses')
+            ->assertSee('Add Other')
+            ->assertDontSee('form_expenses');
     }
 
     public function test_settings_render_contact_person_and_keep_form_management_separate(): void

@@ -1,6 +1,7 @@
 <x-app-layout>
     @php
         $selectedTaskIds = array_map('strval', (array) old('type_of_task', $monitoring->task_ids ?: [$monitoring->task_id]));
+        $hasExpenseErrors = $errors->has('expenses') || collect($errors->keys())->contains(fn ($key) => str_starts_with($key, 'expenses.') || str_starts_with($key, 'other_expenses.'));
     @endphp
     <div class="fixed inset-0 z-40 overflow-y-auto bg-gray-900/50 px-4 py-6 sm:px-6" role="dialog" aria-modal="true" aria-labelledby="update-task-monitoring-title">
         <div class="mx-auto flex min-h-full max-w-5xl items-center">
@@ -113,7 +114,7 @@
                         @endcan
                     </div>
 
-                    <form method="POST" action="{{ route('bookings.update', $monitoring) }}" class="grid grid-cols-1 gap-6" data-confirm="Are you sure you want to update this entry?" x-data="{ isBookingFieldsEditable: false }" x-on:enable-booking-fields.window="isBookingFieldsEditable = true">
+                    <form method="POST" action="{{ route('bookings.update', $monitoring) }}" class="grid grid-cols-1 gap-6" data-confirm="Are you sure you want to update this entry?" x-data="{ isBookingFieldsEditable: @js($hasExpenseErrors) }" x-on:enable-booking-fields.window="isBookingFieldsEditable = true">
                         @csrf
                         @method('patch')
 
@@ -147,6 +148,13 @@
                             </fieldset>
                             <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
                         </div>
+
+                        @include('bookings.partials.expense-editor', [
+                            'expenseCatalog' => $expenseCatalog,
+                            'savedExpenses' => $monitoring->expenses_breakdown ?? [],
+                            'expenseEditorId' => 'monitoring-'.$monitoring->id,
+                            'expenseEditorDisabled' => true,
+                        ])
 
                         <input type="hidden" name="assigned_responsible_person" value="{{ old('assigned_responsible_person', $monitoring->assigned_responsible_person_id) }}">
 
@@ -298,6 +306,7 @@
                             @endif
 
                             <div id="submission-action" class="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-gray-200 pt-4 sm:flex-row">
+                                <x-primary-button x-show="isBookingFieldsEditable" x-cloak>{{ __('Save Changes') }}</x-primary-button>
                                 <a href="{{ route('bookings.index', ['tab' => 'monitoring']) }}" class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                                     <span aria-hidden="true">&larr;</span>
                                     {{ __('Back to Monitoring') }}

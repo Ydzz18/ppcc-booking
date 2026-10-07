@@ -145,11 +145,92 @@ const enhanceMobileRecordTables = (root = document) => {
 	});
 };
 
+const enhanceBookingExpenseEditors = (root = document) => {
+	const enclosingEditor = root.closest?.('[data-booking-expense-editor]');
+	const editors = [
+		...(enclosingEditor ? [enclosingEditor] : []),
+		...(root.matches?.('[data-booking-expense-editor]') ? [root] : []),
+		...root.querySelectorAll('[data-booking-expense-editor]'),
+	];
+
+	[...new Set(editors)].forEach((editor) => {
+		if (editor.dataset.expenseEditorInitialized === 'true') return;
+		editor.dataset.expenseEditorInitialized = 'true';
+
+		const amountInputs = () => [...editor.querySelectorAll('[data-expense-amount]')];
+		const updateTotal = () => {
+			const total = amountInputs().reduce((sum, input) => (
+				sum + (input.closest('[data-other-expense-row]') || !input.disabled ? Number(input.value || 0) : 0)
+			), 0);
+			const output = editor.querySelector('[data-expense-total]');
+			if (output) output.textContent = total.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+		};
+		const updateCatalogToggle = (toggle) => {
+			const amount = editor.querySelector(`[name="expenses[${toggle.value}]"]`);
+			if (!amount) return;
+			amount.disabled = !toggle.checked;
+			amount.required = toggle.checked;
+			if (toggle.checked && amount.value === '') amount.value = toggle.dataset.defaultAmount;
+		};
+
+		editor.querySelectorAll('[data-expense-catalog-toggle]').forEach((toggle) => {
+			toggle.addEventListener('change', () => {
+				updateCatalogToggle(toggle);
+				updateTotal();
+			});
+			updateCatalogToggle(toggle);
+		});
+
+		editor.addEventListener('input', (event) => {
+			if (event.target.matches('[data-expense-amount]')) updateTotal();
+		});
+		editor.addEventListener('click', (event) => {
+			if (!(event.target instanceof Element)) return;
+			if (event.target.matches('[data-add-other-expense]')) {
+				const template = editor.querySelector('[data-other-expense-template]');
+				const rows = editor.querySelector('[data-other-expense-rows]');
+				const row = template.content.firstElementChild.cloneNode(true);
+				const usedIndexes = [...rows.querySelectorAll('[name^="other_expenses["]')]
+					.map((input) => Number(input.name.match(/\[(\d+)\]/)?.[1]))
+					.filter(Number.isInteger);
+				let index = 0;
+				while (usedIndexes.includes(index)) index++;
+
+				const name = row.querySelector('[data-other-expense-name]');
+				const amount = row.querySelector('[data-expense-amount]');
+				row.dataset.newOtherExpense = 'true';
+				name.name = `other_expenses[${index}][name]`;
+				amount.name = `other_expenses[${index}][amount]`;
+				amount.id = `${editor.querySelector('[aria-labelledby]')?.getAttribute('aria-labelledby') ?? 'expense'}-other-amount-${index}`;
+				row.querySelector('.sr-only[for]')?.setAttribute('for', amount.id);
+				rows.append(row);
+				name.focus();
+				updateTotal();
+			} else if (event.target.matches('[data-remove-other-expense]')) {
+				event.target.closest('[data-other-expense-row]').remove();
+				updateTotal();
+			}
+		});
+		const isTaskEntryForm = editor.closest('form')?.id === 'task-entry-form';
+		editor.closest('form')?.addEventListener('reset', () => {
+			window.setTimeout(() => {
+				const rowsToRemove = isTaskEntryForm ? '[data-other-expense-row]' : '[data-new-other-expense]';
+				editor.querySelectorAll(rowsToRemove).forEach((row) => row.remove());
+				editor.querySelectorAll('[data-expense-catalog-toggle]').forEach(updateCatalogToggle);
+				updateTotal();
+			}, 0);
+		});
+
+		updateTotal();
+	});
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const root = document.documentElement;
     applyTheme(initialTheme);
     syncBrandLogos();
 	enhanceMobileRecordTables();
+	enhanceBookingExpenseEditors();
 	new MutationObserver((mutations) => {
 		const tables = new Set();
 		mutations.forEach((mutation) => mutation.addedNodes.forEach((node) => {
