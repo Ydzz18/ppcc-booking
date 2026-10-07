@@ -138,23 +138,19 @@
 
                         <div>
                             <x-input-label for="type_of_task" :value="__('Type of Task')" />
-                            <fieldset id="type_of_task" disabled x-bind:disabled="!isBookingFieldsEditable" class="mt-1 max-h-40 space-y-2 overflow-y-auto rounded-md border border-gray-300 p-3">
-                                @foreach ($tasks as $task)
-                                    <label class="flex items-start gap-2 text-sm text-gray-700">
-                                        <input type="checkbox" name="type_of_task[]" value="{{ $task->id }}" @checked(in_array((string) $task->id, $selectedTaskIds, true)) class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                        <span>{{ $task->task_name }}</span>
-                                    </label>
-                                @endforeach
+                            <fieldset id="type_of_task" disabled x-bind:disabled="!isBookingFieldsEditable" class="mt-1 rounded-md border border-gray-300 p-3">
+                                <legend class="sr-only">{{ __('Type of Task') }}</legend>
+                                <div class="grid gap-2 sm:grid-cols-2">
+                                    @foreach ($tasks as $task)
+                                        <label class="flex min-w-0 cursor-pointer items-start gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-sm text-gray-700">
+                                            <input type="checkbox" name="type_of_task[]" value="{{ $task->id }}" @checked(in_array((string) $task->id, $selectedTaskIds, true)) class="mt-0.5 shrink-0 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                            <span class="break-words">{{ $task->task_name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
                             </fieldset>
                             <x-input-error class="mt-2" :messages="$errors->get('type_of_task')" />
                         </div>
-
-                        @include('bookings.partials.expense-editor', [
-                            'expenseCatalog' => $expenseCatalog,
-                            'savedExpenses' => $monitoring->expenses_breakdown ?? [],
-                            'expenseEditorId' => 'monitoring-'.$monitoring->id,
-                            'expenseEditorDisabled' => true,
-                        ])
 
                         <input type="hidden" name="assigned_responsible_person" value="{{ old('assigned_responsible_person', $monitoring->assigned_responsible_person_id) }}">
 
@@ -228,6 +224,13 @@
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
                         </div>
+
+                        @include('bookings.partials.expense-editor', [
+                            'expenseCatalog' => $expenseCatalog,
+                            'savedExpenses' => $monitoring->expenses_breakdown ?? [],
+                            'expenseEditorId' => 'monitoring-'.$monitoring->id,
+                            'expenseEditorDisabled' => true,
+                        ])
 
                         <div>
                             @if ($allRequiredFormsCompleted)
