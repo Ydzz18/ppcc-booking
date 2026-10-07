@@ -158,6 +158,13 @@
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('required_forms_documents')" />
                             </section>
+
+                            @include('bookings.partials.expense-editor', [
+                                'expenseCatalog' => $expenseCatalog,
+                                'savedExpenses' => [],
+                                'expenseEditorId' => 'task-entry',
+                                'expenseEditorGridSpan' => 'md:col-span-4',
+                            ])
                         </form>
                         </div>
                     </div>

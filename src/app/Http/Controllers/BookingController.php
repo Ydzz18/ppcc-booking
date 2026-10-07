@@ -46,6 +46,8 @@ class BookingController extends Controller
             ->orderBy('form_name')
             ->get();
 
+        $expenseCatalog = $this->expenseCatalog();
+
         // Paginate with eager loading to reduce N+1
         $monitorings = TaskMonitoring::query()
             ->with([
@@ -69,7 +71,7 @@ class BookingController extends Controller
 
         $taskNamesById = $tasks->pluck('task_name', 'id');
 
-        return view('bookings', compact('clients', 'contactPersons', 'tasks', 'forms', 'monitorings', 'formNamesById', 'formStatusesByMonitoringAndForm', 'taskNamesById'));
+        return view('bookings', compact('clients', 'contactPersons', 'tasks', 'forms', 'monitorings', 'formNamesById', 'formStatusesByMonitoringAndForm', 'taskNamesById', 'expenseCatalog'));
     }
 
     /**
@@ -90,6 +92,7 @@ class BookingController extends Controller
             'required_forms_quantities' => ['nullable', 'array'],
             'required_forms_quantities.*' => ['required', 'integer', 'min:1'],
         ]);
+        $expensesBreakdown = $this->validatedExpenseBreakdown($request);
 
         $requiredFormIds = collect($validated['required_forms_documents'] ?? [])->map(fn ($id) => (int) $id)->unique()->values()->all();
         $requiredFormQuantities = collect($requiredFormIds)->mapWithKeys(fn (int $formId) => [
@@ -104,7 +107,7 @@ class BookingController extends Controller
             'assigned_responsible_person_id' => $validated['client_name'],
             'required_forms_quantities' => $requiredFormQuantities,
             'required_forms_documents' => $requiredFormIds,
-            'expenses_breakdown' => [],
+            'expenses_breakdown' => $expensesBreakdown,
             'submission_status' => 'pending',
         ]);
 
@@ -159,7 +162,10 @@ class BookingController extends Controller
             || ! empty($monitoring->receiving_officer)
             || ! empty($monitoring->acknowledgement_receipt_reference_number);
 
-        return view('task-monitorings.edit', compact('monitoring', 'clients', 'tasks', 'contactPersons', 'forms', 'notesByForm', 'showSubmissionForm'));
+        $taskNames = $tasks->whereIn('id', $monitoring->task_ids ?: [$monitoring->task_id])->pluck('task_name')->implode(', ');
+        $expenseCatalog = $this->expenseCatalog();
+
+        return view('task-monitorings.edit', compact('monitoring', 'clients', 'tasks', 'contactPersons', 'forms', 'notesByForm', 'showSubmissionForm', 'taskNames', 'expenseCatalog'));
     }
 
     /**
@@ -169,10 +175,7 @@ class BookingController extends Controller
     {
         $requiredForms = $this->requiredFormsForPrint($monitoring);
         $expenses = $this->expenseSnapshotsForPrint($monitoring);
-        $expenseCatalog = ExpenseCatalogItem::query()
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get(['id', 'name', 'default_amount']);
+        $expenseCatalog = $this->expenseCatalog();
         $taskNames = $this->taskNamesForMonitoring($monitoring);
 
         return view('bookings.print', compact('monitoring', 'requiredForms', 'expenses', 'expenseCatalog', 'taskNames'));
@@ -227,13 +230,10 @@ class BookingController extends Controller
             ]);
 
         $monitoring->update([
-            'expenses_breakdown' => $catalogExpenses
-                ->concat($otherExpenses)
-                ->values()
-                ->all(),
+            'expenses_breakdown' => $expensesBreakdown,
         ]);
 
-        if ($request->boolean('download_pdf')) {
+        if (($validated['download_pdf'] ?? false) === true || $request->boolean('download_pdf')) {
             return Redirect::route('bookings.pdf', $monitoring);
         }
 
@@ -251,6 +251,89 @@ class BookingController extends Controller
 
         return Pdf::loadView('bookings.print', compact('monitoring', 'requiredForms', 'expenses', 'taskNames') + ['isPdf' => true])
             ->download('booking-'.$monitoring->id.'.pdf');
+    }
+
+    private function taskNamesForMonitoring(TaskMonitoring $monitoring): string
+    {
+        $taskIds = collect($monitoring->task_ids ?: [$monitoring->task_id])
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        return Task::query()
+            ->whereIn('id', $taskIds)
+            ->orderBy('task_name')
+            ->pluck('task_name')
+            ->implode(', ') ?: '—';
+    }
+
+    /** @return \Illuminate\Database\Eloquent\Collection<int, ExpenseCatalogItem> */
+    private function expenseCatalog(): \Illuminate\Database\Eloquent\Collection
+    {
+        return ExpenseCatalogItem::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'name', 'default_amount']);
+    }
+
+    /**
+     * @return list<array{catalog_id: int|null, catalog_name: string, expense_amount: float}>
+     */
+    private function validatedExpenseBreakdown(Request $request, ?TaskMonitoring $monitoring = null, bool $preserveWhenOmitted = false): array
+    {
+        if ($preserveWhenOmitted
+            && ! $request->boolean('expense_editor_submitted')
+            && ! $request->exists('expenses')
+            && ! $request->exists('other_expenses')) {
+            return $monitoring?->expenses_breakdown ?? [];
+        }
+
+        $validated = $request->validate([
+            'expenses' => ['sometimes', 'array'],
+            'expenses.*' => ['required', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
+            'other_expenses' => ['sometimes', 'array', 'max:50'],
+            'other_expenses.*.name' => ['required', 'string', 'max:255'],
+            'other_expenses.*.amount' => ['required', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
+            'expense_editor_submitted' => ['sometimes', 'boolean'],
+        ]);
+
+        $submitted = $validated['expenses'] ?? [];
+        $submittedIds = array_keys($submitted);
+        $invalidKeys = array_filter($submittedIds, fn ($id): bool => ! ctype_digit((string) $id) || (int) $id < 1);
+        $catalogById = ExpenseCatalogItem::query()
+            ->whereIn('id', array_map('intval', $submittedIds))
+            ->get(['id', 'name'])
+            ->keyBy('id');
+
+        if ($invalidKeys !== [] || $catalogById->count() !== count($submittedIds)) {
+            throw ValidationException::withMessages([
+                'expenses' => __('Select only expense items from the current catalog.'),
+            ]);
+        }
+
+        $existingCatalogExpenses = collect($monitoring?->expenses_breakdown ?? [])
+            ->filter(fn ($expense): bool => is_array($expense) && isset($expense['catalog_id']))
+            ->keyBy(fn (array $expense) => (int) $expense['catalog_id']);
+
+        $catalogExpenses = collect($submitted)
+            ->map(function ($amount, $catalogId) use ($catalogById, $existingCatalogExpenses): array {
+                $item = $catalogById->get((int) $catalogId);
+                $existing = $existingCatalogExpenses->get((int) $catalogId);
+
+                return [
+                    'catalog_id' => (int) $catalogId,
+                    'catalog_name' => $existing['catalog_name'] ?? $item->name,
+                    'expense_amount' => (float) $amount,
+                ];
+            });
+        $otherExpenses = collect($validated['other_expenses'] ?? [])
+            ->map(fn (array $expense): array => [
+                'catalog_id' => null,
+                'catalog_name' => trim($expense['name']),
+                'expense_amount' => (float) $expense['amount'],
+            ]);
+
+        return $catalogExpenses->concat($otherExpenses)->values()->all();
     }
 
     /**
@@ -341,6 +424,7 @@ class BookingController extends Controller
             'submission_notes_input' => ['nullable', 'string'],
             'existing_submission_notes' => ['nullable', 'string'],
         ]);
+        $expensesBreakdown = $this->validatedExpenseBreakdown($request, $monitoring, true);
 
         $existingSubmissionNotes = trim((string) ($validated['existing_submission_notes'] ?? ($validated['submission_notes'] ?? $monitoring->submission_notes ?? '')));
         $newSubmissionNote = trim((string) ($validated['submission_notes_input'] ?? ''));
@@ -365,6 +449,7 @@ class BookingController extends Controller
             'assigned_responsible_person_id' => $validated['assigned_responsible_person'],
             'required_forms_documents' => $requiredFormIds,
             'required_forms_quantities' => $requiredFormQuantities,
+            'expenses_breakdown' => $expensesBreakdown,
             'date_of_submission' => $validated['date_of_submission'] ?? null,
             'receiving_officer' => $validated['receiving_officer'] ?? null,
             'acknowledgement_receipt_reference_number' => $validated['acknowledgement_receipt_reference_number'] ?? null,
