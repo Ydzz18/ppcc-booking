@@ -797,6 +797,12 @@ html.dark .rounded-xl {
     background: #fff;
 }
 
+html.dark .mobile-filter-toolbar,
+html[data-theme='dark'] .mobile-filter-toolbar {
+    background-color: var(--navy-card) !important;
+    border-color: var(--navy-border) !important;
+}
+
 @media (max-width: 767px) {
     #job-task-monitoring > .mt-6 {
         border: 0;
@@ -1010,8 +1016,6 @@ html.dark .rounded-xl {
         display: flex;
     }
 
-    html.dark .mobile-filter-toolbar,
-    html[data-theme='dark'] .mobile-filter-toolbar,
     html.dark table.mobile-record-table tbody tr,
     html[data-theme='dark'] table.mobile-record-table tbody tr,
     html.dark .mobile-record-toggle,
